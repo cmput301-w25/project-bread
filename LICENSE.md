@@ -1,7 +1,7 @@
 CMPUT 301 Student Submission License
 Version 2.0
 
-Copyright 2025 `<team name>`
+Copyright 2025 `Bread`
 
 Unauthorized redistribution is forbidden under all circumstances. Use of this
 software without explicit authorization from the author **and** the CMPUT 301
