@@ -4,8 +4,8 @@
 
 | Name        | CCID   | GitHub Username |
 | ----------- | ------ | --------------- |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
+| Armaan Katyal | katyal1 | @ArmaanKatyal   |
+| Landys Lepine | landys | lndslpn     |
 | [Full Name] | [CCID] | [@username]     |
 | Maulik Srivastava | maulik2 | @mauliksamit |
 | [Full Name] | [CCID] | [@username]     |
