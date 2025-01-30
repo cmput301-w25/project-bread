@@ -1,15 +1,16 @@
-# CMPUT 301 W25 - Team [Team Name]
+# CMPUT 301 W25 - Team Bread
 
 ## Team Members
 
-| Name            | CCID   | GitHub Username |
-|-----------------|--------|---------------|
-| Armaan Katyal   | katyal1 | @ArmaanKatyal |
-| Landys Lepine   | landys | @lndslpn      |
-| Animesh Mittal  | animesh1 | @animeshm19   |
-| Maulik Srivastava | maulik2 | @mauliksamit  |
-| [Full Name]     | [CCID] | [@username]   |
-| Farhan Khan     | fkhan3 | @khanfsk      |
+| Name        | CCID   | GitHub Username |
+| ----------- | ------ | --------------- |
+| Armaan Katyal | katyal1 | @ArmaanKatyal   |
+| Landys Lepine | landys | @lndslpn     |
+| Animesh Mittal | animesh1 | @animeshm19|
+| Maulik Srivastava | maulik2 | @mauliksamit |
+| Kartik Samir Saxena | kartiksa | @karizzz     |
+| Farhan Khan | fkhan3 | khanfsk |
+
 
 ## Project Description
 
