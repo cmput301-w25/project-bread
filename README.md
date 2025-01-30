@@ -6,8 +6,8 @@
 | ----------- | ------ | --------------- |
 | Armaan Katyal | katyal1 | @ArmaanKatyal   |
 | Landys Lepine | landys | @lndslpn     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
+| Animesh Mittal | animesh1 | @animeshm19|
+| Maulik Srivastava | maulik2 | @mauliksamit |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 
