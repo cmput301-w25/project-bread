@@ -9,8 +9,7 @@
 | Animesh Mittal | animesh1 | @animeshm19|
 | Maulik Srivastava | maulik2 | @mauliksamit |
 | Kartik Samir Saxena | kartiksa | @karizzz     |
-| Farhan Khan | fkhan3 | khanfsk |
-
+| Farhan Khan | fkhan3 | @khanfsk |
 
 ## Project Description
 
