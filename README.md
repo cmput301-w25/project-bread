@@ -1,4 +1,4 @@
-# CMPUT 301 W25 - Team [Team Name]
+# CMPUT 301 W25 - Team Bread
 
 ## Team Members
 
@@ -8,7 +8,7 @@
 | Landys Lepine | landys | @lndslpn     |
 | Animesh Mittal | animesh1 | @animeshm19|
 | Maulik Srivastava | maulik2 | @mauliksamit |
-| [Full Name] | [CCID] | [@username]     |
+| Kartik Samir Saxena | kartiksa | @karizzz     |
 | [Full Name] | [CCID] | [@username]     |
 
 ## Project Description
