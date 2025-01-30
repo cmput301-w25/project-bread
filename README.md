@@ -5,7 +5,7 @@
 | Name        | CCID   | GitHub Username |
 | ----------- | ------ | --------------- |
 | [Full Name] | [CCID] | [@username]     |
-| Landys Lepine | landys | lmdslpn     |
+| Landys Lepine | landys | lndslpn     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
