@@ -5,7 +5,7 @@
 | Name        | CCID   | GitHub Username |
 | ----------- | ------ | --------------- |
 | Armaan Katyal | katyal1 | @ArmaanKatyal   |
-| Landys Lepine | landys | lndslpn     |
+| Landys Lepine | landys | @lndslpn     |
 | Animesh Mittal | animesh1 | @animeshm19|
 | Maulik Srivastava | maulik2 | @mauliksamit |
 | [Full Name] | [CCID] | [@username]     |
@@ -29,7 +29,7 @@
 
 ## Documentation
 
-- [Wiki Link]
-- [Scrum Board]
+- https://github.com/cmput301-w25/project-bread/wiki
+- https://github.com/orgs/cmput301-w25/projects/10
 - [UI Mockups]
 - [UML]
