@@ -8,7 +8,7 @@
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
-| [Kartik Samir Saxena] | kartiksa | karizzz     |
+| [Kartik Samir Saxena] | kartiksa | @karizzz     |
 | [Full Name] | [CCID] | [@username]     |
 
 ## Project Description
