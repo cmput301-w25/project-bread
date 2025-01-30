@@ -4,11 +4,11 @@
 
 | Name        | CCID   | GitHub Username |
 | ----------- | ------ | --------------- |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Kartik Samir Saxena] | kartiksa | @karizzz     |
+| Armaan Katyal | katyal1 | @ArmaanKatyal   |
+| Landys Lepine | landys | lndslpn     |
+| Animesh Mittal | animesh1 | @animeshm19|
+| Maulik Srivastava | maulik2 | @mauliksamit |
+| Kartik Samir Saxena | kartiksa | @karizzz     |
 | [Full Name] | [CCID] | [@username]     |
 
 ## Project Description
