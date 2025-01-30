@@ -1,10 +1,10 @@
-# CMPUT 301 W25 - Team [Team Name]
+# CMPUT 301 W25 - Team Bread
 
 ## Team Members
 
 | Name        | CCID   | GitHub Username |
 | ----------- | ------ | --------------- |
-| [Full Name] | [CCID] | [@username]     |
+| [Kartik Saxena] | [kartiksa] | [karizzz]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
 | [Full Name] | [CCID] | [@username]     |
