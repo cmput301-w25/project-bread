@@ -2,14 +2,14 @@
 
 ## Team Members
 
-| Name          | CCID    | GitHub Username |
-| ------------- | ------- | --------------- |
+| Name        | CCID   | GitHub Username |
+| ----------- | ------ | --------------- |
 | Armaan Katyal | katyal1 | @ArmaanKatyal   |
-| [Full Name]   | [CCID]  | [@username]     |
-| [Full Name]   | [CCID]  | [@username]     |
-| [Full Name]   | [CCID]  | [@username]     |
-| [Full Name]   | [CCID]  | [@username]     |
-| [Full Name]   | [CCID]  | [@username]     |
+| Landys Lepine | landys | lndslpn     |
+| [Full Name] | [CCID] | [@username]     |
+| [Full Name] | [CCID] | [@username]     |
+| [Full Name] | [CCID] | [@username]     |
+| [Full Name] | [CCID] | [@username]     |
 
 ## Project Description
 
