@@ -2,14 +2,14 @@
 
 ## Team Members
 
-| Name        | CCID   | GitHub Username |
-| ----------- | ------ | --------------- |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
-| [Full Name] | [CCID] | [@username]     |
+| Name          | CCID    | GitHub Username |
+| ------------- | ------- | --------------- |
+| Armaan Katyal | katyal1 | @ArmaanKatyal   |
+| [Full Name]   | [CCID]  | [@username]     |
+| [Full Name]   | [CCID]  | [@username]     |
+| [Full Name]   | [CCID]  | [@username]     |
+| [Full Name]   | [CCID]  | [@username]     |
+| [Full Name]   | [CCID]  | [@username]     |
 
 ## Project Description
 
