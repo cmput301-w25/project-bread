@@ -9,7 +9,7 @@
 | Animesh Mittal | animesh1 | @animeshm19|
 | Maulik Srivastava | maulik2 | @mauliksamit |
 | Kartik Samir Saxena | kartiksa | @karizzz     |
-| [Full Name] | [CCID] | [@username]     |
+| Farhan Khan | fkhan3 | @khanfsk |
 
 ## Project Description
 
