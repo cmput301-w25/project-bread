@@ -8,14 +8,14 @@ public class FirebaseService {
 
     public FirebaseService() {
         if (!IS_INITIALIZED) {
-            db = FirebaseFirestore.getInstance();
+            this.db = FirebaseFirestore.getInstance();
             IS_INITIALIZED = true;
         }
     }
 
     public FirebaseFirestore getDb() {
         if (db == null) {
-            db = FirebaseFirestore.getInstance();
+            this.db = FirebaseFirestore.getInstance();
         }
         return db;
     }

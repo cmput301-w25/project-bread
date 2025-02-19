@@ -10,15 +10,13 @@ public class Profile implements Serializable {
     private String firstName;
     private String lastName;
 
-    private byte[] profilePicture;
+    // TODO: New field to store the user's profile picture
 
-
-    public Profile(String username, String email, String firstName, String lastName, byte[] profilePicture) {
+    public Profile(String username, String email, String firstName, String lastName) {
         this.username = username;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.profilePicture = profilePicture;
     }
 
     @NonNull
@@ -62,13 +60,5 @@ public class Profile implements Serializable {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public byte[] getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(byte[] profilePicture) {
-        this.profilePicture = profilePicture;
     }
 }

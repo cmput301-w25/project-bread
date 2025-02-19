@@ -2,7 +2,10 @@ package com.example.bread.model;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.firestore.DocumentReference;
+
 import java.io.Serializable;
+import java.util.UUID;
 
 public class MoodEvent implements Serializable {
     /**
@@ -16,23 +19,32 @@ public class MoodEvent implements Serializable {
         NEUTRAL
     }
 
+    private String id;
     private String timestamp;
     private String reason;
+    private DocumentReference participantRef;
 
     private EmotionalState emotionalState;
 
-    public MoodEvent(String timestamp, String reason, EmotionalState emotionalState) {
+    public MoodEvent() {}
+
+    public MoodEvent(String timestamp, String reason, EmotionalState emotionalState, DocumentReference participantRef) {
+        this.id = UUID.randomUUID().toString();
         this.timestamp = timestamp;
         this.reason = reason;
         this.emotionalState = emotionalState;
+        this.participantRef = participantRef;
     }
+
 
     @NonNull
     @Override
     public String toString() {
         return "MoodEvent{" +
-                "timestamp='" + timestamp + '\'' +
+                "id='" + id + '\'' +
+                ", timestamp='" + timestamp + '\'' +
                 ", reason='" + reason + '\'' +
+                ", participantRef=" + participantRef +
                 ", emotionalState=" + emotionalState +
                 '}';
     }
@@ -61,4 +73,11 @@ public class MoodEvent implements Serializable {
         this.emotionalState = emotionalState;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public DocumentReference getParticipantRef() {
+        return participantRef;
+    }
 }

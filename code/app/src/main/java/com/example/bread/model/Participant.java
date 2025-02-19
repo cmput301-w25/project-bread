@@ -5,6 +5,8 @@ import java.io.Serializable;
 public class Participant implements Serializable {
     private Profile profile;
 
+    public Participant() {}
+
     public Participant(Profile profile) {
         this.profile = profile;
     }
