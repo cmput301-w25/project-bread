@@ -2,12 +2,13 @@ package com.example.bread.model;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 
 import java.io.Serializable;
 import java.util.UUID;
 
-public class MoodEvent implements Serializable {
+public class MoodEvent implements Serializable, Comparable<MoodEvent> {
     /**
      * Enum representing the different emotional states a user can have
      */
@@ -20,7 +21,7 @@ public class MoodEvent implements Serializable {
     }
 
     private String id;
-    private String timestamp;
+    private Timestamp timestamp;
     private String reason;
     private DocumentReference participantRef;
 
@@ -28,7 +29,7 @@ public class MoodEvent implements Serializable {
 
     public MoodEvent() {}
 
-    public MoodEvent(String timestamp, String reason, EmotionalState emotionalState, DocumentReference participantRef) {
+    public MoodEvent(Timestamp timestamp, String reason, EmotionalState emotionalState, DocumentReference participantRef) {
         this.id = UUID.randomUUID().toString();
         this.timestamp = timestamp;
         this.reason = reason;
@@ -49,11 +50,11 @@ public class MoodEvent implements Serializable {
                 '}';
     }
 
-    public String getTimestamp() {
+    public Timestamp getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(String timestamp) {
+    public void setTimestamp(Timestamp timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -79,5 +80,10 @@ public class MoodEvent implements Serializable {
 
     public DocumentReference getParticipantRef() {
         return participantRef;
+    }
+
+    @Override
+    public int compareTo(MoodEvent event) {
+        return this.timestamp.compareTo(event.getTimestamp());
     }
 }

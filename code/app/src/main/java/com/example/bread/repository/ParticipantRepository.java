@@ -25,7 +25,7 @@ public class ParticipantRepository {
     }
 
     public void addParticipant(Participant participant, OnCompleteListener<Void> onCompleteListener) {
-        DocumentReference participantRef = getParticipantCollRef().document(participant.getProfile().getUsername());
+        DocumentReference participantRef = getParticipantCollRef().document(participant.getUsername());
         participantRef.set(participant).addOnCompleteListener(onCompleteListener);
     }
 }
