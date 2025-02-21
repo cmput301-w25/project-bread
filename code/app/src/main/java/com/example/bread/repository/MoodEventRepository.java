@@ -41,4 +41,9 @@ public class MoodEventRepository {
         DocumentReference moodEventRef = getMoodEventCollRef().document(moodEvent.getId());
         moodEventRef.set(moodEvent).addOnCompleteListener(onCompleteListener);
     }
+
+    public void deleteMoodEvent(String id, OnCompleteListener<Void> onCompleteListener) {
+        DocumentReference moodEventRef = getMoodEventCollRef().document(id);
+        moodEventRef.delete().addOnCompleteListener(onCompleteListener);
+    }
 }
