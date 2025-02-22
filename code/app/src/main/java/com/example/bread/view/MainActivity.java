@@ -29,9 +29,11 @@ public class MainActivity extends AppCompatActivity {
         if (preferences.getString("username", "").isEmpty()) {
             Intent intent = new Intent(MainActivity.this, LoginPage.class);
             startActivity(intent);
+            finish();
         } else {
             Intent intent = new Intent(MainActivity.this, HomePage.class);
             startActivity(intent);
+            finish();
         }
     }
 }
