@@ -13,7 +13,13 @@
         android:theme="@style/Theme.Bread"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name=".view.LoginPage"
+            android:exported="false" />
+        <activity
+            android:name=".view.HomePage"
+            android:exported="false" />
+        <activity
+            android:name=".view.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
