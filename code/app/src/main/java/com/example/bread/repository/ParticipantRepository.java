@@ -26,6 +26,20 @@ public class ParticipantRepository {
         return firebaseService.getDb().collection("participants");
     }
 
+    public void fetchBaseParticipant(String username, @NonNull OnSuccessListener<Participant> onSuccessListener, OnFailureListener onFailureListener) {
+        getParticipantCollRef().document(username).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Participant participant = documentSnapshot.toObject(Participant.class);
+                        onSuccessListener.onSuccess(participant);
+                    } else {
+                        Log.e("ParticipantRepository", "Participant with username: " + username + " does not exist");
+                        onSuccessListener.onSuccess(null);
+                    }
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch participant with username: " + username, e));
+    }
+
     public void fetchParticipant(String username, @NonNull OnSuccessListener<Participant> onSuccessListener, OnFailureListener onFailureListener) {
         getParticipantCollRef().document(username).get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -44,7 +58,7 @@ public class ParticipantRepository {
         getParticipantCollRef().document(participant.getUsername()).collection("followers").get()
                 .addOnSuccessListener(followersSnapshot -> {
                     List<String> followers = new ArrayList<>();
-                    for (DocumentSnapshot doc: followersSnapshot) {
+                    for (DocumentSnapshot doc : followersSnapshot) {
                         followers.add(doc.getString("username"));
                     }
                     participant.setFollowers(followers);
@@ -52,7 +66,7 @@ public class ParticipantRepository {
                     getParticipantCollRef().document(participant.getUsername()).collection("following").get()
                             .addOnSuccessListener(followingSnapshot -> {
                                 List<String> following = new ArrayList<>();
-                                for (DocumentSnapshot doc: followersSnapshot) {
+                                for (DocumentSnapshot doc : followersSnapshot) {
                                     following.add(doc.getString("username"));
                                 }
                                 participant.setFollowing(following);
@@ -67,5 +81,30 @@ public class ParticipantRepository {
         getParticipantCollRef().document(participant.getUsername()).set(participant)
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add participant: " + participant, e));
+    }
+
+    public void addFollower(String username, String followerUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        // TODO: check if already followed
+        // TODO: decide on what to store in the follower document
+        getParticipantCollRef().document(username).collection("followers").document(followerUsername).set(new Object())
+                .addOnSuccessListener(onSuccessListener)
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add follower: " + followerUsername + " to participant: " + username, e));
+    }
+
+    public void addFollowing(String username, String followingUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        // TODO: check if already following
+        // TODO: decide on what to store in the following document
+        getParticipantCollRef().document(username).collection("following").document(followingUsername).set(new Object())
+                .addOnSuccessListener(onSuccessListener)
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add following: " + followingUsername + " to participant: " + username, e));
+    }
+
+    public void checkIfUsernameExists(String username, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
+    }
+
+    public void checkIfAlreadyFollowed(String username, String followerUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
+    }
+
+    public void checkIfAlreadyFollowing(String username, String followingUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
     }
 }

@@ -2,7 +2,6 @@ package com.example.bread.model;
 
 import androidx.annotation.NonNull;
 
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
@@ -16,18 +15,22 @@ public class Participant implements Serializable {
     private String firstName;
     private String lastName;
 
-    // TODO: New field to store the participant's profile picture
+    private String profilePictureUrl;
 
-    @Exclude private List<String> followers;
-    @Exclude private List<String> following;
+    @Exclude
+    private List<String> followers;
+    @Exclude
+    private List<String> following;
 
-    public Participant() {}
+    public Participant() {
+    }
 
-    public Participant(String username, String email, String firstName, String lastName) {
+    public Participant(String username, String email, String firstName, String lastName, String profilePictureUrl) {
         this.username = username;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.profilePictureUrl = profilePictureUrl;
     }
 
     @NonNull
@@ -38,6 +41,7 @@ public class Participant implements Serializable {
                 ", email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", profilePictureUrl='" + profilePictureUrl + '\'' +
                 '}';
     }
 
@@ -87,5 +91,13 @@ public class Participant implements Serializable {
 
     public void setFollowing(List<String> following) {
         this.following = following;
+    }
+
+    public String getProfilePictureUrl() {
+        return profilePictureUrl;
+    }
+
+    public void setProfilePictureUrl(String profilePictureUrl) {
+        this.profilePictureUrl = profilePictureUrl;
     }
 }

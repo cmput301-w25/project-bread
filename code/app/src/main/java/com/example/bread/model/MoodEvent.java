@@ -2,10 +2,11 @@ package com.example.bread.model;
 
 import androidx.annotation.NonNull;
 
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.ServerTimestamp;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.UUID;
 
 public class MoodEvent implements Serializable, Comparable<MoodEvent> {
@@ -17,24 +18,45 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         SAD,
         ANGRY,
         ANXIOUS,
-        NEUTRAL
+        NEUTRAL,
+        CONFUSED,
+        FEARFUL,
+        SHAMEFUL,
+        SURPRISED,
+    }
+
+    /**
+     * Enum representing the different social situations a user can be in
+     */
+    public enum SocialSituation {
+        ALONE,
+        WITH_FAMILY,
+        WITH_FRIENDS,
+        WITH_COWORKERS,
+        WITH_STRANGERS
     }
 
     private String id;
-    private Timestamp timestamp;
+    @ServerTimestamp
+    private Date timestamp;
     private String reason;
     private DocumentReference participantRef;
 
     private EmotionalState emotionalState;
+    private SocialSituation socialSituation;
+    private String imageUrl;
 
-    public MoodEvent() {}
+    public MoodEvent() {
+    }
 
-    public MoodEvent(Timestamp timestamp, String reason, EmotionalState emotionalState, DocumentReference participantRef) {
+    public MoodEvent(String reason, EmotionalState emotionalState, DocumentReference participantRef, SocialSituation socialSituation, String imageUrl) {
         this.id = UUID.randomUUID().toString();
-        this.timestamp = timestamp;
+        this.timestamp = null;
         this.reason = reason;
         this.emotionalState = emotionalState;
         this.participantRef = participantRef;
+        this.socialSituation = socialSituation;
+        this.imageUrl = imageUrl;
     }
 
 
@@ -47,14 +69,15 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
                 ", reason='" + reason + '\'' +
                 ", participantRef=" + participantRef +
                 ", emotionalState=" + emotionalState +
+                ", socialSituation=" + socialSituation +
                 '}';
     }
 
-    public Timestamp getTimestamp() {
+    public Date getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
 
@@ -78,8 +101,32 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         return id;
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
     public DocumentReference getParticipantRef() {
         return participantRef;
+    }
+
+    public void setParticipantRef(DocumentReference participantRef) {
+        this.participantRef = participantRef;
+    }
+
+    public SocialSituation getSocialSituation() {
+        return socialSituation;
+    }
+
+    public void setSocialSituation(SocialSituation socialSituation) {
+        this.socialSituation = socialSituation;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     @Override
