@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
-        SharedPreferences preferences =getSharedPreferences("sharedPrefs", MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
         if (preferences.getString("username", "").isEmpty()) {
             Intent intent = new Intent(MainActivity.this, LoginPage.class);
             startActivity(intent);
