@@ -48,6 +48,9 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.geofire.android.common)
 
+    // Google Services
+    implementation(libs.play.services.location)
+
     // testing
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.api)
