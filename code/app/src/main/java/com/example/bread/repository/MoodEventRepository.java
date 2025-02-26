@@ -24,7 +24,7 @@ public class MoodEventRepository {
         return firebaseService.getDb().collection("moodEvents");
     }
 
-    public void fetchEventsWithParticipantRef(DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
+    public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().whereEqualTo("participantRef", participantRef).get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
@@ -38,13 +38,13 @@ public class MoodEventRepository {
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to fetch mood events with participantRef: " + participantRef, e));
     }
 
-    public void addMoodEvent(MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+    public void addMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to add mood event: " + moodEvent, e));
     }
 
-    public void deleteMoodEvent(MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+    public void deleteMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).delete()
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to delete mood event: " + moodEvent, e));
