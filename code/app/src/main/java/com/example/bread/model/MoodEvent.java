@@ -1,5 +1,7 @@
 package com.example.bread.model;
 
+import android.location.Location;
+
 import androidx.annotation.NonNull;
 
 import com.firebase.geofire.GeoFireUtils;
@@ -154,12 +156,12 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         this.geoInfo = geoInfo;
     }
 
-    public Map<String, Object> generateGeoInfo(double latitude, double longitude) {
-        String hash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(latitude, longitude));
+    public Map<String, Object> generateGeoInfo(Location location) {
+        String hash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(location.getLatitude(), location.getLongitude()));
         Map<String, Object> geoInfo = new HashMap<>();
         geoInfo.put("geohash", hash);
-        geoInfo.put("latitude", latitude);
-        geoInfo.put("longitude", longitude);
+        geoInfo.put("latitude", location.getLatitude());
+        geoInfo.put("longitude", location.getLongitude());
         return geoInfo;
     }
 
