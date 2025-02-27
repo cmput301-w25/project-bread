@@ -14,6 +14,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
      * Enum representing the different emotional states a user can have
      */
     public enum EmotionalState {
+        NONE,
         HAPPY,
         SAD,
         ANGRY,

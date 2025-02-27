@@ -1,26 +1,24 @@
-package com.example.bread.utils; // Ensures proper package placement
+package com.example.bread.utils;
 
+import com.example.bread.model.MoodEvent;
 import java.util.HashMap;
 
 public class EmotionUtils {
-    // used a hashmap here to basically store the emotion-to-emoticon mappings
-    private static final HashMap<String, String> emotionEmoticonMap = new HashMap<>();
-
-    // Static block for the mappings when the class is first accessed
+    private static final HashMap<MoodEvent.EmotionalState, String> emotionEmoticonMap = new HashMap<>();
     static {
-        emotionEmoticonMap.put("HAPPY", "😃");      // Happy
-        emotionEmoticonMap.put("SAD", "😢");        // Sad
-        emotionEmoticonMap.put("ANGRY", "😡");      // Angry
-        emotionEmoticonMap.put("ANXIOUS", "😰");    // Anxious
-        emotionEmoticonMap.put("NEUTRAL", "😐");    // Neutral
-        emotionEmoticonMap.put("CONFUSED", "😕");   // Confused
-        emotionEmoticonMap.put("FEARFUL", "😨");    // Fearful
-        emotionEmoticonMap.put("SHAMEFUL", "😞");   // Shameful
-        emotionEmoticonMap.put("SURPRISED", "😲");  // Surprised
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.HAPPY, "😃");
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.SAD, "😢");
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.ANGRY, "😡");
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.ANXIOUS, "😰");
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.NEUTRAL, "😐");
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.CONFUSED, "😕");
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.FEARFUL, "😨");
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.SHAMEFUL, "😞");
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.SURPRISED, "😲");
+        emotionEmoticonMap.put(MoodEvent.EmotionalState.NONE, "❓");
     }
-
-
-    public static String getEmoticon(String emotion) {
-        return emotionEmoticonMap.getOrDefault(emotion, "❓"); // Returns a question mark if the emotion is not mapped
+    public static String getEmoticon(MoodEvent.EmotionalState emotion) {
+        return emotionEmoticonMap.getOrDefault(emotion, "❓");
     }
 }
+
