@@ -6,25 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/white"
-    tools:context=".view.LoginPage">
-
-    <ImageView
-        android:id="@+id/sentio_logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        android:scaleX="1.5"
-        android:scaleY="1.5"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.056"
-        app:srcCompat="@mipmap/sound_wave_layer" />
+    tools:context=".view.SignupPage">
 
     <TextView
-        android:id="@+id/login_tagline"
+        android:id="@+id/signup_tagline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
@@ -51,20 +36,31 @@
         app:layout_constraintVertical_bias="0.0" />
 
     <EditText
-        android:id="@+id/login_email_text"
+        android:id="@+id/signup_username_text"
         android:layout_width="229dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="32dp"
+        android:ems="10"
+        android:hint="Username"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signup_lastname_text" />
+
+    <EditText
+        android:id="@+id/signup_email_text"
+        android:layout_width="229dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:ems="10"
         android:hint="Email"
         android:inputType="textEmailAddress"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_tagline" />
+        app:layout_constraintTop_toBottomOf="@+id/signup_username_text" />
 
     <EditText
-        android:id="@+id/login_password_text"
+        android:id="@+id/signup_password_text"
         android:layout_width="229dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
@@ -72,30 +68,56 @@
         android:hint="Password"
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_email_text" />
+        app:layout_constraintTop_toBottomOf="@+id/signup_email_text" />
 
     <Button
-        android:id="@+id/login_button"
+        android:id="@+id/signup_button"
         android:layout_width="229dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="64dp"
-        android:text="Login"
+        android:layout_marginTop="48dp"
+        android:text="Sign Up"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_password_text" />
+        app:layout_constraintTop_toBottomOf="@+id/signup_password_text" />
 
-    <Button
-        android:id="@+id/login_signup_button"
+    <ImageView
+        android:id="@+id/sentio_logo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Sign Up"
+        android:scaleType="centerCrop"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_button" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.056"
+        app:srcCompat="@mipmap/sound_wave_layer" />
 
+    <EditText
+        android:id="@+id/signup_firstname_text"
+        android:layout_width="229dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:ems="10"
+        android:inputType="text"
+        android:hint="First Name"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signup_tagline" />
+
+    <EditText
+        android:id="@+id/signup_lastname_text"
+        android:layout_width="229dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:hint="Last Name"
+        android:ems="10"
+        android:inputType="text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signup_firstname_text" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

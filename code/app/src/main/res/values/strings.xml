@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Bread</string>
+    <string name="login_tagline">Let\'s get to know each other</string>
+    <string name="sentio">Sentio</string>
 </resources>

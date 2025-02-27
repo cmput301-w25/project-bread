@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/sound_wave_background"/>
+    <foreground android:drawable="@mipmap/sound_wave_layer"/>
+</adaptive-icon>

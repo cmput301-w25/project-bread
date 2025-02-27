@@ -105,6 +105,9 @@ public class ParticipantRepository {
     }
 
     public void checkIfUsernameExists(@NonNull String username, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
+        getParticipantCollRef().document(username).get()
+                .addOnSuccessListener(documentSnapshot -> onSuccessListener.onSuccess(documentSnapshot.exists()))
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to check if username exists: " + username, e));
     }
 
     public void checkIfAlreadyFollowed(@NonNull String username, String followerUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
