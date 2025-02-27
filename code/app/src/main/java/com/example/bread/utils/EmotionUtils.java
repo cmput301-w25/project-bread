@@ -20,5 +20,6 @@ public class EmotionUtils {
     public static String getEmoticon(MoodEvent.EmotionalState emotion) {
         return emotionEmoticonMap.getOrDefault(emotion, "❓");
     }
+
 }
 
