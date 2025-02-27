@@ -16,6 +16,9 @@
         android:theme="@style/Theme.Bread"
         tools:targetApi="31">
         <activity
+            android:name=".view.SignupPage"
+            android:exported="false" />
+        <activity
             android:name=".view.LoginPage"
             android:exported="false" />
         <activity
