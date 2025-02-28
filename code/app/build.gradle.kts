@@ -55,6 +55,7 @@ dependencies {
 
     // Google Services
     implementation(libs.play.services.location)
+    implementation(libs.firebase.auth)
 
     // testing
     testImplementation(libs.junit)
