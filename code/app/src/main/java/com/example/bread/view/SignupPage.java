@@ -60,14 +60,29 @@ public class SignupPage extends AppCompatActivity {
             String lastName = lastNameEditText.getText().toString();
 
             if (username.isEmpty() || email.isEmpty() || password.isEmpty() || firstName.isEmpty() || lastName.isEmpty()) {
-                Log.e("SignupPage", "fields are empty");
-                Toast.makeText(SignupPage.this, "Please fill out all fields", Toast.LENGTH_SHORT).show();
+                if (username.isEmpty()) {
+                    usernameEditText.setError("Username is required");
+                }
+                if (email.isEmpty()) {
+                    emailEditText.setError("Email is required");
+                }
+                if (password.isEmpty()) {
+                    passwordEditText.setError("Password is required");
+                }
+                if (firstName.isEmpty()) {
+                    firstNameEditText.setError("First Name is required");
+                }
+                if (lastName.isEmpty()) {
+                    lastNameEditText.setError("Last Name is required");
+                }
                 return;
             }
 
+            // TODO: Check if the password is valid
+
             participantRepository.checkIfUsernameExists(username, exists -> {
                 if (exists) {
-                    Toast.makeText(SignupPage.this, "Username Already Exists", Toast.LENGTH_SHORT).show();
+                    usernameEditText.setError("Username already exists");
                 } else {
                     signUpUser(email, password, authResult -> {
                         FirebaseUser currentUser = authResult.getUser();

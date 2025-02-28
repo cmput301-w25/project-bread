@@ -74,9 +74,15 @@ public class LoginPage extends AppCompatActivity {
             String password = passwordEditText.getText().toString();
 
             if (email.isEmpty() || password.isEmpty()) {
-                Toast.makeText(LoginPage.this, "Please fill in all fields.", Toast.LENGTH_SHORT).show();
+                if (email.isEmpty()) {
+                    emailEditText.setError("Email is required");
+                }
+                if (password.isEmpty()) {
+                    passwordEditText.setError("Password is required");
+                }
                 return;
             }
+
             signInUser(email, password, authResult -> {
                 FirebaseUser user = authResult.getUser();
                 SharedPreferences preferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
