@@ -19,6 +19,22 @@
             android:textStyle="bold"
             android:paddingBottom="8dp"/>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title"
+            android:textColor="#FFFFFF"
+            android:paddingBottom="4dp"/>
+
+        <EditText
+            android:id="@+id/eventTitleEditText"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:hint="Enter event title (optional)"
+            android:background="@drawable/rounded_background"
+            android:textColor="#FFFFFF"
+            android:padding="4dp"/>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -92,13 +108,31 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Trigger (optional)"
+            android:text="Reason"
             android:textColor="#FFFFFF"
             android:paddingBottom="4dp"
             android:paddingTop="8dp"/>
 
         <EditText
             android:id="@+id/reasonEditText"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:hint="Enter reason (optional)"
+            android:maxLength="20"
+            android:background="@drawable/rounded_background"
+            android:textColor="#FFFFFF"
+            android:padding="4dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trigger (optional)"
+            android:textColor="#FFFFFF"
+            android:paddingBottom="4dp"
+            android:paddingTop="8dp"/>
+
+        <EditText
+            android:id="@+id/triggerEditText"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:hint="Enter trigger (optional)"
@@ -122,6 +156,23 @@
             android:background="@drawable/rounded_background"
             android:textColor="#FFFFFF"
             android:padding="4dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#FFFFFF"
+            android:paddingBottom="3dp"
+            android:paddingTop="3dp"/>
+
+        <CheckBox
+            android:id="@+id/locationCheckbox"
+            android:layout_width="157dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_background"
+            android:buttonTint="#4CAF50"
+            android:text="Include Location"
+            android:textColor="#FFFFFF" />
 
         <Button
             android:id="@+id/saveButton"
