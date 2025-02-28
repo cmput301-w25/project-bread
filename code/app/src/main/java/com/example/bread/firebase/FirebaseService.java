@@ -13,7 +13,7 @@ public class FirebaseService {
         }
     }
 
-    public FirebaseFirestore getDb() {
+    public synchronized FirebaseFirestore getDb() {
         if (db == null) {
             this.db = FirebaseFirestore.getInstance();
         }

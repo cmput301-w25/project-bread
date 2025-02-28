@@ -1,12 +1,18 @@
 package com.example.bread.model;
 
+import android.location.Location;
+
 import androidx.annotation.NonNull;
 
+import com.firebase.geofire.GeoFireUtils;
+import com.firebase.geofire.GeoLocation;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class MoodEvent implements Serializable, Comparable<MoodEvent> {
@@ -23,6 +29,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         FEARFUL,
         SHAMEFUL,
         SURPRISED,
+        NONE,
     }
 
     /**
@@ -33,13 +40,16 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         WITH_FAMILY,
         WITH_FRIENDS,
         WITH_COWORKERS,
-        WITH_STRANGERS
+        WITH_STRANGERS,
+        NONE,
     }
 
     private String id;
+    private String title;
     @ServerTimestamp
     private Date timestamp;
     private String reason;
+    private Map<String, Object> geoInfo;
     private DocumentReference participantRef;
 
     private EmotionalState emotionalState;
@@ -49,14 +59,13 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
     public MoodEvent() {
     }
 
-    public MoodEvent(String reason, EmotionalState emotionalState, DocumentReference participantRef, SocialSituation socialSituation, String imageUrl) {
+    public MoodEvent(String title, String reason, EmotionalState emotionalState, DocumentReference participantRef) {
         this.id = UUID.randomUUID().toString();
+        this.title = title;
         this.timestamp = null;
         this.reason = reason;
         this.emotionalState = emotionalState;
         this.participantRef = participantRef;
-        this.socialSituation = socialSituation;
-        this.imageUrl = imageUrl;
     }
 
 
@@ -66,10 +75,12 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         return "MoodEvent{" +
                 "id='" + id + '\'' +
                 ", timestamp='" + timestamp + '\'' +
+                ", title='" + title + '\'' +
                 ", reason='" + reason + '\'' +
                 ", participantRef=" + participantRef +
                 ", emotionalState=" + emotionalState +
                 ", socialSituation=" + socialSituation +
+                ", imageUrl='" + imageUrl + '\'' +
                 '}';
     }
 
@@ -79,6 +90,14 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
 
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getReason() {
@@ -127,6 +146,23 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Map<String, Object> getGeoInfo() {
+        return geoInfo;
+    }
+
+    public void setGeoInfo(Map<String, Object> geoInfo) {
+        this.geoInfo = geoInfo;
+    }
+
+    public Map<String, Object> generateGeoInfo(Location location) {
+        String hash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(location.getLatitude(), location.getLongitude()));
+        Map<String, Object> geoInfo = new HashMap<>();
+        geoInfo.put("geohash", hash);
+        geoInfo.put("latitude", location.getLatitude());
+        geoInfo.put("longitude", location.getLongitude());
+        return geoInfo;
     }
 
     @Override
