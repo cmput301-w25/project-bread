@@ -27,7 +27,7 @@ android {
         }
     }
 
-    buildFeatures{
+    buildFeatures {
         viewBinding = true
     }
 
@@ -55,7 +55,6 @@ dependencies {
 
     // Google Services
     implementation(libs.play.services.location)
-    implementation(libs.google.firebase.auth)
 
     // testing
     testImplementation(libs.junit)
