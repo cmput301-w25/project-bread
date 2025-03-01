@@ -7,6 +7,8 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import com.example.bread.R;
 
@@ -21,7 +23,7 @@ public class AddFragment extends Fragment {
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
-
+    private Spinner spinnerSocialSituation;
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
@@ -57,10 +59,33 @@ public class AddFragment extends Fragment {
         }
     }
 
+    /**
+     * Called to have the fragment instantiate its user interface view. This is optional, and
+     * non-graphical fragments can return null. This will be called between {@link #onCreate(Bundle)}
+     * and {@link #onViewCreated(View, Bundle)}.
+     *
+     * @param inflater The LayoutInflater object that can be used to inflate any views in the fragment,
+     * @param container If non-null, this is the parent view that the fragment's UI should be attached to.
+     *                  The fragment should not add the view itself, but this can be used to generate the
+     *                  LayoutParams of the view.
+     * @param savedInstanceState If non-null, this fragment is being re-constructed from a previous saved state
+     *                           as given here.
+     * @return Return the View for the fragment's UI, or null.
+     */
+
+    // TODO: Functionality works, Awaiting final UI design integration to enhance visual presentation.
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add, container, false);
+        View view = inflater.inflate(R.layout.fragment_add, container, false);
+        spinnerSocialSituation = view.findViewById(R.id.spinner_social_situation);
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
+                R.array.social_situation_options, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSocialSituation.setAdapter(adapter);
+
+        return view;
     }
 }
