@@ -11,6 +11,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
 import com.example.bread.R;
+import com.example.bread.model.MoodEvent;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -81,8 +82,7 @@ public class AddFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_add, container, false);
         spinnerSocialSituation = view.findViewById(R.id.spinner_social_situation);
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
-                R.array.social_situation_options, android.R.layout.simple_spinner_item);
+        ArrayAdapter<MoodEvent.SocialSituation> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, MoodEvent.SocialSituation.values());
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSocialSituation.setAdapter(adapter);
 

@@ -8,8 +8,13 @@ import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.MoodEvent;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.List;
 
@@ -39,6 +44,12 @@ public class MoodEventRepository {
     }
 
     public void addMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+// TODO: newly added
+//        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+//        if (currentUser != null) {
+//            moodEvent.setParticipantRef(currentUser.getUid()); // Set the participant reference to the current user's UID
+//        }
+
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to add mood event: " + moodEvent, e));
@@ -48,5 +59,11 @@ public class MoodEventRepository {
         getMoodEventCollRef().document(moodEvent.getId()).delete()
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to delete mood event: " + moodEvent, e));
+    }
+
+    public void updateMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
+                .addOnSuccessListener(onSuccessListener)
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to update mood event: " + moodEvent.getId(), e));
     }
 }

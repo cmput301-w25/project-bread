@@ -9,6 +9,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.bread.R;
+//import com.example.bread.controller.MoodEventAdapter;
+//import com.example.bread.repository.MoodEventRepository;
+
+import java.util.Set;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -63,4 +67,5 @@ public class HistoryFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_history, container, false);
     }
+
 }

@@ -4,13 +4,4 @@
     <string name="sentio">Sentio</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string-array name="social_situation_options">
-        <item>Alone</item>
-        <item>With one other person</item>
-        <item>With two to several people</item>
-        <item>With Family</item>
-        <item>With Friends</item>
-        <item>With Strangers</item>
-        <item>None</item>
-    </string-array>
 </resources>
