@@ -10,25 +10,24 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 /**
- * Utility class for compressing images to be stored in Firebase.
- *
- * <p>
- *     Firebase Firestore has a document size limit of 1MB, but this implementation ensures that
- *     images are compressed to a maximum size of 64KB. This is to ensure that the images can be
- *     stored in the document without exceeding the limit.
- * </p>
- *
+ * Utility class for handling images that are stored in Firebase.
  * <a href="https://stackoverflow.com/questions/4830711/how-can-i-convert-an-image-into-a-base64-string">Convert Image to Base64</a>
  * <a href="https://stackoverflow.com/questions/18545246/how-to-compress-image-size">Compress Image Size</a>
  */
-public class ImageCompressor {
+public class ImageHandler {
 
     public static final int MAX_IMAGE_SIZE = 64 * 1024; // 64 KB
     public static final float SCALE_FACTOR = 0.7f;
-    public static final String TAG = "ImageCompressor";
 
     /**
      * Compress an image file to a base64 encoded string with size less that {@link #MAX_IMAGE_SIZE}.
+     *
+     * <p>
+     * Firebase Firestore has a document size limit of 1MB, but this implementation ensures that
+     * images are compressed to a maximum size of 64KB. This is to ensure that the images can be
+     * stored in the document without exceeding the limit.
+     * </p>
+     *
      * @param imageFile the image file to compress
      * @return Base64 encoded string of the compressed image
      * @throws IOException if the file cannot be read
@@ -43,6 +42,7 @@ public class ImageCompressor {
 
     /**
      * Compress a bitmap to a base64 encoded string with size less that {@link #MAX_IMAGE_SIZE}.
+     *
      * @param bitmap the bitmap to compress
      * @return Base64 encoded string of the compressed image
      */
@@ -73,6 +73,7 @@ public class ImageCompressor {
 
     /**
      * Scale a bitmap by a factor of {@link #SCALE_FACTOR}.
+     *
      * @param bitmap the bitmap to scale
      * @return the scaled bitmap
      */
@@ -80,5 +81,17 @@ public class ImageCompressor {
         int width = Math.round(bitmap.getWidth() * SCALE_FACTOR);
         int height = Math.round(bitmap.getHeight() * SCALE_FACTOR);
         return Bitmap.createScaledBitmap(bitmap, width, height, true);
+    }
+
+
+    /**
+     * Convert a base64 encoded string to a bitmap.
+     *
+     * @param base64 the base64 encoded string
+     * @return the bitmap
+     */
+    public static Bitmap base64ToBitmap(String base64) {
+        byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
     }
 }
