@@ -1,13 +1,14 @@
 package com.example.bread.utils;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Utility class for handling images that are stored in Firebase.
@@ -28,14 +29,21 @@ public class ImageHandler {
      * stored in the document without exceeding the limit.
      * </p>
      *
-     * @param imageFile the image file to compress
+     * <p>
+     * For usage check out this android page <a href="https://developer.android.com/training/data-storage/shared/photopicker#java">Photo picker</a>
+     * </p>
+     *
+     * @param context the context
+     * @param uri     the URI of the image file
      * @return Base64 encoded string of the compressed image
      * @throws IOException if the file cannot be read
      */
-    public static String compressImageToBase64(File imageFile) throws IOException {
-        FileInputStream fis = new FileInputStream(imageFile);
-        Bitmap orginalBitmap = BitmapFactory.decodeStream(fis);
-        fis.close();
+    public static String compressImageToBase64(Context context, Uri uri) throws IOException {
+        InputStream inputStream = context.getContentResolver().openInputStream(uri);
+        Bitmap orginalBitmap = BitmapFactory.decodeStream(inputStream);
+        if (inputStream != null) {
+            inputStream.close();
+        }
 
         return compressBitmapToBase64(orginalBitmap);
     }
@@ -82,7 +90,6 @@ public class ImageHandler {
         int height = Math.round(bitmap.getHeight() * SCALE_FACTOR);
         return Bitmap.createScaledBitmap(bitmap, width, height, true);
     }
-
 
     /**
      * Convert a base64 encoded string to a bitmap.
