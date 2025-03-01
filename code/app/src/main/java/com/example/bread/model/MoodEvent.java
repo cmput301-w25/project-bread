@@ -55,7 +55,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
     private EmotionalState emotionalState;
     private SocialSituation socialSituation;
     private String imageUrl;
-
+    private String trigger;
     public MoodEvent() {
     }
 
@@ -77,6 +77,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
                 ", timestamp='" + timestamp + '\'' +
                 ", title='" + title + '\'' +
                 ", reason='" + reason + '\'' +
+                ", trigger='" + trigger + '\''+
                 ", participantRef=" + participantRef +
                 ", emotionalState=" + emotionalState +
                 ", socialSituation=" + socialSituation +
@@ -154,6 +155,12 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
 
     public void setGeoInfo(Map<String, Object> geoInfo) {
         this.geoInfo = geoInfo;
+    }
+    public String getTrigger() {
+        return trigger;
+    }
+    public void setTrigger(String trigger){
+        this.trigger = trigger;
     }
 
     public Map<String, Object> generateGeoInfo(Location location) {
