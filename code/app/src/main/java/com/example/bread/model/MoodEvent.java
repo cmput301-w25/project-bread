@@ -37,11 +37,37 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
      */
     public enum SocialSituation {
         ALONE,
+        WITH_ONE_OTHER_PERSON,
+        WITH_TWO_TO_SEVERAL_PEOPLE,
         WITH_FAMILY,
         WITH_FRIENDS,
         WITH_COWORKERS,
         WITH_STRANGERS,
-        NONE,
+        NONE;
+
+        @Override
+        public String toString() {
+            // This will format the enum's name as required
+            return capitalizeFully(name().replace('_', ' '));
+        }
+
+        private static String capitalizeFully(String input) {
+            if (input == null || input.isEmpty()) {
+                return input;
+            }
+            String[] words = input.toLowerCase().split(" ");
+            StringBuilder builder = new StringBuilder();
+            for (String word : words) {
+                if (!word.isEmpty()) {
+                    builder.append(Character.toUpperCase(word.charAt(0)));
+                    if (word.length() > 1) {
+                        builder.append(word.substring(1));
+                    }
+                    builder.append(" ");
+                }
+            }
+            return builder.toString().trim();
+        }
     }
 
     private String id;

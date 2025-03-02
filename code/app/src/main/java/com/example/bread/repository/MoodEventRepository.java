@@ -49,4 +49,10 @@ public class MoodEventRepository {
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to delete mood event: " + moodEvent, e));
     }
+
+    public void updateMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
+                .addOnSuccessListener(onSuccessListener)
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to update mood event: " + moodEvent.getId(), e));
+    }
 }
