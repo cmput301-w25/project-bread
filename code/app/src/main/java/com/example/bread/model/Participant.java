@@ -15,7 +15,7 @@ public class Participant implements Serializable {
     private String firstName;
     private String lastName;
 
-    private String profilePictureUrl;
+    private String profilePicture;
 
     @Exclude
     private List<String> followers;
@@ -25,12 +25,11 @@ public class Participant implements Serializable {
     public Participant() {
     }
 
-    public Participant(String username, String email, String firstName, String lastName, String profilePictureUrl) {
+    public Participant(String username, String email, String firstName, String lastName) {
         this.username = username;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.profilePictureUrl = profilePictureUrl;
     }
 
     @NonNull
@@ -41,7 +40,6 @@ public class Participant implements Serializable {
                 ", email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
-                ", profilePictureUrl='" + profilePictureUrl + '\'' +
                 '}';
     }
 
@@ -93,11 +91,11 @@ public class Participant implements Serializable {
         this.following = following;
     }
 
-    public String getProfilePictureUrl() {
-        return profilePictureUrl;
+    public String getProfilePicture() {
+        return profilePicture;
     }
 
-    public void setProfilePictureUrl(String profilePictureUrl) {
-        this.profilePictureUrl = profilePictureUrl;
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }
