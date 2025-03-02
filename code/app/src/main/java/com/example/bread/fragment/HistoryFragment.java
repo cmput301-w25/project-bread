@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.bread.R;
-import java.util.Set;
 
 /**
  * A simple {@link Fragment} subclass.
