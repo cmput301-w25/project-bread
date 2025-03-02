@@ -24,8 +24,8 @@ public class HomePage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //followed the following video for navigation bar implementation, accessed on Feb 27 2025
-        //https://www.youtube.com/watch?v=jOFLmKMOcK0
+        //Allows taskbar to switch between fragments when user selects
+        //different screens
         binding = ActivityHomePageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -45,7 +45,7 @@ public class HomePage extends AppCompatActivity {
                 replaceFragment(new ProfileFragment());
             }
 
-            return true;  // Important to return true to indicate the item was selected
+            return true;
         });
     }
 
