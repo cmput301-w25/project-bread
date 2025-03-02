@@ -52,10 +52,10 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
     implementation(libs.geofire.android.common)
+    implementation(libs.firebase.auth)
 
     // Google Services
     implementation(libs.play.services.location)
-    implementation(libs.firebase.auth)
 
     // testing
     testImplementation(libs.junit)

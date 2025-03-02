@@ -96,7 +96,7 @@ public class SignupPage extends AppCompatActivity {
                                 editor.putString("username", username);
                                 editor.apply();
                             }, null);
-                            participantRepository.addParticipant(new Participant(username, email, firstName, lastName, ""), aVoid -> {
+                            participantRepository.addParticipant(new Participant(username, email, firstName, lastName), aVoid -> {
                                 Log.d("SignupPage", "Participant added successfully");
                                 finish();
                             }, e -> {
