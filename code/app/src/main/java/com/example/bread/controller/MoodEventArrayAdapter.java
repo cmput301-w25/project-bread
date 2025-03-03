@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
+import com.example.bread.utils.EmotionUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,9 +22,16 @@ import java.util.Set;
 public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> {
     private ArrayList<MoodEvent> events;
     private Set<MoodEvent> selectedEvents = new HashSet<>();
+
     public MoodEventArrayAdapter(@NonNull Context context, ArrayList<MoodEvent> events) {
         super(context, 0, events);
         this.events = events;
+    }
+
+    static class ViewHolder {
+        CheckBox checkBox;
+        TextView emoticonTextView;
+        TextView titleTextView;
     }
 
     @NonNull
@@ -34,32 +42,39 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_mood_event, parent, false);
             holder = new ViewHolder();
             holder.checkBox = convertView.findViewById(R.id.checkbox);
-            holder.textView = convertView.findViewById(R.id.textViewMoodDetail);
+            holder.emoticonTextView = convertView.findViewById(R.id.emoticon_text_view);
+            holder.titleTextView = convertView.findViewById(R.id.title_text_view);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
-
-        MoodEvent event = getItem(position);
-        holder.textView.setText(event.getTitle());
-        holder.checkBox.setChecked(selectedEvents.contains(event));
-        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                selectedEvents.add(event);
-            } else {
-                selectedEvents.remove(event);
+        MoodEvent moodEvent = getItem(position);
+        if (moodEvent != null) {
+            if (holder.emoticonTextView != null) {
+                holder.emoticonTextView.setText(EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
             }
-        });
-
+            if (holder.titleTextView != null) {
+                holder.titleTextView.setText(moodEvent.getTitle());
+            }
+            int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
+            convertView.setBackgroundResource(colorResId);
+            if (holder.checkBox != null) {
+                holder.checkBox.setOnCheckedChangeListener(null);
+                holder.checkBox.setChecked(selectedEvents.contains(moodEvent));
+                holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (isChecked) {
+                        selectedEvents.add(moodEvent);
+                    } else {
+                        selectedEvents.remove(moodEvent);
+                    }
+                });
+            }
+        }
         return convertView;
-    }
-
-    static class ViewHolder {
-        CheckBox checkBox;
-        TextView textView;
     }
 
     public Set<MoodEvent> getSelectedEvents() {
         return selectedEvents;
     }
 }
+
