@@ -37,11 +37,37 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
      */
     public enum SocialSituation {
         ALONE,
+        WITH_ONE_OTHER_PERSON,
+        WITH_TWO_TO_SEVERAL_PEOPLE,
         WITH_FAMILY,
         WITH_FRIENDS,
         WITH_COWORKERS,
         WITH_STRANGERS,
-        NONE,
+        NONE;
+
+        @Override
+        public String toString() {
+            // This will format the enum's name as required
+            return capitalizeFully(name().replace('_', ' '));
+        }
+
+        private static String capitalizeFully(String input) {
+            if (input == null || input.isEmpty()) {
+                return input;
+            }
+            String[] words = input.toLowerCase().split(" ");
+            StringBuilder builder = new StringBuilder();
+            for (String word : words) {
+                if (!word.isEmpty()) {
+                    builder.append(Character.toUpperCase(word.charAt(0)));
+                    if (word.length() > 1) {
+                        builder.append(word.substring(1));
+                    }
+                    builder.append(" ");
+                }
+            }
+            return builder.toString().trim();
+        }
     }
 
     private String id;
@@ -54,8 +80,8 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
 
     private EmotionalState emotionalState;
     private SocialSituation socialSituation;
-    private String imageUrl;
-    private String trigger;
+    private String attachedImage;
+
     public MoodEvent() {
     }
 
@@ -77,11 +103,9 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
                 ", timestamp='" + timestamp + '\'' +
                 ", title='" + title + '\'' +
                 ", reason='" + reason + '\'' +
-                ", trigger='" + trigger + '\''+
                 ", participantRef=" + participantRef +
                 ", emotionalState=" + emotionalState +
                 ", socialSituation=" + socialSituation +
-                ", imageUrl='" + imageUrl + '\'' +
                 '}';
     }
 
@@ -141,12 +165,12 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         this.socialSituation = socialSituation;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    public String getAttachedImage() {
+        return attachedImage;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setAttachedImage(String attachedImage) {
+        this.attachedImage = attachedImage;
     }
 
     public Map<String, Object> getGeoInfo() {
@@ -155,12 +179,6 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
 
     public void setGeoInfo(Map<String, Object> geoInfo) {
         this.geoInfo = geoInfo;
-    }
-    public String getTrigger() {
-        return trigger;
-    }
-    public void setTrigger(String trigger){
-        this.trigger = trigger;
     }
 
     public Map<String, Object> generateGeoInfo(Location location) {

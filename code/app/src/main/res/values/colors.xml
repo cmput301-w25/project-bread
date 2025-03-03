@@ -2,4 +2,16 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="navbar">#242323</color>
+    <color name="nav_bubble">#817979</color>
+    <color name="happyColor">#FFE066</color>
+    <color name="sadColor">#A9D6E5</color>
+    <color name="angryColor">#FF6B6B</color>
+    <color name="anxiousColor">#BDB2FF</color>
+    <color name="neutralColor">#D3D3D3</color>
+    <color name="confusedColor">#FDFFB6</color>
+    <color name="fearfulColor">#9BF6FF</color>
+    <color name="shamefulColor">#FFC6FF</color>
+    <color name="surprisedColor">#70F473</color>
+    <color name="noneColor">#FFFFFF</color>
 </resources>

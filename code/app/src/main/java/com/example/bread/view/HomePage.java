@@ -1,26 +1,58 @@
 package com.example.bread.view;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
+import com.example.bread.databinding.ActivityHomePageBinding;
+import com.example.bread.fragment.AddFragment;
+import com.example.bread.fragment.HistoryFragment;
+import com.example.bread.fragment.HomeFragment;
+import com.example.bread.fragment.MapFragment;
+import com.example.bread.fragment.ProfileFragment;
 
 public class HomePage extends AppCompatActivity {
 
+    ActivityHomePageBinding binding;
+
+    @SuppressLint("NonConstantResourceId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_home_page);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+        //followed the following video for navigation bar implementation, accessed on Feb 27 2025
+        //https://www.youtube.com/watch?v=jOFLmKMOcK0
+        binding = ActivityHomePageBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        replaceFragment(new HomeFragment());
+
+        binding.bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.home) {
+                replaceFragment(new HomeFragment());
+            } else if (itemId == R.id.map) {
+                replaceFragment(new MapFragment());
+            } else if (itemId == R.id.add) {
+                replaceFragment(new AddFragment());
+            } else if (itemId == R.id.history) {
+                replaceFragment(new HistoryFragment());
+            } else if (itemId == R.id.profile) {
+                replaceFragment(new ProfileFragment());
+            }
+
+            return true;  // Important to return true to indicate the item was selected
         });
+    }
+
+    private void replaceFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.frame_layout, fragment);
+        transaction.commit();
     }
 }
