@@ -63,6 +63,5 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> {
         profile.setImageResource(R.drawable.default_avatar);
 
         return view;
-//        return super.getView(position, convertView, parent);
     }
 }
