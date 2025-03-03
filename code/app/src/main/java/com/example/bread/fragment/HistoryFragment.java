@@ -58,10 +58,10 @@ public class HistoryFragment extends Fragment {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser(); //https://firebase.google.com/docs/auth/android/manage-users
         if (currentUser != null) {
             username = currentUser.getDisplayName();
-        if (username == null) {
-            Log.e("HistoryFragment", "Username is null. Cannot load mood events.");
-            return;
-        }
+            if (username == null) {
+                Log.e("HistoryFragment", "Username is null. Cannot load mood events.");
+                return;
+            }
             participantRef = userRepo.getParticipantRef(username);
             loadMoodEvents();
         } else {
@@ -81,6 +81,6 @@ public class HistoryFragment extends Fragment {
                 },
                 error -> {
                     Log.e("MoodHistory", "Failed to listen for mood events", error);
-        });
+                });
     }
 }
