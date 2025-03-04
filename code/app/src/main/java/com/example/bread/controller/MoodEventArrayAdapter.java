@@ -99,19 +99,19 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
                     }
                 });
             }
-            if (holder.username != null){
+            if (holder.username != null) {
                 holder.username.setText(participantUsername);
             }
-            if (holder.date != null){
+            if (holder.date != null) {
                 Date eventDate = moodEvent.getTimestamp(); //https://stackoverflow.com/questions/5683728/convert-java-util-date-to-string
                 Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String s = formatter.format(eventDate);
                 holder.date.setText(s);
             }
-            if (holder.reason != null){
+            if (holder.reason != null) {
                 holder.reason.setText(moodEvent.getReason());
             }
-            if (holder.profilePic != null){
+            if (holder.profilePic != null) {
                 holder.profilePic.setImageResource(R.drawable.default_avatar);
             }
             if (currentUser != null) {
