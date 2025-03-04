@@ -80,7 +80,7 @@ public class HistoryFragment extends Fragment {
                     moodArrayAdapter.notifyDataSetChanged();
                 },
                 error -> {
-                    Log.e("MoodHistory", "Failed to listen for mood events", error);
+                    Log.e("History Fragment", "Failed to listen for mood events", error);
                 });
     }
 }
