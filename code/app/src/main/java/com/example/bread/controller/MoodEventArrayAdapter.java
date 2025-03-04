@@ -1,7 +1,6 @@
 package com.example.bread.controller;
 
 import android.content.Context;
-import android.media.Image;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -41,12 +40,8 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
     }
 
     static class ViewHolder {
-        //ANI
         CheckBox checkBox;
         TextView emoticonTextView;
-        TextView titleTextView;
-
-        //L
         TextView username;
         TextView date;
         TextView reason;
@@ -58,21 +53,14 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-//            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_mood_event, parent, false);
             convertView = LayoutInflater.from(context).inflate(R.layout.layout_event, parent, false);
             holder = new ViewHolder();
-            //A
             holder.checkBox = convertView.findViewById(R.id.checkbox);
             holder.emoticonTextView = convertView.findViewById(R.id.emoticon_text_view);
-//            holder.titleTextView = convertView.findViewById(R.id.title_text_view);
-
-            //L
             holder.username = convertView.findViewById(R.id.username);
             holder.date = convertView.findViewById(R.id.date);
             holder.reason = convertView.findViewById(R.id.reason);
             holder.profilePic = convertView.findViewById(R.id.profilePic);
-
-
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -87,9 +75,6 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
             if (holder.emoticonTextView != null) {
                 holder.emoticonTextView.setText(EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
             }
-//            if (holder.titleTextView != null) {
-//                holder.titleTextView.setText(moodEvent.getTitle());
-//            }
             int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
             convertView.setBackgroundResource(colorResId);
             if (holder.checkBox != null) {

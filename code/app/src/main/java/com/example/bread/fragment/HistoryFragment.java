@@ -1,7 +1,6 @@
 package com.example.bread.fragment;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -9,12 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.Toast;
 import com.example.bread.R;
 import com.example.bread.controller.MoodEventArrayAdapter;
@@ -25,12 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import java.util.ArrayList;
-import java.util.List;
-import com.example.bread.controller.MoodEventArrayAdapter;
-import com.example.bread.model.MoodEvent;
-import com.example.bread.repository.MoodEventRepository;
 import com.google.android.gms.tasks.OnSuccessListener;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,8 +33,6 @@ public class HistoryFragment extends Fragment {
 
     private MoodEventRepository moodsRepo;
     private ParticipantRepository userRepo;
-    private ListView listView;
-    private MoodEventArrayAdapter adapter;
     private Set<MoodEvent> selectedEvents = new HashSet<>();
 
     private String username;
@@ -70,8 +58,12 @@ public class HistoryFragment extends Fragment {
         return view;
     }
 
-    //retrieves
-    private void fetchParticipantAndLoadEvents() { //LANDYS
+    /**
+     * Retrieves current user using FirebaseUser and uses to find participant ref.
+     * Logs appropriate error messages if username null or user is not found.
+     * Uses loadMoodEvents() to find mood events corresponding to user
+     */
+    private void fetchParticipantAndLoadEvents() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser(); //https://firebase.google.com/docs/auth/android/manage-users
         if (currentUser != null) {
             username = currentUser.getDisplayName();
@@ -86,13 +78,19 @@ public class HistoryFragment extends Fragment {
         }
     }
 
-    private void loadMoodEvents() { //LANDYS
+    /**
+     * Uses listenForEventsWithParticipantRef() from MoodEventRepository class
+     * to actively retrieve mood events corresponding to user whenever added.
+     * Adds/alters user mood events to moodEventArrayList whenever there are changes.
+     * Sorts mood events by date and time added
+     */
+    private void loadMoodEvents() {
         moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
                         //chatGPT prompt "how can i sort an ArrayList of events by timestamp Date object"
-                        moodEventArrayList.sort((e1, e2) -> e2.getTimestamp().compareTo(e1.getTimestamp()));
+                        moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
                     }
                     moodArrayAdapter.notifyDataSetChanged();
                 },
@@ -101,6 +99,10 @@ public class HistoryFragment extends Fragment {
                 });
         }
 
+    /**
+     * Displays a confirmation dialog asking the user if they want to delete the selected mood events.
+     * If the user confirms, deletion is triggered.
+     */
     private void showDeleteConfirmationDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Confirm Deletion");
@@ -111,6 +113,11 @@ public class HistoryFragment extends Fragment {
         alertDialog.show();
     }
 
+    /**
+     * Deletes all currently selected mood events from Firestore.
+     * Removes the events from the list and updates the adapter.
+     * Displays a toast if any errors occur during deletion.
+     */
     private void deleteSelectedMoodEvents() {
         MoodEventRepository repository = new MoodEventRepository();
         for (MoodEvent event : selectedEvents) {
