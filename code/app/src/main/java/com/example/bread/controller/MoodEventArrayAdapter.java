@@ -33,6 +33,17 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
     private String participantUsername;
     private Set<MoodEvent> selectedEvents = new HashSet<>();
 
+    // Add interface for click listener
+    public interface OnMoodEventClickListener {
+        void onMoodEventClick(MoodEvent moodEvent);
+    }
+
+    private OnMoodEventClickListener clickListener;
+
+    public void setOnMoodEventClickListener(OnMoodEventClickListener listener) {
+        this.clickListener = listener;
+    }
+
     public MoodEventArrayAdapter(@NonNull Context context, ArrayList<MoodEvent> events) {
         super(context, 0, events);
         this.context = context;
@@ -106,6 +117,13 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
             if (currentUser != null) {
                 participantUsername = currentUser.getDisplayName();
             }
+
+            // Add click listener for the item
+            convertView.setOnClickListener(v -> {
+                if (clickListener != null) {
+                    clickListener.onMoodEventClick(moodEvent);
+                }
+            });
         }
         return convertView;
     }
@@ -114,4 +132,3 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
         return selectedEvents;
     }
 }
-
