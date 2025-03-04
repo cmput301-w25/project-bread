@@ -71,7 +71,6 @@ public class SignupPage extends AppCompatActivity {
         lastNameEditText = findViewById(R.id.signup_lastname_text);
         signupButton = findViewById(R.id.signup_button);
 
-        // Add ProgressBar to the layout if not already present
         progressBar = findViewById(R.id.signup_progress_bar);
         if (progressBar == null) {
             Log.w(TAG, "ProgressBar not found in layout. Loading indicator will not be shown.");
@@ -96,16 +95,10 @@ public class SignupPage extends AppCompatActivity {
         String password = passwordEditText.getText().toString();
         String firstName = firstNameEditText.getText().toString().trim();
         String lastName = lastNameEditText.getText().toString().trim();
-
-        // Validate input fields
         if (!validateInputFields(username, email, password, firstName, lastName)) {
             return;
         }
-
-        // Show loading indicator
         showLoading(true);
-
-        // Check if username already exists
         checkUsernameAvailability(username, email, password, firstName, lastName);
     }
 
@@ -134,7 +127,6 @@ public class SignupPage extends AppCompatActivity {
             isValid = false;
         }
 
-        // Additional validation
         if (!TextUtils.isEmpty(username) && username.length() < MIN_USERNAME_LENGTH) {
             usernameEditText.setError("Username must be at least " + MIN_USERNAME_LENGTH + " characters");
             isValid = false;
@@ -150,9 +142,14 @@ public class SignupPage extends AppCompatActivity {
             isValid = false;
         }
 
-        if (!TextUtils.isEmpty(password) && password.length() < MIN_PASSWORD_LENGTH) {
-            passwordEditText.setError("Password must be at least " + MIN_PASSWORD_LENGTH + " characters");
-            isValid = false;
+        if (!TextUtils.isEmpty(password)) {
+            String passwordPattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{6,}$";
+
+            if (!Pattern.matches(passwordPattern, password)) {
+                passwordEditText.setError("Password must be at least 6 characters and include at least one digit, " +
+                        "one uppercase letter, one lowercase letter, and one special character");
+                isValid = false;
+            }
         }
 
         return isValid;
@@ -170,7 +167,7 @@ public class SignupPage extends AppCompatActivity {
         }, e -> {
             showLoading(false);
             Log.e(TAG, "Failed to check if username exists", e);
-            Toast.makeText(SignupPage.this, "Network error. Please try again.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SignupPage.this, "Network error", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -182,14 +179,14 @@ public class SignupPage extends AppCompatActivity {
                         updateUserProfile(user, username, email, firstName, lastName);
                     } else {
                         showLoading(false);
-                        Toast.makeText(SignupPage.this, "Account creation failed. Please try again.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(SignupPage.this, "Account creation failed.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(this, e -> {
                     showLoading(false);
                     Log.e(TAG, "Failed to create user", e);
-                    String errorMessage = "Account creation failed: " + e.getMessage();
-                    Toast.makeText(SignupPage.this, errorMessage, Toast.LENGTH_LONG).show();
+                    Toast.makeText(SignupPage.this, "Account creation failed.", Toast.LENGTH_SHORT).show();
+
                 });
     }
 
@@ -206,7 +203,7 @@ public class SignupPage extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     showLoading(false);
                     Log.e(TAG, "Failed to update user profile", e);
-                    Toast.makeText(SignupPage.this, "Failed to update profile. Please try again.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SignupPage.this, "Failed to update profile", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -216,17 +213,14 @@ public class SignupPage extends AppCompatActivity {
         participantRepository.addParticipant(participant, aVoid -> {
             Log.d(TAG, "Participant added successfully");
 
-            // Save username to SharedPreferences
             saveToSharedPreferences(username);
-
-            // Navigate to home page
             showLoading(false);
             goToHomePage();
 
         }, e -> {
             showLoading(false);
             Log.e(TAG, "Failed to add participant", e);
-            Toast.makeText(SignupPage.this, "Failed to save profile. Please try again.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(SignupPage.this, "Failed to save profile", Toast.LENGTH_SHORT).show();
         });
     }
 
