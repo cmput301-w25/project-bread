@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import androidx.fragment.app.Fragment;
 import android.widget.Button;
@@ -25,7 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends Fragment implements FilterMoodEventFragment.FilterMoodDialogListener{
 
     private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
@@ -54,6 +55,13 @@ public class HistoryFragment extends Fragment {
 
         Button deleteButton = view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
+
+        ImageButton filterButton = view.findViewById(R.id.filterButton);
+        filterButton.setOnClickListener(v -> {
+            FilterMoodEventFragment filterFragment = new FilterMoodEventFragment(); //new instance of our filter dialog fragment
+            filterFragment.setListener(this); //passing HistoryFragment as a listener to dialog fragment
+            filterFragment.show(getParentFragmentManager(), "Filter Mood Events"); //displaying Filter Mood Events
+        });
 
         return view;
     }
@@ -131,5 +139,26 @@ public class HistoryFragment extends Fragment {
             }, e -> Toast.makeText(getContext(), "Error deleting event", Toast.LENGTH_SHORT).show());
         }
         selectedEvents.clear();  // Clear the selection after deletion
+    }
+
+    @Override
+    public void mostRecentWeek(boolean isChecked) {
+        if (isChecked){
+            //create functionality so it filters for moods in last 7 days
+        }
+        else{
+            //call loadMoodEvents()
+        }
+
+    }
+
+    @Override
+    public void filterByMood() {
+
+    }
+
+    @Override
+    public void filterByReason() {
+
     }
 }
