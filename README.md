@@ -32,4 +32,4 @@
 - https://github.com/cmput301-w25/project-bread/wiki
 - https://github.com/orgs/cmput301-w25/projects/10
 - https://github.com/cmput301-w25/project-bread/wiki/Sentio-Mood-Sharing-App-UI
-- [UML]
+- https://github.com/cmput301-w25/project-bread/wiki/UML-Diagram
