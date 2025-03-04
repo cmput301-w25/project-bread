@@ -11,15 +11,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+
         <ImageButton
             android:id="@+id/imageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="28dp"
+            android:contentDescription="Filter options"
             android:src="@drawable/filter_svgrepo_com"
-            app:layout_constraintBottom_toTopOf="@+id/historyListView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/deleteButton" />
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/deleteButton"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/sentio_logo"
