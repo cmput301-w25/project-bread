@@ -1,5 +1,7 @@
 package com.example.bread.fragment;
 
+import static android.opengl.Matrix.length;
+
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,7 +24,11 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import java.util.ArrayList;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -141,24 +147,98 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
         selectedEvents.clear();  // Clear the selection after deletion
     }
 
+    //https://stackoverflow.com/questions/17210839/get-last-week-date-range-for-a-date-in-java
+
+    /**
+     * Retrieves a date range for the most recent week (7 days).
+     * The range starts from 7 days ago and ends at the current date.
+     *
+     * @return An ArrayList containing two Date objects:
+     *         the start date (7 days ago) and the end date (today).
+     */
+    public ArrayList<Date> getMostRecentWeek(){
+        ArrayList<Date> weekRange = new ArrayList<Date>();
+        Date date = new Date(); //gets current date
+        Calendar c = Calendar.getInstance(); //sets calendar to today
+        c.setTime(date);
+        Date end = c.getTime();
+        c.add(Calendar.DATE, -7);
+        Date start = c.getTime();
+
+        weekRange.add(start);
+        weekRange.add(end);
+
+        return weekRange;
+    }
+
+    /**
+     * Filters the displayed mood events to show only those from the most recent week,
+     * if the filter switch is enabled.
+     * If the switch is off, all mood events are reloaded.
+     *
+     * @param isChecked True if the "Most Recent Week" filter is enabled, false otherwise.
+     */
     @Override
     public void mostRecentWeek(boolean isChecked) {
         if (isChecked){
-            //create functionality so it filters for moods in last 7 days
+            moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
+                        if (moodEvents != null) {
+                            //create functionality so it filters for moods in last 7 days
+                            moodEventArrayList.clear();
+                            ArrayList<Date> weekRange = getMostRecentWeek();
+                            for (int i = 0; i < moodEvents.size(); i++){
+                                if ((moodEvents.get(i).getTimestamp().before(weekRange.get(0))) //if mood is in last week
+                                    &&
+                                    (moodEvents.get(i).getTimestamp().after(weekRange.get(1)))){
+                                    moodEventArrayList.add(moodEvents.get(i));
+                                }
+                            }
+                            moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
+                        }
+                        moodArrayAdapter.notifyDataSetChanged();
+                    },
+                    error -> {
+                        Log.e("History Fragment", "Failed to listen for mood events", error);
+                    });
         }
-        else{
-            //call loadMoodEvents()
+        else{ //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!??????? might mess with other filters? call it first?
+            //call loadMoodEvents() to keep things the same
+            loadMoodEvents();
         }
 
     }
 
+    /**
+     * Filters the displayed mood events to show only those with the specified emotional state.
+     *
+     * @param moodState The emotional state to filter by (e.g., HAPPY, SAD, etc.).
+     */
     @Override
-    public void filterByMood() {
-
+    public void filterByMood(MoodEvent.EmotionalState moodState) {
+        moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
+                    if (moodEvents != null) {
+                        //create functionality so it filters for moods in last 7 days
+                        moodEventArrayList.clear();
+                        for (int i = 0; i < moodEvents.size(); i++){
+                            if (moodEvents.get(i).getEmotionalState() == moodState){
+                                moodEventArrayList.add(moodEvents.get(i));
+                            }
+                        }
+                        moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
+                    }
+                    moodArrayAdapter.notifyDataSetChanged();
+                },
+                error -> {
+                    Log.e("History Fragment", "Failed to listen for mood events", error);
+                });
     }
 
+    /**
+     *
+     * @param reason
+     */
     @Override
-    public void filterByReason() {
-
+    public void filterByReason(String reason) {
+        // TODO: implement filtering by reason
     }
 }

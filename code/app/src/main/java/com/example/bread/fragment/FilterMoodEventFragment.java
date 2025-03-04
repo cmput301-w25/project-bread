@@ -10,6 +10,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Switch;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -18,14 +19,18 @@ import androidx.fragment.app.DialogFragment;
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class FilterMoodEventFragment extends DialogFragment {
     String reasonKeywordInput;
-    boolean mostRecentSwitchInput;
+//    boolean mostRecentSwitchInput;
+    boolean mostRecentButtonInput;
 
     interface FilterMoodDialogListener {
         void mostRecentWeek(boolean isChecked);
-        void filterByMood();
-        void filterByReason();
+        void filterByMood(MoodEvent.EmotionalState moodState);
+        void filterByReason(String reason);
     }
 
     private FilterMoodDialogListener listener;
@@ -42,13 +47,18 @@ public class FilterMoodEventFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.fragment_filter_moods, null);
-        Switch mostRecentSwitch = view.findViewById(R.id.mostRecentWeekSwitch);
+        ToggleButton mostRecentButton = view.findViewById(R.id.mostRecentWeekButton);
 
+        //adding mood states to the spinner
         Spinner moodDropdown = view.findViewById(R.id.moodDropdown);
-        MoodEvent.EmotionalState[] states = MoodEvent.EmotionalState.values(); //getting mood states from MoodEvent class
-        String[] moodStates = new String[states.length + 1];
-        moodStates[0] = "Select";
-
+        List<String> moodOptions = new ArrayList<>(); //array of mood options
+        moodOptions.add("");  // adding blank first option incase no mood wanted
+        for (MoodEvent.EmotionalState state : MoodEvent.EmotionalState.values()) {
+            moodOptions.add(state.name());  //looping through emotional states and adding to array
+        }
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, moodOptions);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        moodDropdown.setAdapter(adapter);
 
         EditText reasonKeyword = view.findViewById(R.id.reasonKeywordEdit);
 
@@ -58,11 +68,28 @@ public class FilterMoodEventFragment extends DialogFragment {
                 .setTitle("Filter Mood Events")
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Filter", (dialog, which) -> {
-                    
-                    reasonKeywordInput = reasonKeyword.getText().toString();
-                    mostRecentSwitchInput = mostRecentSwitch.isChecked();
+                    //boolean testing whether user selected yes or no to most recent week !!!!!FIX SWITCH
+                    mostRecentButtonInput = mostRecentButton.isChecked();
+                    if (mostRecentButtonInput){
+                        listener.mostRecentWeek(mostRecentButtonInput);
+                    }
 
-                    listener.mostRecentWeek(mostRecentSwitchInput);
+                    //retrieving reason keywords and calling function if filtered
+                    if (reasonKeyword.getText().toString().isBlank()){
+                        reasonKeywordInput = null; //set keyword to null if user does not want to filter by reason
+                    }
+                    else{
+                        reasonKeywordInput = reasonKeyword.getText().toString(); //set keyword to string if user filters by reason
+                        listener.filterByReason(reasonKeywordInput);
+                    }
+
+                    // get selected mood from spinner and convert to string to pass to function
+                    // Inside FilterMoodEventFragment
+                    String selectedMoodString = (String) moodDropdown.getSelectedItem();
+                    if (!selectedMoodString.isEmpty()) {
+                        MoodEvent.EmotionalState selectedMood = MoodEvent.EmotionalState.valueOf(selectedMoodString);
+                        listener.filterByMood(selectedMood);
+                    }
                 })
                 .create();
     }
