@@ -8,10 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
 import androidx.fragment.app.Fragment;
+
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.example.bread.R;
 import com.example.bread.controller.MoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
@@ -21,8 +24,11 @@ import com.example.bread.repository.ParticipantRepository;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+
 import java.util.ArrayList;
+
 import com.google.android.gms.tasks.OnSuccessListener;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.text.SimpleDateFormat;
@@ -142,6 +148,7 @@ public class HistoryFragment extends Fragment {
 
     /**
      * Shows a dialog with the details of the selected mood event.
+     *
      * @param moodEvent The mood event to show details for
      */
     private void showMoodDetailsDialog(MoodEvent moodEvent) {

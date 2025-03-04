@@ -78,6 +78,7 @@ public class HomeFragment extends Fragment {
 
     /**
      * Shows a dialog with the details of the selected mood event.
+     *
      * @param moodEvent The mood event to show details for
      */
     public void showMoodDetailsDialog(MoodEvent moodEvent) {
