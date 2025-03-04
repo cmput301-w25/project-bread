@@ -39,7 +39,7 @@ public class HistoryFragment extends Fragment {
     private DocumentReference participantRef;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) { //LANDYS
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_history, container, false);
 
         moodEventListView = view.findViewById(R.id.historyListView);
@@ -64,7 +64,7 @@ public class HistoryFragment extends Fragment {
      * Uses loadMoodEvents() to find mood events corresponding to user
      */
     private void fetchParticipantAndLoadEvents() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser(); //https://firebase.google.com/docs/auth/android/manage-users
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             username = currentUser.getDisplayName();
             if (username == null) {
@@ -89,7 +89,6 @@ public class HistoryFragment extends Fragment {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
-                        //chatGPT prompt "how can i sort an ArrayList of events by timestamp Date object"
                         moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
                     }
                     moodArrayAdapter.notifyDataSetChanged();
@@ -97,7 +96,7 @@ public class HistoryFragment extends Fragment {
                 error -> {
                     Log.e("History Fragment", "Failed to listen for mood events", error);
                 });
-        }
+    }
 
     /**
      * Displays a confirmation dialog asking the user if they want to delete the selected mood events.
