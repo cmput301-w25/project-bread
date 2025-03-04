@@ -10,10 +10,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import androidx.fragment.app.Fragment;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.example.bread.R;
 import com.example.bread.controller.MoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
+import com.example.bread.model.MoodEvent.SocialSituation;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,13 +25,14 @@ import java.util.ArrayList;
 import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.HashSet;
 import java.util.Set;
+import java.text.SimpleDateFormat;
 
 
 public class HistoryFragment extends Fragment {
 
     private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
-    private ArrayAdapter<MoodEvent> moodArrayAdapter;
+    private MoodEventArrayAdapter moodArrayAdapter;
 
     private MoodEventRepository moodsRepo;
     private ParticipantRepository userRepo;
@@ -46,6 +49,9 @@ public class HistoryFragment extends Fragment {
         moodEventArrayList = new ArrayList<>();
         moodArrayAdapter = new MoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodArrayAdapter);
+
+        // Set click listener for mood events
+        moodArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
 
         moodsRepo = new MoodEventRepository();
         userRepo = new ParticipantRepository();
@@ -97,7 +103,7 @@ public class HistoryFragment extends Fragment {
                 error -> {
                     Log.e("History Fragment", "Failed to listen for mood events", error);
                 });
-        }
+    }
 
     /**
      * Displays a confirmation dialog asking the user if they want to delete the selected mood events.
@@ -132,5 +138,52 @@ public class HistoryFragment extends Fragment {
             }, e -> Toast.makeText(getContext(), "Error deleting event", Toast.LENGTH_SHORT).show());
         }
         selectedEvents.clear();  // Clear the selection after deletion
+    }
+
+    /**
+     * Shows a dialog with the details of the selected mood event.
+     * @param moodEvent The mood event to show details for
+     */
+    private void showMoodDetailsDialog(MoodEvent moodEvent) {
+        if (getContext() == null) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("View Mood");
+
+        // Inflate a custom layout for the dialog
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_mood_details, null);
+
+        // Set up the views
+        TextView emotionTextView = dialogView.findViewById(R.id.detail_emotion);
+        TextView dateTextView = dialogView.findViewById(R.id.detail_date);
+        TextView reasonTextView = dialogView.findViewById(R.id.detail_reason);
+        TextView socialSituationTextView = dialogView.findViewById(R.id.detail_social_situation);
+
+        // Set the data
+        emotionTextView.setText(moodEvent.getEmotionalState().toString());
+
+        // Format date
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
+        String dateString = formatter.format(moodEvent.getTimestamp());
+        dateTextView.setText(dateString);
+
+        // Set reason
+        reasonTextView.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "No reason provided");
+
+        // Set social situation
+        SocialSituation situation = moodEvent.getSocialSituation();
+        socialSituationTextView.setText(situation != null ? situation.toString() : "Not specified");
+
+        builder.setView(dialogView);
+        builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
+
+        // Add an Edit button
+        builder.setNeutralButton("Edit", (dialog, which) -> {
+            // TODO: Implement edit functionality in future updates
+            Toast.makeText(getContext(), "Edit functionality to be implemented", Toast.LENGTH_SHORT).show();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
