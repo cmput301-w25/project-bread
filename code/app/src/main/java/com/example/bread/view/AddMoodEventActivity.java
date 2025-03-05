@@ -1,41 +1,47 @@
 package com.example.bread.view;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+import android.widget.CompoundButton;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.bread.utils.LocationHandler;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class AddMoodEventActivity extends AppCompatActivity {
-    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private Spinner emotionalStateSpinner, socialSituationSpinner;
     private EditText eventTitleEditText, reasonEditText, triggerEditText;
     private CheckBox locationCheckbox;
     private Button saveButton;
     private MoodEventRepository moodEventRepository;
     private ParticipantRepository participantRepository;
-    private FusedLocationProviderClient fusedLocationClient;
+    private LocationHandler locationHandler;
+
+    // Activity result launcher for location permission
+    private final ActivityResultLauncher<String> requestPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    // If permission is granted, fetch location and keep checkbox checked
+                    locationHandler.fetchUserLocation();
+                } else {
+                    // If permission is denied, uncheck the box
+                    locationCheckbox.setChecked(false);
+                    Toast.makeText(this, "Please enable location permissions.", Toast.LENGTH_SHORT).show();
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,14 +53,14 @@ public class AddMoodEventActivity extends AppCompatActivity {
         reasonEditText = findViewById(R.id.reasonEditText);
         socialSituationSpinner = findViewById(R.id.socialSituationSpinner);
         saveButton = findViewById(R.id.saveButton);
-        eventTitleEditText = findViewById(R.id.eventTitleEditText);  // New field
-        triggerEditText = findViewById(R.id.triggerEditText);        // New field
-        locationCheckbox = findViewById(R.id.locationCheckbox);      // New field
+        eventTitleEditText = findViewById(R.id.eventTitleEditText);
+        triggerEditText = findViewById(R.id.triggerEditText);
+        locationCheckbox = findViewById(R.id.locationCheckbox);
 
-        // Set up repositories and location client
+        // Set up repositories and location handler
         moodEventRepository = new MoodEventRepository();
         participantRepository = new ParticipantRepository();
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        locationHandler = LocationHandler.getInstance(this);
 
         // Populate emotional state spinner
         ArrayAdapter<MoodEvent.EmotionalState> moodAdapter = new ArrayAdapter<>(this,
@@ -62,120 +68,129 @@ public class AddMoodEventActivity extends AppCompatActivity {
         moodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         emotionalStateSpinner.setAdapter(moodAdapter);
 
+        //emotionalStateSpinner.setSelection(getIndex(emotionalStateSpinner, MoodEvent.EmotionalState.NONE));
+
         // Populate social situation spinner
         ArrayAdapter<MoodEvent.SocialSituation> socialAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, MoodEvent.SocialSituation.values());
         socialAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         socialSituationSpinner.setAdapter(socialAdapter);
 
+        // Set up location checkbox listener
+        locationCheckbox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                // Request location permission when checkbox is checked
+                locationHandler.requestLocationPermission(requestPermissionLauncher);
+            }
+        });
+
         // Save button logic
         saveButton.setOnClickListener(v -> saveMoodEvent());
     }
 
     private void saveMoodEvent() {
-        // Get event title (optional)
-        String eventTitle = eventTitleEditText.getText().toString().trim();
-        if (eventTitle.isEmpty()) eventTitle = null;
-
-        // Get reason (optional)
-        String reason = reasonEditText.getText().toString().trim();
-        if (reason.isEmpty()) reason = null;
-
-        // Get trigger (optional)
-        String trigger = triggerEditText.getText().toString().trim();
-        if (trigger.isEmpty()) trigger = null;
-
-        // Get selected emotional state (required)
+        // Get required information for mood event
         MoodEvent.EmotionalState emotionalState = (MoodEvent.EmotionalState) emotionalStateSpinner.getSelectedItem();
         if (emotionalState == null) {
             Toast.makeText(this, "Please select a mood!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Get social situation (optional)
+        // Get all the form data
+        String eventTitle = eventTitleEditText.getText().toString().trim();
+        //if (eventTitle.isEmpty()) eventTitle = null;
+
+        String reason = reasonEditText.getText().toString().trim();
+        //if (reason.isEmpty()) reason = null;
+
+        String trigger = triggerEditText.getText().toString().trim();
+        //if (trigger.isEmpty()) trigger = null;
+
         MoodEvent.SocialSituation socialSituation = (MoodEvent.SocialSituation) socialSituationSpinner.getSelectedItem();
 
-        // Handle location (optional, based on checkbox)
-        AtomicReference<Map<String, Object>> geoInfo = new AtomicReference<>();
-        if (locationCheckbox.isChecked()) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
-                Toast.makeText(this, "Location permission required. Please grant permission and try again.", Toast.LENGTH_SHORT).show();
-                return;
-            }
 
-            String finalEventTitle = eventTitle;
-            String finalReason = reason;
-            String finalTrigger = trigger;
-            fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
-                if (location != null) {
-                    geoInfo.set(new MoodEvent().generateGeoInfo(location)); // Reuse MoodEvent's method
-                    saveMoodEventWithLocation(geoInfo.get(), finalEventTitle, finalReason, emotionalState, socialSituation, finalTrigger);
-                } else {
-                    Toast.makeText(this, "Unable to get location. Please enable GPS and try again.", Toast.LENGTH_SHORT).show();
-                }
-            });
+        boolean isValid = true;
+
+        // Validate eventTitle (example: non-empty required)
+        if (eventTitle.isEmpty()) {
+            eventTitleEditText.setError("Event title cannot be empty");
+            isValid = false;
         } else {
-            saveMoodEventWithLocation(null, eventTitle, reason, emotionalState, socialSituation, trigger);
+            eventTitleEditText.setError(null);
         }
-    }
 
-    private void saveMoodEventWithLocation(Map<String, Object> geoInfo, String eventTitle, String reason,
-                                           MoodEvent.EmotionalState emotionalState, MoodEvent.SocialSituation socialSituation,
-                                           String trigger) {
-        // Fetch the current participant from Firebase using ParticipantRepository
-        participantRepository.fetchParticipant(getCurrentUsername(), participant -> {
-            if (participant == null) {
-                Toast.makeText(this, "User not found. Please log in or register!", Toast.LENGTH_SHORT).show();
-                return;
+        if (!reason.isEmpty()) { // Only validate if reason is provided
+            int charCount = reason.length();
+            int wordCount = reason.split("\\s+").length; // Split by whitespace to count words
+
+            if (charCount > 20 || wordCount > 3) {
+                reasonEditText.setError("Reason must be 20 characters or fewer and 3 words or fewer");
+                isValid = false;
+            } else {
+                reasonEditText.setError(null); // Clear error if valid
             }
+        } else {
+            reasonEditText.setError(null); // Clear error if empty (optional field)
+        }
 
-            // Get the participant's username or use a unique identifier (e.g., document ID)
-            String username = participant.getUsername();
-            DocumentReference participantRef = FirebaseFirestore.getInstance().collection("participants").document(username);
 
-            // Create and save the mood event inside the lambda
-            MoodEvent moodEvent = new MoodEvent(eventTitle, reason, emotionalState, participantRef);
-            moodEvent.setSocialSituation(socialSituation);  // Optional
-            moodEvent.setGeoInfo(geoInfo);                 // Optional location
-            moodEvent.setTrigger(trigger);                 // Optional trigger
+        // Validate trigger (example: optional, but if provided, max length 100)
+//        if (!trigger.isEmpty() && trigger.length() > 100) {
+//            triggerEditText.setError("Trigger must be 100 characters or less");
+//            isValid = false;
+//        } else {
+//            triggerEditText.setError(null); // Clear error if valid
+//        }
+        if (trigger.isEmpty()) {
+            triggerEditText.setError(null); // Clear error, empty is valid since trigger is optional
+        }
 
-            // TODO: Implement image upload functionality for mood events (US 02.02.01)
-            moodEvent.setImageUrl(null);  // Placeholder for now
+        // If any validation fails, stop here
+        if (!isValid) {
+            return;
+        }
 
-            // Save to Firebase
-            moodEventRepository.addMoodEvent(
-                    moodEvent,
-                    aVoid -> {
-                        Toast.makeText(this, "Mood saved!", Toast.LENGTH_SHORT).show();
-                        finish(); // Close the screen
-                    },
-                    e -> Toast.makeText(this, "Failed to save mood: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-            );
-        }, e -> Toast.makeText(this, "Failed to fetch user: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        // Get participant reference
+        DocumentReference participantRef = participantRepository.getParticipantRef(getCurrentUsername());
+
+        // Create the mood event
+        MoodEvent moodEvent = new MoodEvent(eventTitle, reason, emotionalState, participantRef);
+        moodEvent.setSocialSituation(socialSituation);
+        moodEvent.setTrigger(trigger);
+        moodEvent.setAttachedImage(null); // TODO: Implement image upload functionality
+
+        // Handle location based on checkbox state
+        if (locationCheckbox.isChecked() && locationHandler.getLastLocation() != null) {
+            // If checkbox is checked and we have a location, add it to the mood event
+            Map<String, Object> geoInfo = moodEvent.generateGeoInfo(locationHandler.getLastLocation());
+            moodEvent.setGeoInfo(geoInfo);
+        } else {
+            // If checkbox is unchecked or no location is available, set geoInfo to null
+            moodEvent.setGeoInfo(null);
+        }
+
+        // Save to Firebase
+        moodEventRepository.addMoodEvent(
+                moodEvent,
+                aVoid -> {
+                    Toast.makeText(this, "Mood saved!", Toast.LENGTH_SHORT).show();
+                    finish(); // Close the screen
+                },
+                e -> Toast.makeText(this, "Failed to save mood: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+        );
     }
 
     // Helper method to get the current username (placeholder - replace with actual login logic)
     private String getCurrentUsername() {
-        // This is a placeholder. In a real app, you’d get the username from Firebase Authentication,
+        // This is a placeholder. In a real app, you'd get the username from Firebase Authentication,
         // SharedPreferences, or another authentication system.
         return getSharedPreferences("sharedPrefs", MODE_PRIVATE).getString("username", "");
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                saveMoodEvent(); // Retry saving with location
-            } else {
-                Toast.makeText(this, "Location permission denied. Location will not be saved.", Toast.LENGTH_SHORT).show();
-                saveMoodEventWithLocation(null, eventTitleEditText.getText().toString().trim().isEmpty() ? null : eventTitleEditText.getText().toString().trim(),
-                        reasonEditText.getText().toString().trim().isEmpty() ? null : reasonEditText.getText().toString().trim(),
-                        (MoodEvent.EmotionalState) emotionalStateSpinner.getSelectedItem(),
-                        (MoodEvent.SocialSituation) socialSituationSpinner.getSelectedItem(),
-                        triggerEditText.getText().toString().trim().isEmpty() ? null : triggerEditText.getText().toString().trim());
-            }
-        }
+    protected void onDestroy() {
+        super.onDestroy();
+        // Make sure to stop location updates when the activity is destroyed
+        locationHandler.stopLocationUpdates();
     }
 }

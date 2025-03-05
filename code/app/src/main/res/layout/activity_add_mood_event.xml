@@ -30,7 +30,7 @@
             android:id="@+id/eventTitleEditText"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:hint="Enter event title (optional)"
+            android:hint="Enter event title"
             android:background="@drawable/rounded_background"
             android:textColor="#FFFFFF"
             android:padding="4dp"/>
@@ -101,7 +101,7 @@
             android:id="@+id/emotionalStateSpinner"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@drawable/rounded_background"
+            android:background="@drawable/spinner_rounded_background_with_arrow"
             android:textColor="#FFFFFF"
             android:padding="4dp"/>
 
@@ -117,8 +117,7 @@
             android:id="@+id/reasonEditText"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:hint="Enter reason (optional)"
-            android:maxLength="20"
+            android:hint="Enter reason"
             android:background="@drawable/rounded_background"
             android:textColor="#FFFFFF"
             android:padding="4dp"/>
@@ -135,7 +134,7 @@
             android:id="@+id/triggerEditText"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:hint="Enter trigger (optional)"
+            android:hint="Enter trigger"
             android:maxLength="20"
             android:background="@drawable/rounded_background"
             android:textColor="#FFFFFF"
@@ -153,7 +152,7 @@
             android:id="@+id/socialSituationSpinner"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:background="@drawable/rounded_background"
+            android:background="@drawable/spinner_rounded_background_with_arrow"
             android:textColor="#FFFFFF"
             android:padding="4dp"/>
 
