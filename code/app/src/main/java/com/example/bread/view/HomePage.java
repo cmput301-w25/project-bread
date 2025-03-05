@@ -1,6 +1,7 @@
 package com.example.bread.view;
 
 import android.annotation.SuppressLint;
+import android.content.Intent; // Added for Intent
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,7 +10,6 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
 import com.example.bread.databinding.ActivityHomePageBinding;
-import com.example.bread.fragment.AddFragment;
 import com.example.bread.fragment.HistoryFragment;
 import com.example.bread.fragment.HomeFragment;
 import com.example.bread.fragment.MapFragment;
@@ -24,8 +24,8 @@ public class HomePage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //followed the following video for navigation bar implementation, accessed on Feb 27 2025
-        //https://www.youtube.com/watch?v=jOFLmKMOcK0
+        // Followed the following video for navigation bar implementation, accessed on Feb 27 2025
+        // https://www.youtube.com/watch?v=jOFLmKMOcK0
         binding = ActivityHomePageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -38,14 +38,18 @@ public class HomePage extends AppCompatActivity {
             } else if (itemId == R.id.map) {
                 replaceFragment(new MapFragment());
             } else if (itemId == R.id.add) {
-                replaceFragment(new AddFragment());
+                // Start AddMoodEventActivity instead of replacing with a fragment
+                Intent intent = new Intent(HomePage.this, AddMoodEventActivity.class);
+                startActivity(intent);
+                // Return false to prevent the navigation item from staying selected (optional)
+                return false;
             } else if (itemId == R.id.history) {
                 replaceFragment(new HistoryFragment());
             } else if (itemId == R.id.profile) {
                 replaceFragment(new ProfileFragment());
             }
 
-            return true;  // Important to return true to indicate the item was selected
+            return true; // Indicate the item was selected (except for 'add')
         });
     }
 
