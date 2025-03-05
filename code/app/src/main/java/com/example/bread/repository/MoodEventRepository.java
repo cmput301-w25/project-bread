@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.Query;
 
 import java.util.List;
 
@@ -36,6 +37,20 @@ public class MoodEventRepository {
                     onSuccessListener.onSuccess(moodEvents);
                 })
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to fetch mood events with participantRef: " + participantRef, e));
+    }
+
+    public void listenForEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
+        getMoodEventCollRef().whereEqualTo("participantRef", participantRef)
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        onFailureListener.onFailure(error);
+                        return;
+                    }
+                    if (value != null) {
+                        List<MoodEvent> moodEvents = value.toObjects(MoodEvent.class);
+                        onSuccessListener.onSuccess(moodEvents);
+                    }
+                }); //https://firebase.google.com/docs/firestore/query-data/listen
     }
 
     public void addMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
