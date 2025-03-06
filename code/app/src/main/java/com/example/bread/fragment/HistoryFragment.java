@@ -6,43 +6,39 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
-import androidx.fragment.app.Fragment;
-
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
 import com.example.bread.R;
-import com.example.bread.controller.MoodEventArrayAdapter;
+import com.example.bread.controller.HistoryMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.MoodEvent.SocialSituation;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-
-import com.google.android.gms.tasks.OnSuccessListener;
-
 import java.util.HashSet;
 import java.util.Set;
-import java.text.SimpleDateFormat;
 
 
 public class HistoryFragment extends Fragment {
 
     private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
-    private MoodEventArrayAdapter moodArrayAdapter;
+    private HistoryMoodEventArrayAdapter moodArrayAdapter;
 
     private MoodEventRepository moodsRepo;
     private ParticipantRepository userRepo;
-    private Set<MoodEvent> selectedEvents = new HashSet<>();
+    private final Set<MoodEvent> selectedEvents = new HashSet<>();
 
     private String username;
     private DocumentReference participantRef;
@@ -53,7 +49,7 @@ public class HistoryFragment extends Fragment {
 
         moodEventListView = view.findViewById(R.id.historyListView);
         moodEventArrayList = new ArrayList<>();
-        moodArrayAdapter = new MoodEventArrayAdapter(getContext(), moodEventArrayList);
+        moodArrayAdapter = new HistoryMoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodArrayAdapter);
 
         // Set click listener for mood events
