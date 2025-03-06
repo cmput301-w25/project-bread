@@ -33,6 +33,17 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
     private String participantUsername;
     private Set<MoodEvent> selectedEvents = new HashSet<>();
 
+    // Add interface for click listener
+    public interface OnMoodEventClickListener {
+        void onMoodEventClick(MoodEvent moodEvent);
+    }
+
+    private OnMoodEventClickListener clickListener;
+
+    public void setOnMoodEventClickListener(OnMoodEventClickListener listener) {
+        this.clickListener = listener;
+    }
+
     public MoodEventArrayAdapter(@NonNull Context context, ArrayList<MoodEvent> events) {
         super(context, 0, events);
         this.context = context;
@@ -88,24 +99,31 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
                     }
                 });
             }
-            if (holder.username != null){
+            if (holder.username != null) {
                 holder.username.setText(participantUsername);
             }
-            if (holder.date != null){
+            if (holder.date != null) {
                 Date eventDate = moodEvent.getTimestamp(); //https://stackoverflow.com/questions/5683728/convert-java-util-date-to-string
                 Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String s = formatter.format(eventDate);
                 holder.date.setText(s);
             }
-            if (holder.reason != null){
+            if (holder.reason != null) {
                 holder.reason.setText(moodEvent.getReason());
             }
-            if (holder.profilePic != null){
+            if (holder.profilePic != null) {
                 holder.profilePic.setImageResource(R.drawable.default_avatar);
             }
             if (currentUser != null) {
                 participantUsername = currentUser.getDisplayName();
             }
+
+            // Add click listener for the item
+            convertView.setOnClickListener(v -> {
+                if (clickListener != null) {
+                    clickListener.onMoodEventClick(moodEvent);
+                }
+            });
         }
         return convertView;
     }
@@ -114,4 +132,3 @@ public class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> { //LANDYS
         return selectedEvents;
     }
 }
-

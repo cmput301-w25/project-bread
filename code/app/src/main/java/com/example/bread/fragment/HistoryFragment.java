@@ -6,15 +6,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import androidx.fragment.app.Fragment;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.example.bread.R;
 import com.example.bread.controller.MoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
+import com.example.bread.model.MoodEvent.SocialSituation;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,19 +23,18 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import java.util.ArrayList;
 import com.google.android.gms.tasks.OnSuccessListener;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.text.SimpleDateFormat;
 
 
 public class HistoryFragment extends Fragment implements FilterMoodEventFragment.FilterMoodDialogListener{
 
     private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
-    private ArrayAdapter<MoodEvent> moodArrayAdapter;
+    private MoodEventArrayAdapter moodArrayAdapter;
 
     private MoodEventRepository moodsRepo;
     private ParticipantRepository userRepo;
@@ -51,6 +51,9 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
         moodEventArrayList = new ArrayList<>();
         moodArrayAdapter = new MoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodArrayAdapter);
+
+        // Set click listener for mood events
+        moodArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
 
         moodsRepo = new MoodEventRepository();
         userRepo = new ParticipantRepository();
@@ -146,7 +149,6 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
     }
 
     //https://stackoverflow.com/questions/17210839/get-last-week-date-range-for-a-date-in-java
-
     /**
      * Retrieves a date range for the most recent week (7 days).
      * The range starts from 7 days ago and ends at the current date.
@@ -239,5 +241,56 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
     public void filterByReason(String reason) {
         // TODO: implement filtering by reason
         //use contains() function
+        for (MoodEvent event : selectedEvents){
+
+        }
+    }
+
+    /**
+     * Shows a dialog with the details of the selected mood event.
+     *
+     * @param moodEvent The mood event to show details for
+     */
+    private void showMoodDetailsDialog(MoodEvent moodEvent) {
+        if (getContext() == null) return;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("View Mood");
+
+        // Inflate a custom layout for the dialog
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_mood_details, null);
+
+        // Set up the views
+        TextView emotionTextView = dialogView.findViewById(R.id.detail_emotion);
+        TextView dateTextView = dialogView.findViewById(R.id.detail_date);
+        TextView reasonTextView = dialogView.findViewById(R.id.detail_reason);
+        TextView socialSituationTextView = dialogView.findViewById(R.id.detail_social_situation);
+
+        // Set the data
+        emotionTextView.setText(moodEvent.getEmotionalState().toString());
+
+        // Format date
+        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
+        String dateString = formatter.format(moodEvent.getTimestamp());
+        dateTextView.setText(dateString);
+
+        // Set reason
+        reasonTextView.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "No reason provided");
+
+        // Set social situation
+        SocialSituation situation = moodEvent.getSocialSituation();
+        socialSituationTextView.setText(situation != null ? situation.toString() : "Not specified");
+
+        builder.setView(dialogView);
+        builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
+
+        // Add an Edit button
+        builder.setNeutralButton("Edit", (dialog, which) -> {
+            // TODO: Implement edit functionality in future updates
+            Toast.makeText(getContext(), "Edit functionality to be implemented", Toast.LENGTH_SHORT).show();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }
