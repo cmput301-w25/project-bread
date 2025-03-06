@@ -2,6 +2,7 @@ package com.example.bread;
 
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.Espresso.onIdle;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
@@ -34,103 +35,119 @@ public class MoodEventEditTest {
         // Navigate to the History tab
         onView(withId(R.id.history)).perform(click());
 
-        // Wait for data to load
-        try {
-            Thread.sleep(1500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Ensure UI updates before proceeding
+        onIdle();
     }
 
     @Test
     public void testEditDialogAppears() {
-        try {
-            // Click on the first mood event in the list
-            onData(anything())
-                    .inAdapterView(withId(R.id.historyListView))
-                    .atPosition(0)
-                    .perform(click());
+        // Select and click the first mood event automatically
+        onData(anything())
+                .inAdapterView(withId(R.id.historyListView))
+                .atPosition(0)
+                .perform(click());
 
-            // Verify that the details dialog appears
-            onView(withText("View Mood")).inRoot(isDialog()).check(matches(isDisplayed()));
+        // Ensure UI updates
+        onIdle();
 
-            // Click the Edit button
-            onView(withText("Edit")).perform(click());
+        // Verify that the details dialog appears
+        onView(withText("View Mood")).check(matches(isDisplayed()));
 
-            // Verify that the edit dialog appears
-            onView(withText("Edit Mood")).inRoot(isDialog()).check(matches(isDisplayed()));
+        // Click the Edit button
+        onView(withText("Edit")).perform(click());
 
-            // Verify edit dialog has the necessary fields
-            onView(withId(R.id.edit_title)).check(matches(isDisplayed()));
-            onView(withId(R.id.edit_reason)).check(matches(isDisplayed()));
-            onView(withId(R.id.edit_emotion_spinner)).check(matches(isDisplayed()));
-            onView(withId(R.id.edit_social_situation_spinner)).check(matches(isDisplayed()));
+        // Ensure UI updates
+        onIdle();
 
-            // Close the dialog
-            onView(withText("Cancel")).perform(click());
-        } catch (Exception e) {
-            System.out.println("Test failed: " + e.getMessage());
-        }
+        // Verify that the edit dialog appears
+        onView(withText("Edit Mood")).check(matches(isDisplayed()));
+
+        // Verify edit dialog has the necessary fields
+        onView(withId(R.id.edit_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.edit_reason)).check(matches(isDisplayed()));
+        onView(withId(R.id.edit_emotion_spinner)).check(matches(isDisplayed()));
+        onView(withId(R.id.edit_social_situation_spinner)).check(matches(isDisplayed()));
+
+        // Close the dialog
+        onView(withText("Cancel")).perform(click());
+
+        // Ensure UI updates
+        onIdle();
     }
 
     @Test
     public void testEditDialogCanBeSaved() {
+        // Select and click the first mood event automatically
+        onData(anything())
+                .inAdapterView(withId(R.id.historyListView))
+                .atPosition(0)
+                .perform(click());
+
+        // Ensure UI updates
+        onIdle();
+
+        // Click the Edit button
+        onView(withText("Edit")).perform(click());
+
+        // Ensure UI updates
+        onIdle();
+
+        // Make a simple change
+        onView(withId(R.id.edit_reason)).perform(replaceText("Test reason"));
+
+        // Ensure UI updates
+        onIdle();
+
+        // Click Save button
+        onView(withText("Save")).perform(click());
+
+        // Ensure UI updates
+        onIdle();
+
+        // Verify dialog is dismissed
         try {
-            // Click on the first mood event in the list
-            onData(anything())
-                    .inAdapterView(withId(R.id.historyListView))
-                    .atPosition(0)
-                    .perform(click());
-
-            // Click the Edit button
-            onView(withText("Edit")).perform(click());
-
-            // Make a simple change
-            onView(withId(R.id.edit_reason)).perform(replaceText("Test reason"));
-
-            // Click Save button
-            onView(withText("Save")).perform(click());
-
-
-            // Verify dialog is dismissed (will throw exception if still visible)
-            try {
-                onView(withText("Edit Mood")).inRoot(isDialog()).check(matches(isDisplayed()));
-                throw new AssertionError("Dialog should be dismissed after saving");
-            } catch (Exception e) {
-                // Expected - dialog should be dismissed
-            }
+            onView(withText("Edit Mood")).check(matches(isDisplayed()));
+            throw new AssertionError("Dialog should be dismissed after saving");
         } catch (Exception e) {
-            System.out.println("Test failed: " + e.getMessage());
+            // Expected - dialog should be dismissed
         }
     }
 
     @Test
     public void testEditDialogCanBeCanceled() {
+        // Select and click the first mood event automatically
+        onData(anything())
+                .inAdapterView(withId(R.id.historyListView))
+                .atPosition(0)
+                .perform(click());
+
+        // Ensure UI updates
+        onIdle();
+
+        // Click the Edit button
+        onView(withText("Edit")).perform(click());
+
+        // Ensure UI updates
+        onIdle();
+
+        // Make a change
+        onView(withId(R.id.edit_reason)).perform(replaceText("This should not be saved"));
+
+        // Ensure UI updates
+        onIdle();
+
+        // Click Cancel button
+        onView(withText("Cancel")).perform(click());
+
+        // Ensure UI updates
+        onIdle();
+
+        // Verify dialog is dismissed
         try {
-            // Click on the first mood event in the list
-            onData(anything())
-                    .inAdapterView(withId(R.id.historyListView))
-                    .atPosition(0)
-                    .perform(click());
-
-            // Click the Edit button
-            onView(withText("Edit")).perform(click());
-
-            // Make a change
-            onView(withId(R.id.edit_reason)).perform(replaceText("This should not be saved"));
-
-            // Click Cancel button
-            onView(withText("Cancel")).perform(click());
-
-            // Verify dialog is dismissed
-            try {
-                onView(withText("Edit Mood")).inRoot(isDialog()).check(matches(isDisplayed()));
-                throw new AssertionError("Dialog should be dismissed after canceling");
-            } catch (Exception e) {
-                // Expected - dialog should be dismissed
-            }
+            onView(withText("Edit Mood")).check(matches(isDisplayed()));
+            throw new AssertionError("Dialog should be dismissed after canceling");
         } catch (Exception e) {
-            System.out.println("Test failed: " + e.getMessage());
+            // Expected - dialog should be dismissed
         }
     }
 }
