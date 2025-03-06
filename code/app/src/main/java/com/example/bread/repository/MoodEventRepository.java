@@ -10,12 +10,14 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.Query;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MoodEventRepository {
     private final FirebaseService firebaseService;
+    private static final String TAG = "MoodEventRepository";
 
     public MoodEventRepository() {
         firebaseService = new FirebaseService();
@@ -36,7 +38,7 @@ public class MoodEventRepository {
                     List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
                     onSuccessListener.onSuccess(moodEvents);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to fetch mood events with participantRef: " + participantRef, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch mood events with participantRef: " + participantRef, e));
     }
 
     public void listenForEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
@@ -53,21 +55,46 @@ public class MoodEventRepository {
                 }); //https://firebase.google.com/docs/firestore/query-data/listen
     }
 
+    public void listenForEventsFromFollowing(@NonNull String username, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
+        ParticipantRepository participantRepository = new ParticipantRepository();
+        participantRepository.fetchFollowing(username, following -> {
+            List<MoodEvent> allMoodEvents = new ArrayList<>();
+            AtomicInteger queriesRemaining = new AtomicInteger(following.size());
+            for (String followingUsername : following) {
+                getMoodEventCollRef().whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                        .addSnapshotListener(((value, error) -> {
+                            if (error != null) {
+                                onFailureListener.onFailure(error);
+                                return;
+                            } else if (value != null) {
+                                List<MoodEvent> moodEvents = value.toObjects(MoodEvent.class);
+                                synchronized (allMoodEvents) {
+                                    allMoodEvents.addAll(moodEvents);
+                                }
+                            }
+                            if (queriesRemaining.decrementAndGet() == 0) {
+                                onSuccessListener.onSuccess(allMoodEvents);
+                            }
+                        }));
+            }
+        }, onFailureListener);
+    }
+
     public void addMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to add mood event: " + moodEvent, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add mood event: " + moodEvent, e));
     }
 
     public void deleteMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).delete()
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to delete mood event: " + moodEvent, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to delete mood event: " + moodEvent, e));
     }
 
     public void updateMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("MoodEventRepository", "Failed to update mood event: " + moodEvent.getId(), e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to update mood event: " + moodEvent.getId(), e));
     }
 }

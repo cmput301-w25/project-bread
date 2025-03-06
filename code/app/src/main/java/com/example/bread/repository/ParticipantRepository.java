@@ -13,7 +13,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class ParticipantRepository {
@@ -59,27 +61,38 @@ public class ParticipantRepository {
         return getParticipantCollRef().document(username);
     }
 
-    private void fetchFollowersAndFollowing(@NonNull Participant participant, @NonNull OnSuccessListener<Participant> onSuccessListener, OnFailureListener onFailureListener) {
-        getParticipantCollRef().document(participant.getUsername()).collection("followers").get()
+    public void fetchFollowersAndFollowing(@NonNull Participant participant, @NonNull OnSuccessListener<Participant> onSuccessListener, OnFailureListener onFailureListener) {
+        fetchFollowing(participant.getUsername(), following -> {
+            participant.setFollowing(following);
+            fetchFollowers(participant.getUsername(), followers -> {
+                participant.setFollowers(followers);
+                onSuccessListener.onSuccess(participant);
+            }, onFailureListener);
+        }, onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch following for participant: " + participant.getUsername(), e));
+    }
+
+    public void fetchFollowers(@NonNull String username, @NonNull OnSuccessListener<List<String>> onSuccessListener, OnFailureListener onFailureListener) {
+        getParticipantCollRef().document(username).collection("followers").get()
                 .addOnSuccessListener(followersSnapshot -> {
                     List<String> followers = new ArrayList<>();
                     for (DocumentSnapshot doc : followersSnapshot) {
                         followers.add(doc.getString("username"));
                     }
-                    participant.setFollowers(followers);
-
-                    getParticipantCollRef().document(participant.getUsername()).collection("following").get()
-                            .addOnSuccessListener(followingSnapshot -> {
-                                List<String> following = new ArrayList<>();
-                                for (DocumentSnapshot doc : followersSnapshot) {
-                                    following.add(doc.getString("username"));
-                                }
-                                participant.setFollowing(following);
-                                onSuccessListener.onSuccess(participant);
-                            })
-                            .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch following for participant: " + participant.getUsername(), e));
+                    onSuccessListener.onSuccess(followers);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch followers for participant: " + participant.getUsername(), e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch followers for participant: " + username, e));
+    }
+
+    public void fetchFollowing(@NonNull String username, @NonNull OnSuccessListener<List<String>> onSuccessListener, OnFailureListener onFailureListener) {
+        getParticipantCollRef().document(username).collection("following").get()
+                .addOnSuccessListener(followingSnapshot -> {
+                    List<String> following = new ArrayList<>();
+                    for (DocumentSnapshot doc : followingSnapshot) {
+                        following.add(doc.getString("username"));
+                    }
+                    onSuccessListener.onSuccess(following);
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch following for participant: " + username, e));
     }
 
     public void addParticipant(@NonNull Participant participant, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
@@ -91,7 +104,9 @@ public class ParticipantRepository {
     public void addFollower(@NonNull String username, String followerUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         // TODO: check if already followed
         // TODO: decide on what to store in the follower document
-        getParticipantCollRef().document(username).collection("followers").document(followerUsername).set(new Object())
+        Map<String, String> follower = new HashMap<>();
+        follower.put("username", followerUsername);
+        getParticipantCollRef().document(username).collection("followers").document(followerUsername).set(follower)
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add follower: " + followerUsername + " to participant: " + username, e));
     }
@@ -99,7 +114,9 @@ public class ParticipantRepository {
     public void addFollowing(@NonNull String username, String followingUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         // TODO: check if already following
         // TODO: decide on what to store in the following document
-        getParticipantCollRef().document(username).collection("following").document(followingUsername).set(new Object())
+        Map<String, String> following = new HashMap<>();
+        following.put("username", followingUsername);
+        getParticipantCollRef().document(username).collection("following").document(followingUsername).set(following)
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add following: " + followingUsername + " to participant: " + username, e));
     }
