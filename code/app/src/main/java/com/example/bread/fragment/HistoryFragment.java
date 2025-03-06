@@ -1,7 +1,5 @@
 package com.example.bread.fragment;
 
-import static android.opengl.Matrix.length;
-
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -240,5 +238,6 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
     @Override
     public void filterByReason(String reason) {
         // TODO: implement filtering by reason
+        //use contains() function
     }
 }
