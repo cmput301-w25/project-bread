@@ -192,6 +192,15 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
 
     @Override
     public int compareTo(MoodEvent event) {
-        return this.timestamp.compareTo(event.getTimestamp());
+        if (this.timestamp == null && event.timestamp == null) {
+            return 0;
+        }
+        if (this.timestamp == null) {
+            return -1;
+        }
+        if (event.timestamp == null) {
+            return 1;
+        }
+        return this.timestamp.compareTo(event.timestamp);
     }
 }

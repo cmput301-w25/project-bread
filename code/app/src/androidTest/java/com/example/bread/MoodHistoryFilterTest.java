@@ -54,6 +54,9 @@ public class MoodHistoryFilterTest{
         FirebaseFirestore.getInstance().useEmulator(androidLocalhost, portNumber);
     }
 
+    @Rule
+    public ActivityScenarioRule<HomePage> activityRule = new ActivityScenarioRule<>(HomePage.class);
+
     //https://stackoverflow.com/questions/17210839/get-last-week-date-range-for-a-date-in-java
     @Before
     public void setDates(){
@@ -76,9 +79,6 @@ public class MoodHistoryFilterTest{
         c.add(Calendar.DATE, -10); //9 days before current date
         moodDate4 = c.getTime();
     }
-
-    @Rule
-    public ActivityScenarioRule<HomePage> activityRule = new ActivityScenarioRule<>(HomePage.class);
 
     //https://firebase.google.com/docs/firestore/manage-data/add-data
     @Before

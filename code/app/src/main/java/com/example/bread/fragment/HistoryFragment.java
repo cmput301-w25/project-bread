@@ -9,19 +9,24 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import androidx.fragment.app.Fragment;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.TextView;
+import android.widget.Toast;
+import androidx.fragment.app.Fragment;
 import com.example.bread.R;
-import com.example.bread.controller.MoodEventArrayAdapter;
+import com.example.bread.controller.HistoryMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.MoodEvent.EmotionalState;
 import com.example.bread.model.MoodEvent.SocialSituation;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -29,14 +34,16 @@ import java.util.ArrayList;
 import com.google.android.gms.tasks.OnSuccessListener;
 import java.util.Calendar;
 import java.util.Date;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.text.SimpleDateFormat;
 
 public class HistoryFragment extends Fragment implements FilterMoodEventFragment.FilterMoodDialogListener{
     private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
-    private MoodEventArrayAdapter moodArrayAdapter;
+    private HistoryMoodEventArrayAdapter moodArrayAdapter;
 
     private MoodEventRepository moodsRepo;
     private ParticipantRepository userRepo;
@@ -56,7 +63,7 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
 
         moodEventListView = view.findViewById(R.id.historyListView);
         moodEventArrayList = new ArrayList<>();
-        moodArrayAdapter = new MoodEventArrayAdapter(getContext(), moodEventArrayList);
+        moodArrayAdapter = new HistoryMoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodArrayAdapter);
 
         //setting click listener for mood events, connects fragment to adapter
@@ -195,7 +202,7 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
      */
     private void deleteSelectedMoodEvents() {
         MoodEventRepository repository = new MoodEventRepository();
-        selectedEvents = ((MoodEventArrayAdapter) moodEventListView.getAdapter()).getSelectedEvents();
+        selectedEvents = ((HistoryMoodEventArrayAdapter) moodEventListView.getAdapter()).getSelectedEvents();
         for (MoodEvent event : selectedEvents) {
             repository.deleteMoodEvent(event, new OnSuccessListener<Void>() {
                 @Override
