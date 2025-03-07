@@ -1,7 +1,7 @@
 package com.example.bread.view;
 
 import android.annotation.SuppressLint;
-import android.content.Intent; // Added for Intent
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
