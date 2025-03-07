@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Repository class for handling mood events in the database
+ */
 public class MoodEventRepository {
     private final FirebaseService firebaseService;
     private static final String TAG = "MoodEventRepository";
@@ -28,6 +31,12 @@ public class MoodEventRepository {
         return firebaseService.getDb().collection("moodEvents");
     }
 
+    /**
+     * Fetches all mood events from the database with the given participant reference
+     * @param participantRef The reference to the participant whose mood events are to be fetched
+     * @param onSuccessListener The listener to be called when the mood events are successfully fetched
+     * @param onFailureListener The listener to be called when the mood events cannot be fetched
+     */
     public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().whereEqualTo("participantRef", participantRef).get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -42,6 +51,12 @@ public class MoodEventRepository {
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch mood events with participantRef: " + participantRef, e));
     }
 
+    /**
+     * Listens for all mood events from the database with the given participant reference
+     * @param participantRef The reference to the participant whose mood events are to be fetched
+     * @param onSuccessListener The listener to be called when the mood events are successfully fetched
+     * @param onFailureListener The listener to be called when the mood events cannot be fetched
+     */
     public void listenForEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
         getMoodEventCollRef().whereEqualTo("participantRef", participantRef)
                 .addSnapshotListener((value, error) -> {
@@ -65,6 +80,12 @@ public class MoodEventRepository {
                 });//https://firebase.google.com/docs/firestore/query-data/listen
     }
 
+    /**
+     * Listens for all mood events that are created by the participants that the given participant is following
+     * @param username The username of the participant whose following's mood events are to be fetched
+     * @param onSuccessListener The listener to be called when the mood events are successfully fetched
+     * @param onFailureListener The listener to be called when the mood events cannot be fetched
+     */
     public void listenForEventsFromFollowing(@NonNull String username, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
         ParticipantRepository participantRepository = new ParticipantRepository();
         participantRepository.fetchFollowing(username, following -> {
@@ -90,18 +111,36 @@ public class MoodEventRepository {
         }, onFailureListener);
     }
 
+    /**
+     * Adds a mood event to the database
+     * @param moodEvent The mood event to be added
+     * @param onSuccessListener The listener to be called when the mood event is successfully added
+     * @param onFailureListener The listener to be called when the mood event cannot be added
+     */
     public void addMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add mood event: " + moodEvent, e));
     }
 
+    /**
+     * Deletes a mood event from the database
+     * @param moodEvent The mood event to be deleted
+     * @param onSuccessListener The listener to be called when the mood event is successfully deleted
+     * @param onFailureListener The listener to be called when the mood event cannot be deleted
+     */
     public void deleteMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).delete()
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to delete mood event: " + moodEvent, e));
     }
 
+    /**
+     * Updates a mood event in the database
+     * @param moodEvent The mood event to be updated
+     * @param onSuccessListener The listener to be called when the mood event is successfully updated
+     * @param onFailureListener The listener to be called when the mood event cannot be updated
+     */
     public void updateMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
 
         // need to add check if the mood event id is null

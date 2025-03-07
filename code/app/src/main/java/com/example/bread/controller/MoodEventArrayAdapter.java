@@ -10,12 +10,18 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 
+/**
+ * Abstract class for the MoodEventArrayAdapter
+ * Used to display mood events in a list view
+ */
 public abstract class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> {
     protected Context context;
     protected ArrayList<MoodEvent> events;
     protected FirebaseAuth mAuth;
 
-    // Add interface for click listener
+    /**
+     * Interface for handling click events on mood events
+     */
     public interface OnMoodEventClickListener {
         void onMoodEventClick(MoodEvent moodEvent);
     }

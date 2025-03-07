@@ -20,6 +20,9 @@ import com.example.bread.utils.ImageHandler;
 
 import java.util.ArrayList;
 
+/**
+ * Adapter class for the HomeFragment ListView
+ */
 public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
     public HomeMoodEventArrayAdapter(@NonNull Context context, ArrayList<MoodEvent> events) {
         super(context, events);

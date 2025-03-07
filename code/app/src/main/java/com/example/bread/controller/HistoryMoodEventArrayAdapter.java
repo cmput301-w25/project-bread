@@ -23,6 +23,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Adapter class for the HistoryFragment ListView
+ */
 public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
     private final Set<MoodEvent> selectedEvents = new HashSet<>();
