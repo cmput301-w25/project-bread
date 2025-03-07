@@ -24,13 +24,13 @@ import java.util.List;
 
 public class FilterMoodEventFragment extends DialogFragment {
     String reasonKeywordInput;
-//    boolean mostRecentSwitchInput;
+    MoodEvent.EmotionalState selectedMood;
     boolean mostRecentButtonInput;
 
     interface FilterMoodDialogListener {
-        void mostRecentWeek(boolean isChecked);
-        void filterByMood(MoodEvent.EmotionalState moodState);
-        void filterByReason(String reason);
+        //----------------------------------------------------------------------------------------------------
+        void applyingFilters(boolean isChecked, MoodEvent.EmotionalState moodState, String reason);
+        void saveFilterState(boolean mostRecent, String reason, MoodEvent.EmotionalState moodState);
     }
 
     private FilterMoodDialogListener listener;
@@ -62,6 +62,27 @@ public class FilterMoodEventFragment extends DialogFragment {
 
         EditText reasonKeyword = view.findViewById(R.id.reasonKeywordEdit);
 
+        //----------------------------------------------------------------------------------------------------
+        Bundle args = getArguments();
+        if (args != null) {
+            // Set toggle state
+            mostRecentButton.setChecked(args.getBoolean("mostRecent", false));
+
+            // Set reason keyword (if present)
+            if (args.containsKey("reasonKeyword")) {
+                reasonKeyword.setText(args.getString("reasonKeyword"));
+            }
+
+            // Set mood spinner (if present)
+            if (args.containsKey("moodState")) {
+                String moodStateName = args.getString("moodState");
+                if (moodStateName != null) {
+                    int spinnerPosition = adapter.getPosition(moodStateName.toUpperCase());
+                    moodDropdown.setSelection(spinnerPosition);
+                }
+            }
+        }
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         return builder
                 .setView(view)
@@ -71,7 +92,6 @@ public class FilterMoodEventFragment extends DialogFragment {
                     //boolean testing whether user selected yes or no to most recent week !!!!!FIX SWITCH
                     mostRecentButtonInput = mostRecentButton.isChecked();
                     if (mostRecentButtonInput){
-                        listener.mostRecentWeek(mostRecentButtonInput);
                     }
 
                     //retrieving reason keywords and calling function if filtered
@@ -80,16 +100,18 @@ public class FilterMoodEventFragment extends DialogFragment {
                     }
                     else{
                         reasonKeywordInput = reasonKeyword.getText().toString(); //set keyword to string if user filters by reason
-                        listener.filterByReason(reasonKeywordInput);
                     }
 
                     // get selected mood from spinner and convert to string to pass to function
-                    // Inside FilterMoodEventFragment
                     String selectedMoodString = (String) moodDropdown.getSelectedItem();
                     if (!selectedMoodString.isEmpty()) {
-                        MoodEvent.EmotionalState selectedMood = MoodEvent.EmotionalState.valueOf(selectedMoodString);
-                        listener.filterByMood(selectedMood);
+                        selectedMood = MoodEvent.EmotionalState.valueOf(selectedMoodString);
                     }
+                    else{
+                        selectedMood = null; //if user does not want to filter by mood state
+                    }
+                    listener.applyingFilters(mostRecentButtonInput, selectedMood, reasonKeywordInput);
+                    listener.saveFilterState(mostRecentButtonInput, reasonKeywordInput, selectedMood);
                 })
                 .create();
     }

@@ -43,6 +43,12 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
     private String username;
     private DocumentReference participantRef;
 
+    //storing user filter choices and setting default values
+    //----------------------------------------------------------------------------------------------------
+    private boolean savedMostRecent = false;
+    private MoodEvent.EmotionalState savedMoodState = null;
+    private String savedReasonKeyword = null;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_history, container, false);
@@ -52,25 +58,51 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
         moodArrayAdapter = new MoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodArrayAdapter);
 
-        // Set click listener for mood events
+        //setting click listener for mood events, connects fragment to adapter
         moodArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
 
         moodsRepo = new MoodEventRepository();
         userRepo = new ParticipantRepository();
 
+        //initiates list of mood history events
         fetchParticipantAndLoadEvents();
 
         Button deleteButton = view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
 
+
         ImageButton filterButton = view.findViewById(R.id.filterButton);
         filterButton.setOnClickListener(v -> {
             FilterMoodEventFragment filterFragment = new FilterMoodEventFragment(); //new instance of our filter dialog fragment
             filterFragment.setListener(this); //passing HistoryFragment as a listener to dialog fragment
-            filterFragment.show(getParentFragmentManager(), "Filter Mood Events"); //displaying Filter Mood Events
-        });
+            //----------------------------------------------------------------------------------------------------
+            //creating a bundle to pass data from HistoryFragment to FilterMoodEventFragment
+            Bundle selections = new Bundle();
+            selections.putBoolean("mostRecent", savedMostRecent);
+            if (savedMoodState != null) {
+                selections.putString("moodState", savedMoodState.name());
+            }
+            if (savedReasonKeyword != null) {
+                selections.putString("reasonKeyword", savedReasonKeyword);
+            }
+            filterFragment.setArguments(selections); //passing current user selections to filterFragment as a bundle
+            filterFragment.show(getParentFragmentManager(), "Filter Mood Events");
 
+        });
         return view;
+    }
+
+    /**
+     * saves users selected filter options and is called in FilterMoodEventFragment
+     * @param mostRecent = boolean value where true = user selected most recent week and false = not only recent week
+     * @param reason = reason keyword String user enters when searching for specific events
+     * @param moodState = EmotionalState enum value that user selects from Spinner when searching for mood events
+     */
+    @Override
+    public void saveFilterState(boolean mostRecent, String reason, MoodEvent.EmotionalState moodState) {
+        savedMostRecent = mostRecent;
+        savedReasonKeyword = reason;
+        savedMoodState = moodState;
     }
 
     /**
@@ -134,6 +166,7 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
      */
     private void deleteSelectedMoodEvents() {
         MoodEventRepository repository = new MoodEventRepository();
+        selectedEvents = ((MoodEventArrayAdapter) moodEventListView.getAdapter()).getSelectedEvents();
         for (MoodEvent event : selectedEvents) {
             repository.deleteMoodEvent(event, new OnSuccessListener<Void>() {
                 @Override
@@ -170,80 +203,54 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
 
         return weekRange;
     }
-
     /**
-     * Filters the displayed mood events to show only those from the most recent week,
-     * if the filter switch is enabled.
-     * If the switch is off, all mood events are reloaded.
      *
-     * @param isChecked True if the "Most Recent Week" filter is enabled, false otherwise.
+     * @param isChecked = boolean value where true = user wants moods from most recent week & false = user wants all moods not just recent week
+     * @param moodState = EmotionalState enum (from MoodEvent) value that user picks if they want to filter by an emotional state
+     * @param reason = String keyword(s) that user enters if they want to find a mood event with specific keywords in the reason
      */
     @Override
-    public void mostRecentWeek(boolean isChecked) {
-        if (isChecked){
-            moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
-                        if (moodEvents != null) {
-                            //create functionality so it filters for moods in last 7 days
-                            moodEventArrayList.clear();
+    public void applyingFilters(boolean isChecked, MoodEvent.EmotionalState moodState, String reason){
+        moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
+                    moodEventArrayList.clear(); //clears movie array in the beginning
+                    if (moodEvents != null) {
+                        if (isChecked){ //if user chooses most recent week option
                             ArrayList<Date> weekRange = getMostRecentWeek();
                             for (int i = 0; i < moodEvents.size(); i++){
                                 if ((moodEvents.get(i).getTimestamp().before(weekRange.get(0))) //if mood is in last week
-                                    &&
-                                    (moodEvents.get(i).getTimestamp().after(weekRange.get(1)))){
+                                        &&
+                                        (moodEvents.get(i).getTimestamp().after(weekRange.get(1)))){
                                     moodEventArrayList.add(moodEvents.get(i));
                                 }
                             }
-                            moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
                         }
-                        moodArrayAdapter.notifyDataSetChanged();
-                    },
-                    error -> {
-                        Log.e("History Fragment", "Failed to listen for mood events", error);
-                    });
-        }
-        else{ //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!??????? might mess with other filters? call it first?
-            //call loadMoodEvents() to keep things the same
-            loadMoodEvents();
-        }
 
-    }
-
-    /**
-     * Filters the displayed mood events to show only those with the specified emotional state.
-     *
-     * @param moodState The emotional state to filter by (e.g., HAPPY, SAD, etc.).
-     */
-    @Override
-    public void filterByMood(MoodEvent.EmotionalState moodState) {
-        moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
-                    if (moodEvents != null) {
-                        //create functionality so it filters for moods in last 7 days
-                        moodEventArrayList.clear();
-                        for (int i = 0; i < moodEvents.size(); i++){
-                            if (moodEvents.get(i).getEmotionalState() == moodState){
-                                moodEventArrayList.add(moodEvents.get(i));
+                        if (moodState != null){ //if user enters a mood state from Spinner
+                            for (int i = 0; i < moodEvents.size(); i++){
+                                if (moodEvents.get(i).getEmotionalState() == moodState){
+                                    moodEventArrayList.add(moodEvents.get(i));
+                                }
                             }
                         }
-                        moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
+
+                        if (reason != null && !reason.isEmpty()){ //if user enters reason keywords
+                            for (int i = 0; i < moodEvents.size(); i++){
+                                if (moodEvents.get(i).getReason().contains(reason)){
+                                    moodEventArrayList.add(moodEvents.get(i));
+                                }
+                            }
+                        }
+
+                        else{ //if user does not enter any filters
+                            loadMoodEvents();
+                        }
                     }
+                    moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
                     moodArrayAdapter.notifyDataSetChanged();
                 },
                 error -> {
                     Log.e("History Fragment", "Failed to listen for mood events", error);
                 });
-    }
-
-    /**
-     *
-     * @param reason
-     */
-    @Override
-    public void filterByReason(String reason) {
-        // TODO: implement filtering by reason
-        //use contains() function
-        for (MoodEvent event : selectedEvents){
-
-        }
     }
 
     /**
