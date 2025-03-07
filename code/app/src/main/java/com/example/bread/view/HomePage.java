@@ -10,7 +10,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
 import com.example.bread.databinding.ActivityHomePageBinding;
-import com.example.bread.fragment.AddFragment;
+
 import com.example.bread.fragment.HistoryFragment;
 import com.example.bread.fragment.HomeFragment;
 import com.example.bread.fragment.MapFragment;
