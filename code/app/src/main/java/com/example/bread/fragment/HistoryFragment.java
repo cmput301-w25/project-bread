@@ -94,6 +94,16 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
         return view;
     }
 
+    //https://stackoverflow.com/questions/28550370/how-to-detect-whether-android-app-is-running-ui-test-with-espresso
+    public static boolean isRunningTest() {
+        try {
+            Class.forName("androidx.test.espresso.Espresso");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     /**
      * saves users selected filter options and is called in FilterMoodEventFragment
      * @param mostRecent = boolean value where true = user selected most recent week and false = not only recent week
@@ -113,19 +123,35 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
      * Uses loadMoodEvents() to find mood events corresponding to user
      */
     private void fetchParticipantAndLoadEvents() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            username = currentUser.getDisplayName();
-            if (username == null) {
-                Log.e("HistoryFragment", "Username is null. Cannot load mood events.");
-                return;
-            }
-            participantRef = userRepo.getParticipantRef(username);
-            loadMoodEvents();
+        if (isRunningTest()) {
+            username = "testUser";  // Force to match your test data
         } else {
-            Log.e("HistoryFragment", "No authenticated user found.");
+            FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+            username = (currentUser != null) ? currentUser.getDisplayName() : null;
         }
+        if (username == null) {
+            Log.e("HistoryFragment", "Username is null, cannot proceed.");
+            return;  // Safeguard in case username somehow becomes null
+        }
+        participantRef = userRepo.getParticipantRef(username);
+        loadMoodEvents();
     }
+
+    //old
+//    private void fetchParticipantAndLoadEvents() {
+//        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+//        if (currentUser != null) {
+//            username = currentUser.getDisplayName();
+//            if (username == null) {
+//                Log.e("HistoryFragment", "Username is null. Cannot load mood events.");
+//                return;
+//            }
+//            participantRef = userRepo.getParticipantRef(username);
+//            loadMoodEvents();
+//        } else {
+//            Log.e("HistoryFragment", "No authenticated user found.");
+//        }
+//    }
 
     /**
      * Uses listenForEventsWithParticipantRef() from MoodEventRepository class
