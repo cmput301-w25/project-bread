@@ -62,7 +62,6 @@ public class FilterMoodEventFragment extends DialogFragment {
 
         EditText reasonKeyword = view.findViewById(R.id.reasonKeywordEdit);
 
-        //----------------------------------------------------------------------------------------------------
         Bundle args = getArguments();
         if (args != null) {
             // Set toggle state

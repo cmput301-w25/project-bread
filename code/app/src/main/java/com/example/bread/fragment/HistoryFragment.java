@@ -46,7 +46,6 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
     private DocumentReference participantRef;
 
     //storing user filter choices and setting default values
-    //----------------------------------------------------------------------------------------------------
     private boolean savedMostRecent = false;
     private MoodEvent.EmotionalState savedMoodState = null;
     private String savedReasonKeyword = null;
@@ -72,13 +71,11 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
         Button deleteButton = view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
 
-
         ImageButton filterButton = view.findViewById(R.id.filterButton);
         filterButton.setOnClickListener(v -> {
             FilterMoodEventFragment filterFragment = new FilterMoodEventFragment(); //new instance of our filter dialog fragment
             filterFragment.setListener(this); //passing HistoryFragment as a listener to dialog fragment
-            //----------------------------------------------------------------------------------------------------
-            //creating a bundle to pass data from HistoryFragment to FilterMoodEventFragment
+            //bundle to pass data from HistoryFragment to FilterMoodEventFragment
             Bundle selections = new Bundle();
             selections.putBoolean("mostRecent", savedMostRecent);
             if (savedMoodState != null) {
@@ -94,6 +91,10 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
         return view;
     }
 
+    /**
+     * Used for testing and assigning a default username
+     * @return boolean for running or not running
+     */
     //https://stackoverflow.com/questions/28550370/how-to-detect-whether-android-app-is-running-ui-test-with-espresso
     public static boolean isRunningTest() {
         try {
@@ -117,27 +118,27 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
         savedMoodState = moodState;
     }
 
-    /**
-     * Retrieves current user using FirebaseUser and uses to find participant ref.
-     * Logs appropriate error messages if username null or user is not found.
-     * Uses loadMoodEvents() to find mood events corresponding to user
-     */
     private void fetchParticipantAndLoadEvents() {
         if (isRunningTest()) {
-            username = "testUser";  // Force to match your test data
+            username = "testUser";
         } else {
             FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
             username = (currentUser != null) ? currentUser.getDisplayName() : null;
         }
         if (username == null) {
             Log.e("HistoryFragment", "Username is null, cannot proceed.");
-            return;  // Safeguard in case username somehow becomes null
+            return;
         }
         participantRef = userRepo.getParticipantRef(username);
         loadMoodEvents();
     }
 
-    //old
+    /**
+     * OLD
+     * Retrieves current user using FirebaseUser and uses to find participant ref.
+     * Logs appropriate error messages if username null or user is not found.
+     * Uses loadMoodEvents() to find mood events corresponding to user
+     */
 //    private void fetchParticipantAndLoadEvents() {
 //        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 //        if (currentUser != null) {
@@ -238,47 +239,45 @@ public class HistoryFragment extends Fragment implements FilterMoodEventFragment
      * @param reason = String keyword(s) that user enters if they want to find a mood event with specific keywords in the reason
      */
     @Override
-    public void applyingFilters(boolean isChecked, MoodEvent.EmotionalState moodState, String reason){
+    public void applyingFilters(boolean isChecked, MoodEvent.EmotionalState moodState, String reason) {
         moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
-                    moodEventArrayList.clear(); //clears movie array in the beginning
-                    if (moodEvents != null) {
-                        if (isChecked){ //if user chooses most recent week option
+            if (isChecked || moodState != null || (reason != null && !reason.isEmpty())) { // only runs if a filter is applied
+                moodEventArrayList.clear();
+
+                if (moodEvents != null) {
+                    for (MoodEvent userMood : moodEvents) {
+                        boolean matchesRecent = true;  // default to true if filter is not applied so mood is not excluded by filters
+                        boolean matchesMoodState = true;
+                        boolean matchesReason = true;
+
+                        if (isChecked) { // filter by recent week if checked
                             ArrayList<Date> weekRange = getMostRecentWeek();
-                            for (int i = 0; i < moodEvents.size(); i++){
-                                if ((moodEvents.get(i).getTimestamp().before(weekRange.get(0))) //if mood is in last week
-                                        &&
-                                        (moodEvents.get(i).getTimestamp().after(weekRange.get(1)))){
-                                    moodEventArrayList.add(moodEvents.get(i));
-                                }
-                            }
+                            matchesRecent = userMood.getTimestamp().after(weekRange.get(0)) && userMood.getTimestamp().before(weekRange.get(1)); //mood is after start (week ago) and before end (today)
                         }
 
-                        if (moodState != null){ //if user enters a mood state from Spinner
-                            for (int i = 0; i < moodEvents.size(); i++){
-                                if (moodEvents.get(i).getEmotionalState() == moodState){
-                                    moodEventArrayList.add(moodEvents.get(i));
-                                }
-                            }
+                        if (moodState != null) { // filter by mood state if selected
+                            matchesMoodState = (userMood.getEmotionalState() == moodState);
                         }
 
-                        if (reason != null && !reason.isEmpty()){ //if user enters reason keywords
-                            for (int i = 0; i < moodEvents.size(); i++){
-                                if (moodEvents.get(i).getReason().contains(reason)){
-                                    moodEventArrayList.add(moodEvents.get(i));
-                                }
-                            }
+                        if (reason != null && !reason.isEmpty()) { // filter by reason if provided
+                            matchesReason = (userMood.getReason().contains(reason));
                         }
 
-                        else{ //if user does not enter any filters
-                            loadMoodEvents();
+                        // mood is valid if all filters match
+                        if (matchesRecent && matchesMoodState && matchesReason) {
+                            moodEventArrayList.add(userMood);
                         }
                     }
-                    moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
-                    moodArrayAdapter.notifyDataSetChanged();
-                },
-                error -> {
-                    Log.e("History Fragment", "Failed to listen for mood events", error);
-                });
+                }
+                moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
+                moodArrayAdapter.notifyDataSetChanged();
+            }
+            else{
+                loadMoodEvents();
+            }
+        }, error -> {
+            Log.e("History Fragment", "Failed to listen for mood events", error);
+        });
     }
 
     /**
