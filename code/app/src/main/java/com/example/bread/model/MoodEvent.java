@@ -43,8 +43,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         WITH_FAMILY,
         WITH_FRIENDS,
         WITH_COWORKERS,
-        WITH_STRANGERS,
-        ;
+        WITH_STRANGERS;
 
         @Override
         public String toString() {
@@ -202,21 +201,21 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         return geoInfo;
     }
 
-//    @Override
-//    public int compareTo(MoodEvent event) {
-//        return this.timestamp.compareTo(event.getTimestamp());
-//    }
     @Override
     public int compareTo(MoodEvent event) {
-        if (this.timestamp == null && event.getTimestamp() == null) {
-            return 0; // Both null, equal
-        }
-        if (this.timestamp == null) {
-            return 1; // Null timestamps come after non-null
-        }
-        if (event.getTimestamp() == null) {
-            return -1; // Non-null comes before null
-        }
         return this.timestamp.compareTo(event.getTimestamp());
     }
+//    @Override
+//    public int compareTo(MoodEvent event) {
+//        if (this.timestamp == null && event.getTimestamp() == null) {
+//            return 0; // Both null, equal
+//        }
+//        if (this.timestamp == null) {
+//            return 1; // Null timestamps come after non-null
+//        }
+//        if (event.getTimestamp() == null) {
+//            return -1; // Non-null comes before null
+//        }
+//        return this.timestamp.compareTo(event.getTimestamp());
+//    }
 }

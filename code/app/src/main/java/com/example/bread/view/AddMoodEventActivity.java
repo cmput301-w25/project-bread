@@ -1,7 +1,7 @@
 package com.example.bread.view;
 
 import android.os.Bundle;
-import android.util.Log; // Added for logging
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -103,7 +103,6 @@ public class AddMoodEventActivity extends AppCompatActivity {
         MoodEvent.EmotionalState emotionalState = (MoodEvent.EmotionalState) emotionalStateSpinner.getSelectedItem();
         if (emotionalState == null) {
             Log.w(TAG, "No emotional state selected");
-            Toast.makeText(this, "Please select a mood!", Toast.LENGTH_SHORT).show();
             return;
         }
         Log.d(TAG, "Emotional state selected: " + emotionalState);
@@ -124,7 +123,7 @@ public class AddMoodEventActivity extends AppCompatActivity {
             isValid = false;
         } else {
             Log.d(TAG, "Event title validated: " + eventTitle);
-            eventTitleEditText.setError(null);
+            //eventTitleEditText.setError(null);
         }
 
         if (!reason.isEmpty()) { // Only validate if reason is provided
@@ -181,7 +180,7 @@ public class AddMoodEventActivity extends AppCompatActivity {
                 Log.i(TAG, "Location attached to mood event: " + geoInfo);
             } catch (Exception e) {
                 Log.e(TAG, "Error generating geo info: " + e.getMessage(), e);
-                Toast.makeText(this, "Error attaching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Error attaching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 return;
             }
         } else {
@@ -200,7 +199,7 @@ public class AddMoodEventActivity extends AppCompatActivity {
                 },
                 e -> {
                     Log.e(TAG, "Failed to save mood event: " + e.getMessage(), e);
-                    Toast.makeText(this, "Failed to save mood: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this, "Failed to save mood: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
         );
     }
