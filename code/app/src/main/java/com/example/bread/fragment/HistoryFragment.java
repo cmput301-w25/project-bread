@@ -6,8 +6,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -16,6 +19,7 @@ import androidx.fragment.app.Fragment;
 import com.example.bread.R;
 import com.example.bread.controller.HistoryMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
+import com.example.bread.model.MoodEvent.EmotionalState;
 import com.example.bread.model.MoodEvent.SocialSituation;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
@@ -28,7 +32,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-
 
 public class HistoryFragment extends Fragment {
 
@@ -182,9 +185,145 @@ public class HistoryFragment extends Fragment {
 
         // Add an Edit button
         builder.setNeutralButton("Edit", (dialog, which) -> {
-            // TODO: Implement edit functionality in future updates
-            Toast.makeText(getContext(), "Edit functionality to be implemented", Toast.LENGTH_SHORT).show();
+            showEditMoodDialog(moodEvent);
         });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    /**
+     * Shows a dialog to edit the selected mood event.
+     *
+     * @param moodEvent The mood event to edit
+     */
+    private void showEditMoodDialog(MoodEvent moodEvent) {
+        if (getContext() == null) return;
+
+
+        // Check and try to fix the ID if it's null
+        if (moodEvent.getId() == null) {
+            // Try to find the mood event in our list that matches this one
+            for (MoodEvent event : moodEventArrayList) {
+                if (event.getTimestamp() != null && moodEvent.getTimestamp() != null &&
+                        event.getTimestamp().equals(moodEvent.getTimestamp()) &&
+                        event.getReason() != null && moodEvent.getReason() != null &&
+                        event.getReason().equals(moodEvent.getReason())) {
+                    // This is likely the same event, copy its ID
+                    moodEvent.setId(event.getId());
+                    Log.d("HistoryFragment", "Fixed null ID: " + moodEvent.getId());
+                    break;
+                }
+            }
+
+            // If still null, we can't edit
+            if (moodEvent.getId() == null) {
+                Toast.makeText(getContext(), "Cannot edit this mood: no ID available", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Edit Mood");
+
+        // Inflate a custom layout for the dialog
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_mood, null);
+
+        // Set up the spinners and EditText fields
+        EditText titleEditText = dialogView.findViewById(R.id.edit_title);
+        EditText reasonEditText = dialogView.findViewById(R.id.edit_reason);
+        Spinner emotionSpinner = dialogView.findViewById(R.id.edit_emotion_spinner);
+        Spinner socialSituationSpinner = dialogView.findViewById(R.id.edit_social_situation_spinner);
+
+        // Set current title
+        titleEditText.setText(moodEvent.getTitle() != null ? moodEvent.getTitle() : "");
+
+        // Set up emotion spinner
+        ArrayAdapter<EmotionalState> emotionAdapter = new ArrayAdapter<>(
+                getContext(),
+                android.R.layout.simple_spinner_item,
+                EmotionalState.values()
+        );
+        emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        emotionSpinner.setAdapter(emotionAdapter);
+
+        // Set current emotional state
+        if (moodEvent.getEmotionalState() != null) {
+            int emotionPosition = emotionAdapter.getPosition(moodEvent.getEmotionalState());
+            emotionSpinner.setSelection(emotionPosition);
+        }
+
+        // Set current reason
+        reasonEditText.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "");
+
+        // Set up social situation spinner
+        ArrayAdapter<SocialSituation> socialAdapter = new ArrayAdapter<>(
+                getContext(),
+                android.R.layout.simple_spinner_item,
+                SocialSituation.values()
+        );
+        socialAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        socialSituationSpinner.setAdapter(socialAdapter);
+
+        // Set current social situation
+        if (moodEvent.getSocialSituation() != null) {
+            int socialPosition = socialAdapter.getPosition(moodEvent.getSocialSituation());
+            socialSituationSpinner.setSelection(socialPosition);
+        }
+
+        // Set current trigger
+
+        builder.setView(dialogView);
+
+        // Add save button
+        builder.setPositiveButton("Save", (dialog, which) -> {
+            // Get updated values
+            String newTitle = titleEditText.getText().toString().trim();
+            EmotionalState newEmotionalState = (EmotionalState) emotionSpinner.getSelectedItem();
+            String newReason = reasonEditText.getText().toString().trim();
+            SocialSituation newSocialSituation = (SocialSituation) socialSituationSpinner.getSelectedItem();
+
+            // Validate the mood ID
+            if (moodEvent.getId() == null) {
+                Toast.makeText(getContext(), "Cannot update: Mood has no ID", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
+            // Update the mood event
+            moodEvent.setTitle(newTitle);
+            moodEvent.setEmotionalState(newEmotionalState);
+            moodEvent.setReason(newReason);
+            moodEvent.setSocialSituation(newSocialSituation);
+
+
+            // Save to Firebase
+            moodsRepo.updateMoodEvent(moodEvent,
+                    aVoid -> {
+                        // This callback might be running on a background thread
+                        if (isAdded() && getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                if (getContext() != null) {
+                                    Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    },
+                    e -> {
+                        if (isAdded() && getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                if (getContext() != null) {
+                                    Toast.makeText(getContext(), "Failed to update mood", Toast.LENGTH_SHORT).show();
+                                    Log.e("HistoryFragment", "Error updating mood", e);
+                                }
+                            });
+                        }
+                    }
+            );
+        });
+
+        // Add cancel button
+        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
         AlertDialog dialog = builder.create();
         dialog.show();

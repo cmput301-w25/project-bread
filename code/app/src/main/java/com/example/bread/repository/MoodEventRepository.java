@@ -10,6 +10,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +50,19 @@ public class MoodEventRepository {
                         return;
                     }
                     if (value != null) {
-                        List<MoodEvent> moodEvents = value.toObjects(MoodEvent.class);
+                        List<MoodEvent> moodEvents = new ArrayList<>();
+                        for (DocumentSnapshot doc : value.getDocuments()) {
+                            MoodEvent moodEvent = doc.toObject(MoodEvent.class);
+                            if (moodEvent != null) {
+                                // Explicitly set the ID from the document
+                                moodEvent.setId(doc.getId());
+                                Log.d("MoodEventRepository", "Loaded mood with ID: " + doc.getId());
+                                moodEvents.add(moodEvent);
+                            }
+                        }
                         onSuccessListener.onSuccess(moodEvents);
                     }
-                }); //https://firebase.google.com/docs/firestore/query-data/listen
+                });//https://firebase.google.com/docs/firestore/query-data/listen
     }
 
     public void listenForEventsFromFollowing(@NonNull String username, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
@@ -93,6 +103,13 @@ public class MoodEventRepository {
     }
 
     public void updateMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+
+        // need to add check if the mood event id is null
+        if (moodEvent.getId() == null) {
+            onFailureListener.onFailure(new IllegalArgumentException("Mood event ID cannot be null"));
+            return;
+        }
+        Log.d("MoodEventRepository", "Updating mood event with ID: " + moodEvent.getId());
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to update mood event: " + moodEvent.getId(), e));
