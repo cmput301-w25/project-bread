@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.bread.R;
-import com.example.bread.controller.HistoryMoodEventArrayAdapter;
+import com.example.bread.controller.HomeMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.view.LoginPage;
@@ -20,12 +20,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class HomeFragment extends Fragment {
 
     private static final String TAG = "HomeFragment";
     private ArrayList<MoodEvent> moodEventArrayList;
-    private HistoryMoodEventArrayAdapter moodEventArrayAdapter;
+    private HomeMoodEventArrayAdapter moodEventArrayAdapter;
     private MoodEventRepository moodEventRepository;
     private FirebaseAuth mAuth;
 
@@ -41,7 +42,7 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         ListView moodEventListView = view.findViewById(R.id.homeListView);
         moodEventArrayList = new ArrayList<>();
-        moodEventArrayAdapter = new HistoryMoodEventArrayAdapter(getContext(), moodEventArrayList);
+        moodEventArrayAdapter = new HomeMoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodEventArrayAdapter);
 
         mAuth = FirebaseAuth.getInstance();
@@ -49,7 +50,7 @@ public class HomeFragment extends Fragment {
 
         // Note: To use clicking functionality, when you implement the ListView and adapter later,
         // you'll need to add this line:
-        // moodArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
+        moodEventArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
         fetchMoodEvents();
         return view;
     }
@@ -61,6 +62,9 @@ public class HomeFragment extends Fragment {
             if (username != null) {
                 moodEventRepository.listenForEventsFromFollowing(username, moodEvents -> {
                     moodEventArrayList.clear();
+                    // TODO: Ability to sort events based on the selected filters rather than just by date
+                    Collections.sort(moodEvents);
+                    Collections.reverse(moodEvents);
                     moodEventArrayList.addAll(moodEvents);
                     moodEventArrayAdapter.notifyDataSetChanged();
                 }, e -> {
@@ -74,5 +78,10 @@ public class HomeFragment extends Fragment {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
         }
+    }
+
+    private void showMoodDetailsDialog(MoodEvent moodEvent) {
+        // TODO: launch a new fragment to show more details about the mood event
+        Log.d(TAG, "Clicked on mood event: " + moodEvent);
     }
 }

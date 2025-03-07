@@ -57,6 +57,20 @@ public class ParticipantRepository {
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch participant with username: " + username, e));
     }
 
+    public void fetchParticipantByRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<Participant> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
+        participantRef.get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Participant participant = documentSnapshot.toObject(Participant.class);
+                        onSuccessListener.onSuccess(participant);
+                    } else {
+                        Log.e("ParticipantRepository", "Participant with reference: " + participantRef + " does not exist");
+                        onSuccessListener.onSuccess(null);
+                    }
+                })
+                .addOnFailureListener(onFailureListener);
+    }
+
     public DocumentReference getParticipantRef(@NonNull String username) {
         return getParticipantCollRef().document(username);
     }
