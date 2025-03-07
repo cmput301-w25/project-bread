@@ -25,6 +25,75 @@
             app:layout_constraintVertical_bias="0.007"
             app:srcCompat="@mipmap/sound_wave_layer" />
 
+        <Button
+            android:id="@+id/deleteButton"
+            android:layout_width="108dp"
+            android:layout_height="41dp"
+            android:layout_marginEnd="16dp"
+            android:backgroundTint="@color/nav_bubble"
+            android:text="@string/settings"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textView4"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.04" />
+
+        <ImageView
+            android:id="@+id/profilePic"
+            android:layout_width="110dp"
+            android:layout_height="107dp"
+            app:layout_constraintBottom_toTopOf="@+id/listViewFollowRequests"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.434"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:text="Username"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.319" />
+
+        <!-- Add these within your existing ConstraintLayout in fragment_profile.xml -->
+
+
+        <TextView
+            android:id="@+id/followingCountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Following: 0"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/profilePic"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.38" />
+
+        <TextView
+            android:id="@+id/followersCountText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:text="Followers: 0"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/profilePic"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.38" />
+
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
@@ -40,14 +109,38 @@
             app:layout_constraintVertical_bias="0.049" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/Requests"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Profile Page"
+            android:layout_marginStart="16dp"
+            android:text="Requests: "
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.448" />
+
+        <TextView
+            android:id="@+id/TodayMood"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Today: "
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.056"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/Requests"
+            app:layout_constraintVertical_bias="0.544" />
+
+        <ListView
+            android:id="@+id/listViewFollowRequests"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/TodayMood"
+            app:layout_constraintTop_toBottomOf="@+id/Requests"
+
+            tools:layout_editor_absoluteX="-16dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

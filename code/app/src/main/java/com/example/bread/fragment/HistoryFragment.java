@@ -120,6 +120,7 @@ public class HistoryFragment extends Fragment {
      */
     private void deleteSelectedMoodEvents() {
         MoodEventRepository repository = new MoodEventRepository();
+        Set<MoodEvent> selectedEvents = ((MoodEventArrayAdapter) moodEventListView.getAdapter()).getSelectedEvents();
         for (MoodEvent event : selectedEvents) {
             repository.deleteMoodEvent(event, new OnSuccessListener<Void>() {
                 @Override

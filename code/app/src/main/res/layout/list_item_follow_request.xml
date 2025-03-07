@@ -16,57 +16,50 @@
             android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="228dp"
+            android:layout_marginEnd="256dp"
             android:padding="10dp"
             android:text="Username"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="0.555" />
 
-        <TextView
-            android:id="@+id/date"
+        <Button
+            android:id="@+id/buttonAccept"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            android:text="DD/MM/YYYY"
+            android:backgroundTint="#057E40"
+            android:text="Accept"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.95"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:layout_editor_absoluteX="303dp" />
 
-        <TextView
-            android:id="@+id/reason"
-            android:layout_width="181dp"
-            android:layout_height="80dp"
-            android:padding="30dp"
-            android:text="Reason For Mood"
+        <Button
+            android:id="@+id/buttonDecline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/design_default_color_error"
+            android:text="Decline"
+            android:textColor="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/buttonAccept"
+            app:layout_constraintHorizontal_bias="0.708"
+            app:layout_constraintStart_toEndOf="@+id/username"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0" />
 
         <ImageView
             android:id="@+id/profilePic"
-            android:layout_width="61dp"
-            android:layout_height="56dp"
-            android:layout_marginTop="12dp"
+            android:layout_width="44dp"
+            android:layout_height="42dp"
+            android:layout_marginTop="4dp"
             app:layout_constraintEnd_toStartOf="@+id/username"
-            app:layout_constraintHorizontal_bias="0.791"
+            app:layout_constraintHorizontal_bias="0.555"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:srcCompat="@tools:sample/avatars" />
-
-        <CheckBox
-            android:id="@+id/checkbox"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/profilePic"
-            app:layout_constraintHorizontal_bias="0.444"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/emoticon_text_view"
