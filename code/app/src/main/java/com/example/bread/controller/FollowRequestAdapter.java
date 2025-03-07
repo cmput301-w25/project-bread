@@ -12,7 +12,6 @@ import android.widget.Toast;
 import com.example.bread.R;
 import com.example.bread.model.FollowRequest;
 import com.example.bread.repository.ParticipantRepository;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
 
