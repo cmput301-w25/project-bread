@@ -180,7 +180,6 @@ public class AddMoodEventActivity extends AppCompatActivity {
                 Log.i(TAG, "Location attached to mood event: " + geoInfo);
             } catch (Exception e) {
                 Log.e(TAG, "Error generating geo info: " + e.getMessage(), e);
-                //Toast.makeText(this, "Error attaching location: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 return;
             }
         } else {
@@ -199,7 +198,6 @@ public class AddMoodEventActivity extends AppCompatActivity {
                 },
                 e -> {
                     Log.e(TAG, "Failed to save mood event: " + e.getMessage(), e);
-                    //Toast.makeText(this, "Failed to save mood: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
         );
     }
