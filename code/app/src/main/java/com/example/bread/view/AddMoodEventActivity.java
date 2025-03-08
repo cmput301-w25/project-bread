@@ -128,7 +128,7 @@ public class AddMoodEventActivity extends AppCompatActivity {
 
         if (emotionalState == MoodEvent.EmotionalState.NONE) {
             Log.w(TAG, "Validation failed: Emotional state cannot be NONE");
-            Toast.makeText(this, "Please select a valid emotional state!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please select an emotional state!", Toast.LENGTH_SHORT).show();
             isValid = false;
         } else {
             Log.d(TAG, "Emotional state validated: " + emotionalState);

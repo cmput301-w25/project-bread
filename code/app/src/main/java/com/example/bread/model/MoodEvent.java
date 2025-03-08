@@ -29,14 +29,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         CONFUSED,
         FEARFUL,
         SHAMEFUL,
-        SURPRISED;
-
-        @Override
-        public String toString() {
-            // Capitalize only the first letter of the enum name
-            String name = name();
-            return name.substring(0, 1) + name.substring(1).toLowerCase();
-        }
+        SURPRISED,
     }
 
     /**
