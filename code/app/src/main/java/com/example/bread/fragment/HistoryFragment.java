@@ -99,10 +99,10 @@ public class HistoryFragment extends Fragment {
         moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
-                        //moodEventArrayList.addAll(moodEvents);
-                        moodEvents.stream()
-                                .filter(event -> event.getTimestamp() != null)
-                                .forEach(moodEventArrayList::add);
+                        moodEventArrayList.addAll(moodEvents);
+//                        moodEvents.stream()
+//                                .filter(event -> event.getTimestamp() != null)
+//                                .forEach(moodEventArrayList::add);
                         //chatGPT prompt "how can i sort an ArrayList of events by timestamp Date object"
                         moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
                     }
@@ -291,7 +291,6 @@ public class HistoryFragment extends Fragment {
                 Toast.makeText(getContext(), "Cannot update: Mood has no ID", Toast.LENGTH_SHORT).show();
                 return;
             }
-
 
             // Update the mood event
             moodEvent.setTitle(newTitle);
