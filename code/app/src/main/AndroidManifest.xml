@@ -10,6 +10,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/sound_wave_layer"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:label="@string/sentio"
         android:roundIcon="@mipmap/sound_wave_layer"
         android:supportsRtl="true"
@@ -33,7 +34,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity
+            android:name=".view.AddMoodEventActivity"
+            android:exported="false">
+        </activity>
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

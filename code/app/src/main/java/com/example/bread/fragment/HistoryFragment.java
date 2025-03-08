@@ -19,7 +19,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.bread.R;
-import com.example.bread.controller.MoodEventArrayAdapter;
+import com.example.bread.controller.HistoryMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.MoodEvent.EmotionalState;
 import com.example.bread.model.MoodEvent.SocialSituation;
@@ -44,11 +44,11 @@ public class HistoryFragment extends Fragment {
 
     private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
-    private MoodEventArrayAdapter moodArrayAdapter;
+    private HistoryMoodEventArrayAdapter moodArrayAdapter;
 
     private MoodEventRepository moodsRepo;
     private ParticipantRepository userRepo;
-    private Set<MoodEvent> selectedEvents = new HashSet<>();
+    private final Set<MoodEvent> selectedEvents = new HashSet<>();
 
     private String username;
     private DocumentReference participantRef;
@@ -66,7 +66,7 @@ public class HistoryFragment extends Fragment {
 
         moodEventListView = view.findViewById(R.id.historyListView);
         moodEventArrayList = new ArrayList<>();
-        moodArrayAdapter = new MoodEventArrayAdapter(getContext(), moodEventArrayList);
+        moodArrayAdapter = new HistoryMoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodArrayAdapter);
 
         // Set click listener for mood events
@@ -119,7 +119,10 @@ public class HistoryFragment extends Fragment {
         moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
-                        moodEventArrayList.addAll(moodEvents);
+                        //moodEventArrayList.addAll(moodEvents);
+                        moodEvents.stream()
+                                .filter(event -> event.getTimestamp() != null)
+                                .forEach(moodEventArrayList::add);
                         //chatGPT prompt "how can i sort an ArrayList of events by timestamp Date object"
                         moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
 
