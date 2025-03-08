@@ -54,4 +54,8 @@ public class HomePage extends AppCompatActivity {
         transaction.replace(R.id.frame_layout, fragment);
         transaction.commit();
     }
+
+    public void selectHomeNavigation() {
+        binding.bottomNavigationView.setSelectedItemId(R.id.home);
+    }
 }

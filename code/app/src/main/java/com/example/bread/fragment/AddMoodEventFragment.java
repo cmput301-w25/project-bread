@@ -22,6 +22,7 @@ import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.LocationHandler;
+import com.example.bread.view.HomePage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -225,6 +226,10 @@ public class AddMoodEventFragment extends Fragment {
                             .beginTransaction()
                             .replace(R.id.frame_layout, new HomeFragment())
                             .commit();
+
+                    if (getActivity() instanceof HomePage) {
+                        ((HomePage) getActivity()).selectHomeNavigation();
+                    }
                 },
                 e -> {
                     Log.e(TAG, "Failed to save mood event: " + e.getMessage(), e);
