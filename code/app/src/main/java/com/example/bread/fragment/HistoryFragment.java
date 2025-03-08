@@ -1,6 +1,8 @@
 package com.example.bread.fragment;
 
 import android.app.AlertDialog;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,13 +26,18 @@ import com.example.bread.model.MoodEvent.SocialSituation;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class HistoryFragment extends Fragment {
@@ -45,6 +52,13 @@ public class HistoryFragment extends Fragment {
 
     private String username;
     private DocumentReference participantRef;
+
+    // Filter-related variables
+    private FloatingActionButton filterButton;
+    private ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
+    private boolean isFilteringByWeek = false;
+    private MoodEvent.EmotionalState selectedEmotionalState = null;
+    private String searchKeyword = "";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) { //LANDYS
@@ -65,6 +79,12 @@ public class HistoryFragment extends Fragment {
 
         Button deleteButton = view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
+
+        // Add filter button click listener
+        filterButton = view.findViewById(R.id.filter_button);
+        if (filterButton != null) {
+            filterButton.setOnClickListener(v -> showFilterDialog());
+        }
 
         return view;
     }
@@ -105,6 +125,15 @@ public class HistoryFragment extends Fragment {
                                 .forEach(moodEventArrayList::add);
                         //chatGPT prompt "how can i sort an ArrayList of events by timestamp Date object"
                         moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
+
+                        // Save all mood events for filtering
+                        allMoodEvents.clear();
+                        allMoodEvents.addAll(moodEventArrayList);
+
+                        // Reapply any existing filters
+                        if (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty()) {
+                            applyFilters();
+                        }
                     }
                     moodArrayAdapter.notifyDataSetChanged();
                 },
@@ -330,5 +359,173 @@ public class HistoryFragment extends Fragment {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    // Filter-related methods
+    private void showFilterDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_filter_moods, null);
+        builder.setView(dialogView);
+
+        SwitchMaterial recentWeekSwitch = dialogView.findViewById(R.id.recent_week_switch);
+        Spinner moodSpinner = dialogView.findViewById(R.id.mood_spinner);
+        EditText keywordEditText = dialogView.findViewById(R.id.keyword_edit_text);
+        Button applyButton = dialogView.findViewById(R.id.apply_button);
+        Button resetButton = dialogView.findViewById(R.id.reset_button);
+
+        List<String> moodOptions = new ArrayList<>();
+        moodOptions.add("All Moods");
+        for (MoodEvent.EmotionalState state : MoodEvent.EmotionalState.values()) {
+            if (state != MoodEvent.EmotionalState.NONE) {
+                moodOptions.add(state.toString());
+            }
+        }
+
+        ArrayAdapter<String> moodAdapter = new ArrayAdapter<String>(
+                getContext(),
+                android.R.layout.simple_spinner_item,
+                moodOptions
+        ) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                text.setTextColor(Color.WHITE);
+                return view;
+            }
+
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                View view = super.getDropDownView(position, convertView, parent);
+                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                text.setTextColor(Color.WHITE);
+                text.setPadding(16, 16, 16, 16);
+                return view;
+            }
+        };
+
+        moodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        moodSpinner.setAdapter(moodAdapter);
+
+        recentWeekSwitch.setChecked(isFilteringByWeek);
+        if (selectedEmotionalState != null) {
+            int position = moodOptions.indexOf(selectedEmotionalState.toString());
+            if (position >= 0) {
+                moodSpinner.setSelection(position);
+            }
+        }
+        keywordEditText.setText(searchKeyword);
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
+        dialog.show();
+
+        applyButton.setOnClickListener(v -> {
+            isFilteringByWeek = recentWeekSwitch.isChecked();
+
+            int moodPosition = moodSpinner.getSelectedItemPosition();
+            if (moodPosition > 0) {
+                String selectedMood = moodOptions.get(moodPosition);
+                selectedEmotionalState = MoodEvent.EmotionalState.valueOf(selectedMood);
+            } else {
+                selectedEmotionalState = null;
+            }
+
+            searchKeyword = keywordEditText.getText().toString().trim().toLowerCase();
+
+            applyFilters();
+            dialog.dismiss();
+        });
+
+        resetButton.setOnClickListener(v -> {
+            recentWeekSwitch.setChecked(false);
+            moodSpinner.setSelection(0);
+            keywordEditText.setText("");
+
+            isFilteringByWeek = false;
+            selectedEmotionalState = null;
+            searchKeyword = "";
+
+            resetFilters();
+            dialog.dismiss();
+        });
+    }
+
+    private void applyFilters() {
+        if (allMoodEvents.isEmpty() && !moodEventArrayList.isEmpty()) {
+            allMoodEvents.addAll(moodEventArrayList);
+        }
+
+        ArrayList<MoodEvent> filteredList = new ArrayList<>(allMoodEvents);
+
+        if (isFilteringByWeek) {
+            filteredList = filterByRecentWeek(filteredList);
+        }
+
+        if (selectedEmotionalState != null) {
+            filteredList = filterByEmotionalState(filteredList, selectedEmotionalState);
+        }
+
+        if (!searchKeyword.isEmpty()) {
+            filteredList = filterByKeyword(filteredList, searchKeyword);
+        }
+
+        moodEventArrayList.clear();
+        moodEventArrayList.addAll(filteredList);
+        moodArrayAdapter.notifyDataSetChanged();
+
+        if (filteredList.isEmpty() && (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty())) {
+            Toast.makeText(getContext(), "No mood events match the applied filters", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private ArrayList<MoodEvent> filterByRecentWeek(ArrayList<MoodEvent> events) {
+        ArrayList<MoodEvent> filteredList = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, -7);
+        Date oneWeekAgo = calendar.getTime();
+
+        for (MoodEvent event : events) {
+            if (event.getTimestamp().after(oneWeekAgo)) {
+                filteredList.add(event);
+            }
+        }
+
+        return filteredList;
+    }
+
+    private ArrayList<MoodEvent> filterByEmotionalState(ArrayList<MoodEvent> events, MoodEvent.EmotionalState state) {
+        ArrayList<MoodEvent> filteredList = new ArrayList<>();
+
+        for (MoodEvent event : events) {
+            if (event.getEmotionalState() == state) {
+                filteredList.add(event);
+            }
+        }
+
+        return filteredList;
+    }
+
+    private ArrayList<MoodEvent> filterByKeyword(ArrayList<MoodEvent> events, String keyword) {
+        ArrayList<MoodEvent> filteredList = new ArrayList<>();
+
+        for (MoodEvent event : events) {
+            if (event.getReason() != null && event.getReason().toLowerCase().contains(keyword)) {
+                filteredList.add(event);
+            }
+        }
+
+        return filteredList;
+    }
+
+    private void resetFilters() {
+        if (!allMoodEvents.isEmpty()) {
+            moodEventArrayList.clear();
+            moodEventArrayList.addAll(allMoodEvents);
+            moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
+            moodArrayAdapter.notifyDataSetChanged();
+        }
     }
 }
