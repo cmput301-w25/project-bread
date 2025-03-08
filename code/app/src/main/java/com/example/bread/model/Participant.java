@@ -1,3 +1,4 @@
+// Updated Participant.java
 package com.example.bread.model;
 
 import androidx.annotation.NonNull;
@@ -6,7 +7,9 @@ import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @IgnoreExtraProperties
 public class Participant implements Serializable {
@@ -14,15 +17,19 @@ public class Participant implements Serializable {
     private String email;
     private String firstName;
     private String lastName;
-
     private String profilePicture;
 
     @Exclude
     private List<String> followers;
     @Exclude
     private List<String> following;
+    @Exclude
+    private List<Map<String, Object>> followRequests;
 
     public Participant() {
+        this.followers = new ArrayList<>();
+        this.following = new ArrayList<>();
+        this.followRequests = new ArrayList<>();
     }
 
     public Participant(String username, String email, String firstName, String lastName) {
@@ -30,6 +37,9 @@ public class Participant implements Serializable {
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.followers = new ArrayList<>();
+        this.following = new ArrayList<>();
+        this.followRequests = new ArrayList<>();
     }
 
     @NonNull
@@ -97,5 +107,17 @@ public class Participant implements Serializable {
 
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    public List<Map<String, Object>> getFollowRequests() {
+        return followRequests;
+    }
+
+    public void setFollowRequests(List<Map<String, Object>> followRequests) {
+        this.followRequests = followRequests;
+    }
+
+    public String getDisplayName() {
+        return firstName + " " + lastName;
     }
 }

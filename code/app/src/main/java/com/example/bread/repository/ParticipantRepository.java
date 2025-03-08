@@ -1,3 +1,4 @@
+// Updated ParticipantRepository.java
 package com.example.bread.repository;
 
 import android.util.Log;
@@ -11,6 +12,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,12 +27,13 @@ import java.util.Objects;
  */
 public class ParticipantRepository {
     private final FirebaseService firebaseService;
+    private static final String TAG = "ParticipantRepository";
 
     public ParticipantRepository() {
         firebaseService = new FirebaseService();
     }
 
-    private CollectionReference getParticipantCollRef() {
+    public CollectionReference getParticipantCollRef() {
         return firebaseService.getDb().collection("participants");
     }
 
@@ -45,11 +50,11 @@ public class ParticipantRepository {
                         Participant participant = documentSnapshot.toObject(Participant.class);
                         onSuccessListener.onSuccess(participant);
                     } else {
-                        Log.e("ParticipantRepository", "Participant with username: " + username + " does not exist");
+                        Log.e(TAG, "Participant with username: " + username + " does not exist");
                         onSuccessListener.onSuccess(null);
                     }
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch participant with username: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch participant with username: " + username, e));
     }
 
     /**
@@ -65,11 +70,11 @@ public class ParticipantRepository {
                         Participant participant = documentSnapshot.toObject(Participant.class);
                         fetchFollowersAndFollowing(Objects.requireNonNull(participant), onSuccessListener, onFailureListener);
                     } else {
-                        Log.e("ParticipantRepository", "Participant with username: " + username + " does not exist");
+                        Log.e(TAG, "Participant with username: " + username + " does not exist");
                         onSuccessListener.onSuccess(null);
                     }
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch participant with username: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch participant with username: " + username, e));
     }
 
     /**
@@ -85,7 +90,7 @@ public class ParticipantRepository {
                         Participant participant = documentSnapshot.toObject(Participant.class);
                         onSuccessListener.onSuccess(participant);
                     } else {
-                        Log.e("ParticipantRepository", "Participant with reference: " + participantRef + " does not exist");
+                        Log.e(TAG, "Participant with reference: " + participantRef + " does not exist");
                         onSuccessListener.onSuccess(null);
                     }
                 })
@@ -114,7 +119,7 @@ public class ParticipantRepository {
                 participant.setFollowers(followers);
                 onSuccessListener.onSuccess(participant);
             }, onFailureListener);
-        }, onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch following for participant: " + participant.getUsername(), e));
+        }, onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch following for participant: " + participant.getUsername(), e));
     }
 
     /**
@@ -132,7 +137,7 @@ public class ParticipantRepository {
                     }
                     onSuccessListener.onSuccess(followers);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch followers for participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch followers for participant: " + username, e));
     }
 
     /**
@@ -150,7 +155,7 @@ public class ParticipantRepository {
                     }
                     onSuccessListener.onSuccess(following);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch following for participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch following for participant: " + username, e));
     }
 
     /**
@@ -162,7 +167,7 @@ public class ParticipantRepository {
     public void addParticipant(@NonNull Participant participant, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getParticipantCollRef().document(participant.getUsername()).set(participant)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add participant: " + participant, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add participant: " + participant, e));
     }
 
     /**
@@ -173,13 +178,11 @@ public class ParticipantRepository {
      * @param onFailureListener The listener to be called when the follower cannot be added
      */
     public void addFollower(@NonNull String username, String followerUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
-        // TODO: check if already followed
-        // TODO: decide on what to store in the follower document
         Map<String, String> follower = new HashMap<>();
         follower.put("username", followerUsername);
         getParticipantCollRef().document(username).collection("followers").document(followerUsername).set(follower)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add follower: " + followerUsername + " to participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add follower: " + followerUsername + " to participant: " + username, e));
     }
 
     /**
@@ -190,13 +193,116 @@ public class ParticipantRepository {
      * @param onFailureListener The listener to be called when the following cannot be added
      */
     public void addFollowing(@NonNull String username, String followingUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
-        // TODO: check if already following
-        // TODO: decide on what to store in the following document
         Map<String, String> following = new HashMap<>();
         following.put("username", followingUsername);
         getParticipantCollRef().document(username).collection("following").document(followingUsername).set(following)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add following: " + followingUsername + " to participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add following: " + followingUsername + " to participant: " + username, e));
+    }
+
+    /**
+     * Sends a follow request to a participant
+     * @param fromUsername The username of the participant sending the request
+     * @param toUsername The username of the participant to receive the request
+     * @param onSuccessListener The listener to be called when the request is successfully sent
+     * @param onFailureListener The listener to be called when the request cannot be sent
+     */
+    public void sendFollowRequest(@NonNull String fromUsername, @NonNull String toUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("fromUsername", fromUsername);
+        request.put("status", "pending");
+        request.put("timestamp", com.google.firebase.Timestamp.now());
+
+        getParticipantCollRef().document(toUsername).collection("followRequests").document(fromUsername).set(request)
+                .addOnSuccessListener(onSuccessListener)
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to send follow request from: " + fromUsername + " to: " + toUsername, e));
+    }
+
+    /**
+     * Fetch all follow requests for a participant
+     * @param username The username of the participant to fetch requests for
+     * @param onSuccessListener The listener to be called when requests are successfully fetched
+     * @param onFailureListener The listener to be called when requests cannot be fetched
+     */
+    public void fetchFollowRequests(@NonNull String username, @NonNull OnSuccessListener<List<Map<String, Object>>> onSuccessListener, OnFailureListener onFailureListener) {
+        // Simple query without ordering to avoid needing a composite index
+        getParticipantCollRef().document(username).collection("followRequests")
+                .whereEqualTo("status", "pending")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Map<String, Object>> requests = new ArrayList<>();
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        requests.add(doc.getData());
+                    }
+                    onSuccessListener.onSuccess(requests);
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to fetch follow requests for: " + username, e));
+    }
+
+    /**
+     * Accept a follow request
+     * @param username The username of the participant accepting the request
+     * @param requestorUsername The username of the participant who sent the request
+     * @param onSuccessListener The listener to be called when the request is successfully accepted
+     * @param onFailureListener The listener to be called when the request cannot be accepted
+     */
+    public void acceptFollowRequest(@NonNull String username, @NonNull String requestorUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        // Update request status to accepted
+        getParticipantCollRef().document(username).collection("followRequests").document(requestorUsername)
+                .update("status", "accepted")
+                .addOnSuccessListener(aVoid -> {
+                    // Add follower relationship
+                    addFollower(username, requestorUsername, unused -> {
+                        // Add following relationship
+                        addFollowing(requestorUsername, username, onSuccessListener, onFailureListener);
+                    }, onFailureListener);
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to accept follow request from: " + requestorUsername + " for: " + username, e));
+    }
+
+    /**
+     * Decline a follow request
+     * @param username The username of the participant declining the request
+     * @param requestorUsername The username of the participant who sent the request
+     * @param onSuccessListener The listener to be called when the request is successfully declined
+     * @param onFailureListener The listener to be called when the request cannot be declined
+     */
+    public void declineFollowRequest(@NonNull String username, @NonNull String requestorUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        // Instead of updating status to "declined", delete the request document entirely
+        getParticipantCollRef().document(username).collection("followRequests").document(requestorUsername).delete()
+                .addOnSuccessListener(onSuccessListener)
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to decline follow request from: " + requestorUsername + " for: " + username, e));
+    }
+
+    /**
+     * Search for participants by username prefix
+     * @param usernamePrefix The prefix to search for
+     * @param onSuccessListener The listener to be called when participants are successfully found
+     * @param onFailureListener The listener to be called when the search fails
+     */
+    public void searchUsersByUsername(String usernamePrefix, @NonNull OnSuccessListener<List<Participant>> onSuccessListener, OnFailureListener onFailureListener) {
+        String endPrefix = usernamePrefix + "\uf8ff"; // Unicode character that sorts after all other characters
+
+        getParticipantCollRef()
+                .whereGreaterThanOrEqualTo("username", usernamePrefix)
+                .whereLessThan("username", endPrefix)
+                .limit(20) // Limit results to avoid too many results
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        onSuccessListener.onSuccess(new ArrayList<>());
+                        return;
+                    }
+
+                    List<Participant> participants = queryDocumentSnapshots.toObjects(Participant.class);
+                    onSuccessListener.onSuccess(participants);
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to search users with prefix: " + usernamePrefix, e));
     }
 
     /**
@@ -208,12 +314,137 @@ public class ParticipantRepository {
     public void checkIfUsernameExists(@NonNull String username, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
         getParticipantCollRef().document(username).get()
                 .addOnSuccessListener(documentSnapshot -> onSuccessListener.onSuccess(documentSnapshot.exists()))
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to check if username exists: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to check if username exists: " + username, e));
+    }
+
+    /**
+     * Check if a user has already sent a follow request to another user
+     * @param fromUsername The username of the sender
+     * @param toUsername The username of the receiver
+     * @param onSuccessListener The listener to be called with the result
+     * @param onFailureListener The listener to be called when the check fails
+     */
+    public void checkFollowRequestExists(@NonNull String fromUsername, @NonNull String toUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
+        getParticipantCollRef().document(toUsername).collection("followRequests").document(fromUsername).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    // Check if the document exists AND its status is "pending"
+                    boolean exists = documentSnapshot.exists();
+                    if (exists) {
+                        String status = documentSnapshot.getString("status");
+                        exists = "pending".equals(status); // Only consider it existing if status is pending
+                    }
+                    onSuccessListener.onSuccess(exists);
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to check follow request from: " + fromUsername + " to: " + toUsername, e));
+    }
+
+    /**
+     * Check if the user is already following another user
+     * @param username The username checking if they're following
+     * @param targetUsername The username being followed
+     * @param onSuccessListener The listener with the result
+     * @param onFailureListener The listener if the check fails
+     */
+    public void isFollowing(@NonNull String username, @NonNull String targetUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
+        getParticipantCollRef().document(username).collection("following").document(targetUsername).get()
+                .addOnSuccessListener(documentSnapshot -> onSuccessListener.onSuccess(documentSnapshot.exists()))
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to check if " + username + " is following " + targetUsername, e));
     }
 
     public void checkIfAlreadyFollowed(@NonNull String username, String followerUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
+        getParticipantCollRef().document(username).collection("followers").document(followerUsername).get()
+                .addOnSuccessListener(documentSnapshot -> onSuccessListener.onSuccess(documentSnapshot.exists()))
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to check if " + followerUsername + " follows " + username, e));
     }
 
     public void checkIfAlreadyFollowing(@NonNull String username, String followingUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
+        getParticipantCollRef().document(username).collection("following").document(followingUsername).get()
+                .addOnSuccessListener(documentSnapshot -> onSuccessListener.onSuccess(documentSnapshot.exists()))
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to check if " + username + " follows " + followingUsername, e));
+    }
+    /**
+     * Remove a follower from the participant's followers
+     * @param username The username of the participant removing the follower
+     * @param followerUsername The username of the follower to remove
+     * @param onSuccessListener The listener to be called when the follower is successfully removed
+     * @param onFailureListener The listener to be called when the follower cannot be removed
+     */
+    public void removeFollower(@NonNull String username, @NonNull String followerUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        // Remove follower from user's followers collection
+        getParticipantCollRef().document(username).collection("followers").document(followerUsername).delete()
+                .addOnSuccessListener(unused -> {
+                    // Also remove user from follower's following collection
+                    getParticipantCollRef().document(followerUsername).collection("following").document(username).delete()
+                            .addOnSuccessListener(aVoid -> {
+                                // Also delete any previous follow request documents to allow new requests
+                                getParticipantCollRef().document(username).collection("followRequests").document(followerUsername).delete()
+                                        .addOnSuccessListener(onSuccessListener)
+                                        .addOnFailureListener(e -> {
+                                            // Still consider success even if request delete fails
+                                            Log.w(TAG, "Failed to delete follow request after removing follower", e);
+                                            onSuccessListener.onSuccess(null);
+                                        });
+                            })
+                            .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                                    Log.e(TAG, "Failed to remove " + username + " from " + followerUsername + "'s following", e));
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to remove " + followerUsername + " from " + username + "'s followers", e));
+    }
+
+    /**
+     * Unfollow a user
+     * @param username The username of the participant unfollowing
+     * @param targetUsername The username of the participant to unfollow
+     * @param onSuccessListener The listener to be called when successfully unfollowed
+     * @param onFailureListener The listener to be called when unfollowing fails
+     */
+    public void unfollowUser(@NonNull String username, @NonNull String targetUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        // Remove target from user's following collection
+        getParticipantCollRef().document(username).collection("following").document(targetUsername).delete()
+                .addOnSuccessListener(unused -> {
+                    // Also remove user from target's followers collection
+                    getParticipantCollRef().document(targetUsername).collection("followers").document(username).delete()
+                            .addOnSuccessListener(aVoid -> {
+                                // Also delete any previous follow request documents to allow new requests
+                                getParticipantCollRef().document(targetUsername).collection("followRequests").document(username).delete()
+                                        .addOnSuccessListener(onSuccessListener)
+                                        .addOnFailureListener(e -> {
+                                            // Still consider success even if request delete fails
+                                            Log.w(TAG, "Failed to delete follow request after unfollowing", e);
+                                            onSuccessListener.onSuccess(null);
+                                        });
+                            })
+                            .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                                    Log.e(TAG, "Failed to remove " + username + " from " + targetUsername + "'s followers", e));
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to remove " + targetUsername + " from " + username + "'s following", e));
+    }
+    /**
+     * Listen for real-time updates to a participant's data
+     * @param username The username of the participant to listen for
+     * @param onParticipantUpdateListener The listener to be called when the participant data updates
+     * @return The listener registration object, should be removed when not needed anymore
+     */
+    public ListenerRegistration listenForParticipantUpdates(@NonNull String username, @NonNull OnSuccessListener<Participant> onParticipantUpdateListener) {
+        return getParticipantCollRef().document(username)
+                .addSnapshotListener((documentSnapshot, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "Error listening for participant updates", e);
+                        return;
+                    }
+
+                    if (documentSnapshot != null && documentSnapshot.exists()) {
+                        Participant participant = documentSnapshot.toObject(Participant.class);
+
+                        // Fetch followers and following
+                        fetchFollowersAndFollowing(participant, onParticipantUpdateListener, null);
+                    }
+                });
     }
 }
