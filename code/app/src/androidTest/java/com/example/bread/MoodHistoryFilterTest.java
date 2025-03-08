@@ -112,7 +112,6 @@ public class MoodHistoryFilterTest{
     //test for loading events properly
     @Test
     public void loadMoodEventHistoryTest() throws ExecutionException, InterruptedException {
-        seedDatabase();
         Thread.sleep(1000);
         onView(withId(R.id.history)).perform(click());
         Thread.sleep(1000);
@@ -125,7 +124,6 @@ public class MoodHistoryFilterTest{
     //test for filtering with nothing
     @Test
     public void filterByNothingTest() throws ExecutionException, InterruptedException {
-        seedDatabase();
         Thread.sleep(1000);
         onView(withId(R.id.history)).perform(click());
         Thread.sleep(1000);
@@ -144,7 +142,6 @@ public class MoodHistoryFilterTest{
     //test for filtering by most recent week
     @Test
     public void filterByMostRecentWeekTest() throws ExecutionException, InterruptedException {
-        seedDatabase();
         Thread.sleep(1000);
         onView(withId(R.id.history)).perform(click());
         Thread.sleep(1000);
@@ -165,7 +162,6 @@ public class MoodHistoryFilterTest{
 //    test for filtering by mood state
     @Test
     public void filterByMoodStateTest() throws ExecutionException, InterruptedException {
-        seedDatabase();
         Thread.sleep(1000);
         onView(withId(R.id.history)).perform(click());
         Thread.sleep(1000);
@@ -192,7 +188,6 @@ public class MoodHistoryFilterTest{
 //    test for filtering by keyword reason
     @Test
     public void filterByReasonKeywordTest() throws ExecutionException, InterruptedException {
-        seedDatabase();
         Thread.sleep(1000);
         onView(withId(R.id.history)).perform(click());
         Thread.sleep(1000);
@@ -214,7 +209,6 @@ public class MoodHistoryFilterTest{
     //test for filtering by all three
     @Test
     public void filterByAllThreeFilters() throws ExecutionException, InterruptedException {
-        seedDatabase();
         Thread.sleep(1000);
         onView(withId(R.id.history)).perform(click());
         Thread.sleep(1000);
@@ -247,7 +241,6 @@ public class MoodHistoryFilterTest{
     //test for filtering for one thing then another
     @Test
     public void filterByMultipleFiltersTest() throws ExecutionException, InterruptedException {
-        seedDatabase();
         Thread.sleep(1000);
         onView(withId(R.id.history)).perform(click());
         Thread.sleep(1000);

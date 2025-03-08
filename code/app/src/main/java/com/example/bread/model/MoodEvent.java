@@ -20,6 +20,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
      * Enum representing the different emotional states a user can have
      */
     public enum EmotionalState {
+        NONE,
         HAPPY,
         SAD,
         ANGRY,
@@ -29,21 +30,20 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         FEARFUL,
         SHAMEFUL,
         SURPRISED,
-        NONE,
     }
 
     /**
      * Enum representing the different social situations a user can be in
      */
     public enum SocialSituation {
+        NONE,
         ALONE,
         WITH_ONE_OTHER_PERSON,
         WITH_TWO_TO_SEVERAL_PEOPLE,
         WITH_FAMILY,
         WITH_FRIENDS,
         WITH_COWORKERS,
-        WITH_STRANGERS,
-        NONE;
+        WITH_STRANGERS;
 
         @Override
         public String toString() {
@@ -81,6 +81,8 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
     private EmotionalState emotionalState;
     private SocialSituation socialSituation;
     private String attachedImage;
+    private String trigger;
+
 
     public MoodEvent() {
     }
@@ -103,6 +105,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
                 ", timestamp='" + timestamp + '\'' +
                 ", title='" + title + '\'' +
                 ", reason='" + reason + '\'' +
+                ", trigger='" + trigger + '\'' +
                 ", participantRef=" + participantRef +
                 ", emotionalState=" + emotionalState +
                 ", socialSituation=" + socialSituation +
@@ -181,6 +184,14 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         this.geoInfo = geoInfo;
     }
 
+    public String getTrigger() {
+        return trigger;
+    }
+    public void setTrigger(String trigger){
+        this.trigger = trigger;
+    }
+
+
     public Map<String, Object> generateGeoInfo(Location location) {
         String hash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(location.getLatitude(), location.getLongitude()));
         Map<String, Object> geoInfo = new HashMap<>();
@@ -203,4 +214,5 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         }
         return this.timestamp.compareTo(event.timestamp);
     }
+
 }

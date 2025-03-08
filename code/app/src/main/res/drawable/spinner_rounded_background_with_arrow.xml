@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="27dp" /> <!-- Match the radius from rounded_background -->
+            <solid android:color="#78766a" /> <!-- Match your background color or use a transparent color -->
+        </shape>
+    </item>
+    <item
+        android:width="20dp"
+        android:height="20dp"
+        android:gravity="right|center_vertical"
+        android:right="10dp">
+        <bitmap
+            android:src="@android:drawable/arrow_down_float"
+            android:gravity="center" />
+    </item>
+</layer-list>
