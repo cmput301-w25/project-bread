@@ -6,81 +6,88 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:background="#333333"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="#333333">
+        android:padding="16dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/righteous"
+            android:paddingBottom="8dp"
             android:text="Event"
-            android:textSize="20sp"
             android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:paddingBottom="8dp"/>
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingBottom="4dp"
             android:text="Title"
-            android:textColor="#FFFFFF"
-            android:paddingBottom="4dp"/>
+            android:textColor="#FFFFFF" />
 
         <EditText
             android:id="@+id/eventTitleEditText"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:hint="Ex: Party"
             android:background="@drawable/rounded_background"
-            android:textColor="#FFFFFF"
-            android:padding="4dp"/>
+            android:hint="Ex: Party"
+            android:padding="10dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:textColor="#FFFFFF" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingBottom="4dp"/>
+            android:paddingBottom="4dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Emotional State"
-            android:textColor="#FFFFFF"
+            android:paddingTop="8dp"
             android:paddingBottom="4dp"
-            android:paddingTop="8dp"/>
+            android:text="Emotional State"
+            android:textColor="#FFFFFF" />
 
         <Spinner
             android:id="@+id/emotionalStateSpinner"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:background="@drawable/spinner_rounded_background_with_arrow"
-            android:textColor="#FFFFFF"
-            android:padding="4dp"/>
+            android:padding="10dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Reason"
-            android:textColor="#FFFFFF"
+            android:paddingTop="8dp"
             android:paddingBottom="4dp"
-            android:paddingTop="8dp"/>
+            android:text="Reason"
+            android:textColor="#FFFFFF" />
 
         <EditText
             android:id="@+id/reasonEditText"
             android:layout_width="match_parent"
             android:layout_height="40dp"
-            android:hint="Ex: Birthday"
             android:background="@drawable/rounded_background"
-            android:textColor="#FFFFFF"
-            android:padding="4dp"/>
+            android:hint="Ex: Birthday"
+            android:padding="10dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Trigger"
-            android:textColor="#FFFFFF"
+            android:paddingTop="8dp"
             android:paddingBottom="4dp"
-            android:paddingTop="8dp"/>
+            android:text="Trigger"
+            android:textColor="#FFFFFF" />
 
         <EditText
             android:id="@+id/triggerEditText"
@@ -96,26 +103,28 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Social Situation (optional)"
-            android:textColor="#FFFFFF"
+            android:paddingTop="8dp"
             android:paddingBottom="4dp"
-            android:paddingTop="8dp"/>
+            android:text="Social Situation (optional)"
+            android:textColor="#FFFFFF" />
 
         <Spinner
             android:id="@+id/socialSituationSpinner"
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:background="@drawable/spinner_rounded_background_with_arrow"
-            android:textColor="#FFFFFF"
-            android:padding="4dp"/>
+            android:padding="10dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="#FFFFFF"
+            android:paddingTop="3dp"
             android:paddingBottom="3dp"
-            android:paddingTop="3dp"/>
+            android:text=""
+            android:textColor="#FFFFFF" />
 
         <CheckBox
             android:id="@+id/locationCheckbox"
@@ -130,12 +139,12 @@
             android:id="@+id/saveButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save Mood"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#f97070"
             android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#f97070"
             android:padding="8dp"
-            android:layout_marginTop="16dp"/>
+            android:text="Save Mood"
+            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 

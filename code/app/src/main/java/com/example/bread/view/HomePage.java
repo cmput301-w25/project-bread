@@ -1,16 +1,14 @@
 package com.example.bread.view;
 
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
 import com.example.bread.databinding.ActivityHomePageBinding;
-
+import com.example.bread.fragment.AddMoodEventFragment;
 import com.example.bread.fragment.HistoryFragment;
 import com.example.bread.fragment.HomeFragment;
 import com.example.bread.fragment.MapFragment;
@@ -39,18 +37,14 @@ public class HomePage extends AppCompatActivity {
             } else if (itemId == R.id.map) {
                 replaceFragment(new MapFragment());
             } else if (itemId == R.id.add) {
-                // Start AddMoodEventActivity instead of replacing with a fragment
-                Intent intent = new Intent(HomePage.this, AddMoodEventActivity.class);
-                startActivity(intent);
-                // Return false to prevent the navigation item from staying selected (optional)
-                return false;
+                replaceFragment(new AddMoodEventFragment());
             } else if (itemId == R.id.history) {
                 replaceFragment(new HistoryFragment());
             } else if (itemId == R.id.profile) {
                 replaceFragment(new ProfileFragment());
             }
 
-            return true;  // Important to return true to indicate the item was selected
+            return true; // Important to return true to indicate the item was selected
         });
     }
 
