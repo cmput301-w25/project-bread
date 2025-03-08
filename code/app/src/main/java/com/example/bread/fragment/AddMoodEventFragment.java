@@ -22,6 +22,8 @@ import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.LocationHandler;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 
 import java.util.Map;
@@ -232,10 +234,11 @@ public class AddMoodEventFragment extends Fragment {
 
     // Helper method to get the current username (placeholder - replace with actual login logic)
     private String getCurrentUsername() {
-        String username = requireActivity().getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE)
-                .getString("username", "");
-        Log.v(TAG, "Retrieved username from SharedPreferences: " + username);
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String username = currentUser.getDisplayName(); // Use getEmail() if username is email
+        Log.v(TAG, "Retrieved username from FirebaseAuth: " + username);
         return username;
+
     }
 
     @Override
