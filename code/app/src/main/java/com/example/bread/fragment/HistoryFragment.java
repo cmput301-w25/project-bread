@@ -48,7 +48,7 @@ public class HistoryFragment extends Fragment {
 
     private MoodEventRepository moodsRepo;
     private ParticipantRepository userRepo;
-    private final Set<MoodEvent> selectedEvents = new HashSet<>();
+    private Set<MoodEvent> selectedEvents = new HashSet<>();
 
     private String username;
     private DocumentReference participantRef;
@@ -163,6 +163,7 @@ public class HistoryFragment extends Fragment {
      */
     private void deleteSelectedMoodEvents() {
         MoodEventRepository repository = new MoodEventRepository();
+        selectedEvents = ((HistoryMoodEventArrayAdapter) moodEventListView.getAdapter()).getSelectedEvents();
         for (MoodEvent event : selectedEvents) {
             repository.deleteMoodEvent(event, new OnSuccessListener<Void>() {
                 @Override
