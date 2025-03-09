@@ -324,7 +324,6 @@ public class HistoryFragment extends Fragment {
             // **Validation Checks**
             if (newTitle.isEmpty()) {
                 titleEditText.setError("Title cannot be empty");
-                Toast.makeText(getContext(), "Title cannot be empty", Toast.LENGTH_SHORT).show();
                 isValid = false;
             }
 
@@ -333,7 +332,6 @@ public class HistoryFragment extends Fragment {
                 int wordCount = newReason.split("\\s+").length;
                 if (charCount > 20 || wordCount > 3) {
                     reasonEditText.setError("Reason must be 20 characters or fewer and 3 words or fewer");
-                    Toast.makeText(getContext(), "Reason must be 20 characters or fewer and 3 words or fewer", Toast.LENGTH_SHORT).show();
                     isValid = false;
                 }
             }
