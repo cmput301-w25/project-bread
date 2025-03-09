@@ -148,8 +148,6 @@ public class SettingsPageTest {
 
     @Test
     public void logOutTest() throws InterruptedException {
-        onView(withId(R.id.profile)).perform(click());
-        onView(withId(R.id.settings_button)).perform(click());
 
         onView(withId(R.id.log_out_button)).perform(click());
         Thread.sleep(1000);
