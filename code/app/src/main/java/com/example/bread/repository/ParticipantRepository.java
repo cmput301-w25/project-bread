@@ -11,7 +11,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-
+import com.example.bread.repository.NotificationService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +23,7 @@ import java.util.Objects;
  */
 public class ParticipantRepository {
     private final FirebaseService firebaseService;
+    private static final String TAG = "ParticipantRepository";
 
     public ParticipantRepository() {
         firebaseService = new FirebaseService();
@@ -216,4 +217,23 @@ public class ParticipantRepository {
 
     public void checkIfAlreadyFollowing(@NonNull String username, String followingUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
     }
+
+    public void sendFollowRequest(@NonNull String fromUsername, @NonNull String toUsername,
+                                  @NonNull OnSuccessListener<Void> onSuccessListener,
+                                  OnFailureListener onFailureListener) {
+        Map<String, Object> request = new HashMap<>();
+        request.put("fromUsername", fromUsername);
+        request.put("status", "pending");
+        request.put("timestamp", com.google.firebase.Timestamp.now());
+
+        getParticipantCollRef().document(toUsername).collection("followRequests").document(fromUsername).set(request)
+                .addOnSuccessListener(aVoid -> {
+                    // Send notification
+                    NotificationService.sendFollowRequestNotification(fromUsername, toUsername);
+                    onSuccessListener.onSuccess(aVoid);
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to send follow request from: " + fromUsername + " to: " + toUsername, e));
+    }
+
 }
