@@ -51,6 +51,7 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             holder.mood = convertView.findViewById(R.id.textMood);
             holder.profilePic = convertView.findViewById(R.id.imageProfile);
             holder.eventLayout = convertView.findViewById(R.id.homeConstraintLayout);
+            convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
