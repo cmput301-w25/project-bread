@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -48,7 +49,7 @@ public class HistoryFragment extends Fragment {
 
     private MoodEventRepository moodsRepo;
     private ParticipantRepository userRepo;
-    private final Set<MoodEvent> selectedEvents = new HashSet<>();
+    private Set<MoodEvent> selectedEvents = new HashSet<>();
 
     private String username;
     private DocumentReference participantRef;
@@ -163,6 +164,7 @@ public class HistoryFragment extends Fragment {
      */
     private void deleteSelectedMoodEvents() {
         MoodEventRepository repository = new MoodEventRepository();
+        selectedEvents = ((HistoryMoodEventArrayAdapter) moodEventListView.getAdapter()).getSelectedEvents();
         for (MoodEvent event : selectedEvents) {
             repository.deleteMoodEvent(event, new OnSuccessListener<Void>() {
                 @Override
@@ -232,45 +234,20 @@ public class HistoryFragment extends Fragment {
     private void showEditMoodDialog(MoodEvent moodEvent) {
         if (getContext() == null) return;
 
-
-        // Check and try to fix the ID if it's null
-        if (moodEvent.getId() == null) {
-            // Try to find the mood event in our list that matches this one
-            for (MoodEvent event : moodEventArrayList) {
-                if (event.getTimestamp() != null && moodEvent.getTimestamp() != null &&
-                        event.getTimestamp().equals(moodEvent.getTimestamp()) &&
-                        event.getReason() != null && moodEvent.getReason() != null &&
-                        event.getReason().equals(moodEvent.getReason())) {
-                    // This is likely the same event, copy its ID
-                    moodEvent.setId(event.getId());
-                    Log.d("HistoryFragment", "Fixed null ID: " + moodEvent.getId());
-                    break;
-                }
-            }
-
-            // If still null, we can't edit
-            if (moodEvent.getId() == null) {
-                Toast.makeText(getContext(), "Cannot edit this mood: no ID available", Toast.LENGTH_SHORT).show();
-                return;
-            }
-        }
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setTitle("Edit Mood");
 
-        // Inflate a custom layout for the dialog
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_mood, null);
+        builder.setView(dialogView);
 
-        // Set up the spinners and EditText fields
         EditText titleEditText = dialogView.findViewById(R.id.edit_title);
         EditText reasonEditText = dialogView.findViewById(R.id.edit_reason);
         Spinner emotionSpinner = dialogView.findViewById(R.id.edit_emotion_spinner);
         Spinner socialSituationSpinner = dialogView.findViewById(R.id.edit_social_situation_spinner);
 
-        // Set current title
         titleEditText.setText(moodEvent.getTitle() != null ? moodEvent.getTitle() : "");
+        reasonEditText.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "");
 
-        // Set up emotion spinner
         ArrayAdapter<EmotionalState> emotionAdapter = new ArrayAdapter<>(
                 getContext(),
                 android.R.layout.simple_spinner_item,
@@ -279,16 +256,10 @@ public class HistoryFragment extends Fragment {
         emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         emotionSpinner.setAdapter(emotionAdapter);
 
-        // Set current emotional state
         if (moodEvent.getEmotionalState() != null) {
-            int emotionPosition = emotionAdapter.getPosition(moodEvent.getEmotionalState());
-            emotionSpinner.setSelection(emotionPosition);
+            emotionSpinner.setSelection(emotionAdapter.getPosition(moodEvent.getEmotionalState()));
         }
 
-        // Set current reason
-        reasonEditText.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "");
-
-        // Set up social situation spinner
         ArrayAdapter<SocialSituation> socialAdapter = new ArrayAdapter<>(
                 getContext(),
                 android.R.layout.simple_spinner_item,
@@ -297,41 +268,94 @@ public class HistoryFragment extends Fragment {
         socialAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         socialSituationSpinner.setAdapter(socialAdapter);
 
-        // Set current social situation
         if (moodEvent.getSocialSituation() != null) {
-            int socialPosition = socialAdapter.getPosition(moodEvent.getSocialSituation());
-            socialSituationSpinner.setSelection(socialPosition);
+            socialSituationSpinner.setSelection(socialAdapter.getPosition(moodEvent.getSocialSituation()));
         }
 
-        // Set current trigger
+        // **Validation Listeners**
+        titleEditText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                String titleText = titleEditText.getText().toString().trim();
+                if (titleText.isEmpty()) {
+                    titleEditText.setError("Title cannot be empty");
+                } else {
+                    titleEditText.setError(null);
+                }
+            }
+        });
 
-        builder.setView(dialogView);
+        reasonEditText.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                String reasonText = reasonEditText.getText().toString().trim();
+                if (!reasonText.isEmpty()) { // Only validate if reason is provided
+                    int charCount = reasonText.length();
+                    int wordCount = reasonText.split("\\s+").length;
 
-        // Add save button
-        builder.setPositiveButton("Save", (dialog, which) -> {
-            // Get updated values
+                    if (charCount > 20 || wordCount > 3) {
+                        reasonEditText.setError("Reason must be 20 characters or fewer and 3 words or fewer");
+                    } else {
+                        reasonEditText.setError(null);
+                    }
+                } else {
+                    reasonEditText.setError(null);
+                }
+            }
+        });
+
+
+
+        // **Override Save Button to Enforce Validation**
+        builder.setPositiveButton("Save", null); // We override it later to prevent closing
+        builder.setNegativeButton("Cancel", (d, which) -> d.dismiss());
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // **Override the Save Button Behavior**
+        Button saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        saveButton.setOnClickListener(v -> {
+            boolean isValid = true;
+
+            // Get values from inputs
             String newTitle = titleEditText.getText().toString().trim();
             EmotionalState newEmotionalState = (EmotionalState) emotionSpinner.getSelectedItem();
             String newReason = reasonEditText.getText().toString().trim();
             SocialSituation newSocialSituation = (SocialSituation) socialSituationSpinner.getSelectedItem();
 
-            // Validate the mood ID
-            if (moodEvent.getId() == null) {
-                Toast.makeText(getContext(), "Cannot update: Mood has no ID", Toast.LENGTH_SHORT).show();
+            // **Validation Checks**
+            if (newTitle.isEmpty()) {
+                titleEditText.setError("Title cannot be empty");
+                isValid = false;
+            }
+
+            if (!newReason.isEmpty()) { // Validate reason only if provided
+                int charCount = newReason.length();
+                int wordCount = newReason.split("\\s+").length;
+                if (charCount > 20 || wordCount > 3) {
+                    reasonEditText.setError("Reason must be 20 characters or fewer and 3 words or fewer");
+                    isValid = false;
+                }
+            }
+
+            if (newEmotionalState == EmotionalState.NONE) {
+                Toast.makeText(getContext(), "Emotional state cannot be None", Toast.LENGTH_SHORT).show();
+                isValid = false;
+            }
+
+            if (!isValid) {
+                // **Do not close the dialog if validation fails**
                 return;
             }
 
-            // Update the mood event
+            // **Only save if all validations passed**
             moodEvent.setTitle(newTitle);
             moodEvent.setEmotionalState(newEmotionalState);
             moodEvent.setReason(newReason);
             moodEvent.setSocialSituation(newSocialSituation);
 
-
             // Save to Firebase
             moodsRepo.updateMoodEvent(moodEvent,
                     aVoid -> {
-                        // This callback might be running on a background thread
                         if (isAdded() && getActivity() != null) {
                             getActivity().runOnUiThread(() -> {
                                 if (getContext() != null) {
@@ -339,6 +363,7 @@ public class HistoryFragment extends Fragment {
                                 }
                             });
                         }
+                        dialog.dismiss(); // Close the dialog only after a successful save
                     },
                     e -> {
                         if (isAdded() && getActivity() != null) {
@@ -352,12 +377,6 @@ public class HistoryFragment extends Fragment {
                     }
             );
         });
-
-        // Add cancel button
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
     }
 
     // Filter-related methods
