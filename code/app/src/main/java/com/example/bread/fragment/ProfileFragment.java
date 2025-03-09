@@ -1,24 +1,21 @@
 package com.example.bread.fragment;
 
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.MoodEvent.SocialSituation;
-import com.example.bread.view.LoginPage;
-import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.SimpleDateFormat;
 
@@ -75,19 +72,13 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        Button logoutButton = view.findViewById(R.id.logout_button);
-        logoutButton.setOnClickListener(v -> {
-            // Clear SharedPreferences
-            SharedPreferences preferences = getActivity().getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE);
-            preferences.edit().clear().apply();
+        ImageButton settingsButton = view.findViewById(R.id.settings_button);
 
-            // Sign out from Firebase
-            FirebaseAuth.getInstance().signOut();
-
-            // Go back to login page
-            Intent intent = new Intent(getActivity(), LoginPage.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
+        settingsButton.setOnClickListener(v -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.frame_layout, new SettingsFragment());
+            transaction.commit();
         });
 
         // Note: To use clicking functionality, when you implement the ListView and adapter later,
