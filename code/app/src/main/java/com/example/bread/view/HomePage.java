@@ -11,10 +11,12 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
 import com.example.bread.databinding.ActivityHomePageBinding;
 
+import com.example.bread.fragment.FollowRequestsFragment;
 import com.example.bread.fragment.HistoryFragment;
 import com.example.bread.fragment.HomeFragment;
 import com.example.bread.fragment.MapFragment;
 import com.example.bread.fragment.ProfileFragment;
+import com.example.bread.fragment.UserSearchFragment;
 
 public class HomePage extends AppCompatActivity {
 
@@ -59,5 +61,30 @@ public class HomePage extends AppCompatActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.frame_layout, fragment);
         transaction.commit();
+    }
+
+    // Method to navigate to specific fragments
+    public void navigateToFragment(String fragmentName) {
+        Fragment fragment = null;
+
+        switch (fragmentName) {
+            case "followRequests":
+                fragment = new FollowRequestsFragment();
+                break;
+            case "userSearch":
+                fragment = new UserSearchFragment();
+                break;
+            case "profile":
+                fragment = new ProfileFragment();
+                break;
+        }
+
+        if (fragment != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.frame_layout, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
     }
 }

@@ -5,68 +5,51 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.bread.R;
-import com.example.bread.model.MoodEvent;
-import com.example.bread.model.MoodEvent.SocialSituation;
+import com.example.bread.model.Participant;
+import com.example.bread.repository.ParticipantRepository;
+import com.example.bread.utils.ImageHandler;
 import com.example.bread.view.LoginPage;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.ListenerRegistration;
 
-import java.text.SimpleDateFormat;
-
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ProfileFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String TAG = "ProfileFragment";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private TextView usernameText, followersCountText, followingCountText;
+    private ImageView profileImageView;
+    private LinearLayout followersLayout, followingLayout, requestsLayout, searchUsersLayout, settingsLayout;
+
+    private ParticipantRepository participantRepository;
+    private String currentUsername;
+    private ListenerRegistration participantListener;
 
     public ProfileFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ProfileFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ProfileFragment newInstance(String param1, String param2) {
-        ProfileFragment fragment = new ProfileFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static ProfileFragment newInstance() {
+        return new ProfileFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        participantRepository = new ParticipantRepository();
     }
 
     @Override
@@ -75,73 +58,208 @@ public class ProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        Button logoutButton = view.findViewById(R.id.logout_button);
-        logoutButton.setOnClickListener(v -> {
-            // Clear SharedPreferences
-            SharedPreferences preferences = getActivity().getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE);
-            preferences.edit().clear().apply();
+        // Initialize views
+        usernameText = view.findViewById(R.id.profile_username);
+        followersCountText = view.findViewById(R.id.followers_count);
+        followingCountText = view.findViewById(R.id.following_count);
+        profileImageView = view.findViewById(R.id.profile_image);
 
-            // Sign out from Firebase
-            FirebaseAuth.getInstance().signOut();
+        followersLayout = view.findViewById(R.id.followers_layout);
+        followingLayout = view.findViewById(R.id.following_layout);
+        requestsLayout = view.findViewById(R.id.requests_layout);
+        searchUsersLayout = view.findViewById(R.id.search_users_layout);
+        settingsLayout = view.findViewById(R.id.settings_layout);
 
-            // Go back to login page
-            Intent intent = new Intent(getActivity(), LoginPage.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        });
+        // Get current user
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            currentUsername = currentUser.getDisplayName();
+            usernameText.setText(currentUsername);
 
-        // Note: To use clicking functionality, when you implement the ListView and adapter later,
-        // you'll need to add this line:
-        // moodArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
+            // Show loading state
+            followersCountText.setText("...");
+            followingCountText.setText("...");
+
+            // Set up real-time listener for participant data
+            setupParticipantListener();
+        } else {
+            navigateToLogin();
+        }
+
+        // Set up click listeners
+        followersLayout.setOnClickListener(v -> navigateToFollowersList());
+        followingLayout.setOnClickListener(v -> navigateToFollowingList());
+        requestsLayout.setOnClickListener(v -> navigateToFollowRequests());
+        searchUsersLayout.setOnClickListener(v -> navigateToUserSearch());
+        settingsLayout.setOnClickListener(v -> showSettingsOptions());
 
         return view;
     }
 
-    /**
-     * Shows a dialog with the details of the selected mood event.
-     *
-     * @param moodEvent The mood event to show details for
-     */
-    public void showMoodDetailsDialog(MoodEvent moodEvent) {
-        if (getContext() == null) return;
+    private void setupParticipantListener() {
+        // Remove any existing listener
+        if (participantListener != null) {
+            participantListener.remove();
+        }
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("View Mood");
+        // Set up real-time listener for participant data
+        participantListener = participantRepository.getParticipantCollRef()
+                .document(currentUsername)
+                .addSnapshotListener((snapshot, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "Listen failed for participant data", e);
+                        return;
+                    }
 
-        // Inflate a custom layout for the dialog
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_mood_details, null);
+                    if (snapshot != null && snapshot.exists()) {
+                        // Get the participant data
+                        reloadFollowerCounts();
+                    }
+                });
+    }
 
-        // Set up the views
-        TextView emotionTextView = dialogView.findViewById(R.id.detail_emotion);
-        TextView dateTextView = dialogView.findViewById(R.id.detail_date);
-        TextView reasonTextView = dialogView.findViewById(R.id.detail_reason);
-        TextView socialSituationTextView = dialogView.findViewById(R.id.detail_social_situation);
-
-        // Set the data
-        emotionTextView.setText(moodEvent.getEmotionalState().toString());
-
-        // Format date
-        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
-        String dateString = formatter.format(moodEvent.getTimestamp());
-        dateTextView.setText(dateString);
-
-        // Set reason
-        reasonTextView.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "No reason provided");
-
-        // Set social situation
-        SocialSituation situation = moodEvent.getSocialSituation();
-        socialSituationTextView.setText(situation != null ? situation.toString() : "Not specified");
-
-        builder.setView(dialogView);
-        builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
-
-        // Add an Edit button
-        builder.setNeutralButton("Edit", (dialog, which) -> {
-            // TODO: Implement edit functionality in future updates
-            Toast.makeText(getContext(), "Edit functionality to be implemented", Toast.LENGTH_SHORT).show();
+    private void reloadFollowerCounts() {
+        // Directly load the follower and following counts
+        participantRepository.fetchFollowers(currentUsername, followers -> {
+            int count = followers != null ? followers.size() : 0;
+            if (followersCountText != null) {
+                followersCountText.setText(String.valueOf(count));
+            }
+        }, e -> {
+            Log.e(TAG, "Error fetching followers", e);
+            if (followersCountText != null) {
+                followersCountText.setText("0");
+            }
         });
 
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        participantRepository.fetchFollowing(currentUsername, following -> {
+            int count = following != null ? following.size() : 0;
+            if (followingCountText != null) {
+                followingCountText.setText(String.valueOf(count));
+            }
+        }, e -> {
+            Log.e(TAG, "Error fetching following", e);
+            if (followingCountText != null) {
+                followingCountText.setText("0");
+            }
+        });
+
+        // Load profile picture
+        participantRepository.fetchBaseParticipant(currentUsername, participant -> {
+            if (participant != null && participant.getProfilePicture() != null && profileImageView != null) {
+                profileImageView.setImageBitmap(ImageHandler.base64ToBitmap(participant.getProfilePicture()));
+            }
+        }, null);
+    }
+
+    private void navigateToFollowersList() {
+        FollowersListFragment fragment = FollowersListFragment.newInstance(currentUsername, "followers");
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    private void navigateToFollowingList() {
+        FollowersListFragment fragment = FollowersListFragment.newInstance(currentUsername, "following");
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    private void navigateToFollowRequests() {
+        FollowRequestsFragment fragment = new FollowRequestsFragment();
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    private void navigateToUserSearch() {
+        UserSearchFragment fragment = new UserSearchFragment();
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    private void showSettingsOptions() {
+        // Show a dialog with setting options
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Settings");
+
+        String[] options = {"Edit Profile", "Privacy Settings", "Log out"};
+
+        builder.setItems(options, (dialog, which) -> {
+            switch (which) {
+                case 0:
+                    // Edit profile (for future implementation)
+                    Toast.makeText(getContext(), "Edit Profile - Coming soon", Toast.LENGTH_SHORT).show();
+                    break;
+                case 1:
+                    // Privacy settings (for future implementation)
+                    Toast.makeText(getContext(), "Privacy Settings - Coming soon", Toast.LENGTH_SHORT).show();
+                    break;
+                case 2:
+                    logoutUser();
+                    break;
+            }
+        });
+
+        builder.show();
+    }
+
+    private void logoutUser() {
+        // Clear SharedPreferences
+        SharedPreferences preferences = getActivity().getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE);
+        preferences.edit().clear().apply();
+
+        // Sign out from Firebase
+        FirebaseAuth.getInstance().signOut();
+
+        // Go back to login page
+        navigateToLogin();
+    }
+
+    private void navigateToLogin() {
+        Intent intent = new Intent(getContext(), LoginPage.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Force a refresh of follower/following counts
+        if (currentUsername != null) {
+            reloadFollowerCounts();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Clean up listener when paused
+        if (participantListener != null) {
+            participantListener.remove();
+            participantListener = null;
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // Ensure listener is removed
+        if (participantListener != null) {
+            participantListener.remove();
+            participantListener = null;
+        }
     }
 }

@@ -20,7 +20,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 
 public class HomeFragment extends Fragment {
 
@@ -62,10 +64,26 @@ public class HomeFragment extends Fragment {
             if (username != null) {
                 moodEventRepository.listenForEventsFromFollowing(username, moodEvents -> {
                     moodEventArrayList.clear();
-                    // TODO: Ability to sort events based on the selected filters rather than just by date
-                    Collections.sort(moodEvents);
-                    Collections.reverse(moodEvents);
-                    moodEventArrayList.addAll(moodEvents);
+
+                    // Filter events from the last week
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.add(Calendar.DAY_OF_YEAR, -7); // Go back 7 days
+                    Date oneWeekAgo = calendar.getTime();
+
+                    // Add only events from the past week
+                    ArrayList<MoodEvent> recentEvents = new ArrayList<>();
+                    for (MoodEvent event : moodEvents) {
+                        if (event.getTimestamp() != null && event.getTimestamp().after(oneWeekAgo)) {
+                            recentEvents.add(event);
+                        }
+                    }
+
+                    // Sort by date (newest first)
+                    Collections.sort(recentEvents);
+                    Collections.reverse(recentEvents);
+
+                    // Update the list
+                    moodEventArrayList.addAll(recentEvents);
                     moodEventArrayAdapter.notifyDataSetChanged();
                 }, e -> {
                     Log.e(TAG, "Failed to fetch mood events for user: " + username, e);
