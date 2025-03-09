@@ -1,20 +1,17 @@
 package com.example.bread;
 
-import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.RootMatchers.isDialog;
+import static androidx.test.espresso.matcher.RootMatchers.isPlatformPopup;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-
-import static org.hamcrest.CoreMatchers.anything;
-
 import android.util.Log;
-
+import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -24,23 +21,18 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -114,17 +106,15 @@ public class HomeFilterUITest {
         db.collection("moodEvents").document("mood3").set(m3);
     }
 
+    // testing for everything to appear correctly
     @Test
-    public void displaysAllMoodEventsTest() throws InterruptedException, ExecutionException {
+    public void displaysAllMoodEventsAndDialogTest() throws InterruptedException, ExecutionException {
         Thread.sleep(2000);
         onView(withText("test reason 1")).check(matches(isDisplayed()));
         onView(withText("test reason 2")).check(matches(isDisplayed()));
         onView(withText("test reason 3")).check(matches(isDisplayed()));
-    }
 
-    @Test
-    public void testFilterButtonOpensDialog() throws InterruptedException {
-        Thread.sleep(8000);
+        Thread.sleep(2000);
         // Click the filter button
         onView(withId(R.id.filter_button_home)).perform(click());
 
@@ -137,27 +127,153 @@ public class HomeFilterUITest {
         onView(withId(R.id.reset_button)).check(matches(isDisplayed()));
     }
 
-//    @Test
-//    public void filterByNothingTest() throws ExecutionException, InterruptedException {
-//        Thread.sleep(2000);
-//        onView(withId(R.id.filter_button_home)).perform(click());
-//        Thread.sleep(1000);
-//        onView(withId(android.R.id.button1)).perform(click());
-//
-//        Thread.sleep(1000);
-//        onView(withText("test reason 1")).check(matches(isDisplayed()));
-//        onView(withText("test reason 2")).check(matches(isDisplayed()));
-//        onView(withText("test reason 3")).check(matches(isDisplayed()));
-//    }
+    @Test
+    public void filterByNothingTest() throws InterruptedException {
+        Thread.sleep(2000);
+        onView(withId(R.id.filter_button_home)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.apply_button)).perform(click());
+
+        Thread.sleep(1000);
+        onView(withText("test reason 1")).check(matches(isDisplayed()));
+        onView(withText("test reason 2")).check(matches(isDisplayed()));
+        onView(withText("test reason 3")).check(matches(isDisplayed()));
+    }
+
+    //  test for filtering by most recent week
+    @Test
+    public void filterByMostRecentWeekTest() throws InterruptedException {
+        Thread.sleep(1000);
+
+        onView(withId(R.id.filter_button_home)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.recent_week_switch)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.apply_button)).perform(click());
+
+        Thread.sleep(1000);
+        onView(withText("test reason 3")).check(matches(isDisplayed()));
+        onView(withText("test reason 2")).check(doesNotExist());
+        onView(withText("test reason 1")).check(doesNotExist());
+    }
+
+    //  test for filtering by mood state
+    @Test
+    public void filterByMoodStateTest() throws InterruptedException {
+        Thread.sleep(1000);
+
+        onView(withId(R.id.filter_button_home)).perform(click());
+        Thread.sleep(1000);
+
+        onView(withId(R.id.mood_spinner)).perform(click());
+        Thread.sleep(1000);
+
+        onView(withText("HAPPY")) //searches for "HAPPY" state within spinner
+                .inRoot(isPlatformPopup()) //ensure we look in the popup filter window not main screen
+                .perform(click());
+
+        onView(withId(R.id.apply_button)).perform(click());
+
+        Thread.sleep(1000);
+        onView(withText("test reason 3")).check(doesNotExist());
+        onView(withText("test reason 1")).check(matches(isDisplayed()));
+        onView(withText("test reason 2")).check(doesNotExist());
+    }
+
+    // test for filtering by keyword reason
+    @Test
+    public void filterByReasonKeywordTest() throws InterruptedException {
+        Thread.sleep(1000);
+
+        onView(withId(R.id.filter_button_home)).perform(click());
+        Thread.sleep(1000);
+
+        onView(withId(R.id.keyword_edit_text)).perform(ViewActions.typeText("2"));
+        Thread.sleep(1000);
+        onView(withId(R.id.apply_button)).perform(click());
+
+        Thread.sleep(1000);
+        onView(withText("test reason 3")).check(doesNotExist());
+        onView(withText("test reason 1")).check(doesNotExist());
+        onView(withText("test reason 2")).check(matches(isDisplayed()));
+    }
+
+    // test for filtering by all three
+    @Test
+    public void filterByAllThreeFilters() throws InterruptedException {
+        Thread.sleep(1000);
+
+        //filtering by recent week
+        onView(withId(R.id.filter_button_home)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.recent_week_switch)).perform(click());
+        Thread.sleep(1000);
+
+        //filtering by dropdown
+        onView(withId(R.id.mood_spinner)).perform(click());
+        Thread.sleep(1000);
+        onView(withText("SAD")) //searches for "HAPPY" state within spinner
+                .inRoot(isPlatformPopup()) //ensure we look in the popup filter window not main screen
+                .perform(click());
+
+        //filtering by keyword
+        onView(withId(R.id.keyword_edit_text)).perform(ViewActions.typeText("3"));
+        Thread.sleep(1000);
+        onView(withId(R.id.apply_button)).perform(click());
+
+        Thread.sleep(1000);
+        onView(withText("test reason 3")).check(matches(isDisplayed()));
+        onView(withText("test reason 2")).check(doesNotExist());
+        onView(withText("test reason 1")).check(doesNotExist());
+    }
+
+    // test for filtering for one thing then another
+    @Test
+    public void filterByMultipleFiltersTest() throws InterruptedException {
+        Thread.sleep(1000);
+
+        //filtering by most recent week first
+        onView(withId(R.id.filter_button_home)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.recent_week_switch)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.apply_button)).perform(click());
+        Thread.sleep(1000);
+        onView(withText("test reason 3")).check(matches(isDisplayed()));
+        onView(withText("test reason 2")).check(doesNotExist());
+        onView(withText("test reason 1")).check(doesNotExist());
+
+        //unselect most recent week
+        onView(withId(R.id.filter_button_home)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.recent_week_switch)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.apply_button)).perform(click());
+        Thread.sleep(1000);
+        onView(withText("test reason 1")).check(matches(isDisplayed()));
+        onView(withText("test reason 2")).check(matches(isDisplayed()));
+        onView(withText("test reason 3")).check(matches(isDisplayed()));
+
+        //keyword search test
+        onView(withId(R.id.filter_button_home)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.keyword_edit_text)).perform(ViewActions.typeText("1"));
+        Thread.sleep(1000);
+        onView(withId(R.id.apply_button)).perform(click());
+        Thread.sleep(1000);
+        onView(withText("test reason 1")).check(matches(isDisplayed()));
+        onView(withText("test reason 2")).check(doesNotExist());
+        onView(withText("test reason 3")).check(doesNotExist());
+    }
 
     @After
     public void tearDown() {
-        clearFirestoreEmulator();
         clearAuthEmulator();
+        clearFirestoreEmulator();
     }
 
     private void clearFirestoreEmulator() {
-        String projectId = "bread-2259c";
+        String projectId = "project-db"; // Change to your project ID
         String firestoreUrl = "http://10.0.2.2:8080/emulator/v1/projects/"
                 + projectId
                 + "/databases/(default)/documents";
@@ -180,7 +296,7 @@ public class HomeFilterUITest {
     }
 
     private void clearAuthEmulator() {
-        String projectId = "bread-2259c";
+        String projectId = "project-db"; // Change to your project ID
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"
                 + projectId
