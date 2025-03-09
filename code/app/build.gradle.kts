@@ -52,10 +52,11 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.firestore)
     implementation(libs.geofire.android.common)
-    implementation(libs.firebase.auth)
+x    implementation(libs.firebase.auth)
 
     // Google Services
     implementation(libs.play.services.location)
+    implementation("com.google.firebase:firebase-messaging")
 
     // testing
     testImplementation(libs.junit)
