@@ -42,6 +42,7 @@ import java.util.Set;
 
 public class HistoryFragment extends Fragment {
 
+    private static final String TAG = "HistoryFragment";
     private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
     private HistoryMoodEventArrayAdapter moodArrayAdapter;
@@ -99,13 +100,13 @@ public class HistoryFragment extends Fragment {
         if (currentUser != null) {
             username = currentUser.getDisplayName();
             if (username == null) {
-                Log.e("HistoryFragment", "Username is null. Cannot load mood events.");
+                Log.e(TAG, "Username is null. Cannot load mood events.");
                 return;
             }
             participantRef = userRepo.getParticipantRef(username);
             loadMoodEvents();
         } else {
-            Log.e("HistoryFragment", "No authenticated user found.");
+            Log.e(TAG, "No authenticated user found.");
         }
     }
 
@@ -244,7 +245,7 @@ public class HistoryFragment extends Fragment {
                         event.getReason().equals(moodEvent.getReason())) {
                     // This is likely the same event, copy its ID
                     moodEvent.setId(event.getId());
-                    Log.d("HistoryFragment", "Fixed null ID: " + moodEvent.getId());
+                    Log.d(TAG, "Fixed null ID: " + moodEvent.getId());
                     break;
                 }
             }
@@ -347,7 +348,7 @@ public class HistoryFragment extends Fragment {
                             getActivity().runOnUiThread(() -> {
                                 if (getContext() != null) {
                                     Toast.makeText(getContext(), "Failed to update mood", Toast.LENGTH_SHORT).show();
-                                    Log.e("HistoryFragment", "Error updating mood", e);
+                                    Log.e(TAG, "Error updating mood", e);
                                 }
                             });
                         }

@@ -16,6 +16,7 @@ import com.example.bread.controller.HomeMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.view.LoginPage;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -31,9 +32,12 @@ public class HomeFragment extends Fragment {
     private FirebaseAuth mAuth;
 
 
-    public HomeFragment() {
-        // Required empty public constructor
-    }
+    // Filter-related variables
+    private FloatingActionButton filterButton;
+    private ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
+    private boolean isFilteringByWeek = false;
+    private MoodEvent.EmotionalState selectedEmotionalState = null;
+    private String searchKeyword = "";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
