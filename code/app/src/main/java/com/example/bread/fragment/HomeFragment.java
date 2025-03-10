@@ -31,7 +31,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -51,7 +51,7 @@ public class HomeFragment extends Fragment {
 
     // Filter-related variables
     private FloatingActionButton filterButton;
-    private ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
+    private final ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
     private boolean isFilteringByWeek = false;
     private MoodEvent.EmotionalState selectedEmotionalState = null;
     private String searchKeyword = "";
@@ -91,7 +91,8 @@ public class HomeFragment extends Fragment {
 
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
-                        moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
+                        moodEventArrayList.addAll(moodEvents);
+                        moodEventArrayList.sort(Comparator.reverseOrder());
 
                         // Save all mood events for filtering
                         allMoodEvents.clear();
@@ -149,7 +150,7 @@ public class HomeFragment extends Fragment {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                TextView text = view.findViewById(android.R.id.text1);
                 text.setTextColor(Color.WHITE);
                 return view;
             }
@@ -157,7 +158,7 @@ public class HomeFragment extends Fragment {
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                TextView text = view.findViewById(android.R.id.text1);
                 text.setTextColor(Color.WHITE);
                 text.setPadding(16, 16, 16, 16);
                 return view;
