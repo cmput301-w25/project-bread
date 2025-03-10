@@ -1,16 +1,19 @@
 package com.example.bread.fragment;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +23,7 @@ import com.example.bread.controller.FollowRequestAdapter;
 import com.example.bread.controller.HomeMoodEventArrayAdapter;
 import com.example.bread.model.FollowRequest;
 import com.example.bread.model.MoodEvent;
+import com.example.bread.model.MoodEvent.SocialSituation;
 import com.example.bread.model.Participant;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
@@ -45,6 +49,7 @@ public class ProfileFragment extends Fragment {
     private View recentMoodEventView;
     private TextView emptyRequestsText;
     private TextView emptyMoodText;
+    private ImageButton settingsButton;
 
     private ParticipantRepository participantRepository;
     private MoodEventRepository moodEventRepository;
@@ -90,6 +95,15 @@ public class ProfileFragment extends Fragment {
         recentMoodEventView = view.findViewById(R.id.recent_mood_container);
         emptyRequestsText = view.findViewById(R.id.empty_requests_text);
         emptyMoodText = view.findViewById(R.id.empty_mood_text);
+
+        // Initialize settings button from main branch
+        settingsButton = view.findViewById(R.id.settings_button);
+        settingsButton.setOnClickListener(v -> {
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.frame_layout, new SettingsFragment());
+            transaction.commit();
+        });
 
         // Get current user
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -206,7 +220,7 @@ public class ProfileFragment extends Fragment {
 
     private void showFollowBackDialog(String username) {
         if (getContext() != null) {
-            new android.app.AlertDialog.Builder(getContext())
+            new AlertDialog.Builder(getContext())
                     .setTitle("Follow Back")
                     .setMessage("Do you want to follow " + username + " back?")
                     .setPositiveButton("Follow", (dialog, which) -> {
@@ -287,6 +301,7 @@ public class ProfileFragment extends Fragment {
             emptyMoodText.setVisibility(View.GONE);
         }
     }
+
     private void setupParticipantListener() {
         // Remove any existing listener
         if (participantListener != null) {

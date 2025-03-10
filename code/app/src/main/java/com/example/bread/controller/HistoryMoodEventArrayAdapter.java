@@ -88,10 +88,14 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
                 holder.username.setText(participantUsername);
             }
             if (holder.date != null) {
-                Date eventDate = moodEvent.getTimestamp(); //https://stackoverflow.com/questions/5683728/convert-java-util-date-to-string
-                Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                String s = formatter.format(eventDate);
-                holder.date.setText(s);
+                Date eventDate = moodEvent.getTimestamp();
+                if (eventDate != null) {
+                    Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    String s = formatter.format(eventDate);
+                    holder.date.setText(s);
+                } else {
+                    holder.date.setText("Pending"); // Fallback for null timestamp
+                }
             }
             if (holder.reason != null) {
                 holder.reason.setText(moodEvent.getReason());
