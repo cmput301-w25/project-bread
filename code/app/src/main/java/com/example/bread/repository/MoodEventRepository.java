@@ -77,7 +77,7 @@ public class MoodEventRepository {
                         }
                         onSuccessListener.onSuccess(moodEvents);
                     }
-                });//https://firebase.google.com/docs/firestore/query-data/listen
+                });
     }
 
     /**
