@@ -58,9 +58,9 @@ public class SettingsFragment extends Fragment {
 
         Button deleteAccountButton = view.findViewById(R.id.delete_account_button );
         deleteAccountButton.setOnClickListener(v -> {
-        // Delete user account and all associated mood events
-        // TODO: implement delete account functionality (?)
-        //https://firebase.google.com/docs/auth/android/manage-users#delete_a_user
+            // Delete user account and all associated mood events
+            // TODO: implement delete account functionality (?)
+            //https://firebase.google.com/docs/auth/android/manage-users#delete_a_user
         });
         return view;
     }
