@@ -19,12 +19,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.bread.R;
 import com.example.bread.controller.FollowRequestAdapter;
 import com.example.bread.controller.FollowRequestAdapter;
+import com.example.bread.model.FollowRequest;
 import com.example.bread.repository.ParticipantRepository;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class FollowRequestsFragment extends Fragment implements FollowRequestAdapter.RequestActionListener {
 
@@ -37,7 +37,7 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
     private FollowRequestAdapter requestAdapter;
     private ParticipantRepository participantRepository;
     private String currentUsername;
-    private List<Map<String, Object>> requestsList = new ArrayList<>();
+    private List<FollowRequest> requestsList = new ArrayList<>();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -149,7 +149,6 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
         });
     }
 
-    // Method to send a follow back request
     private void sendFollowBackRequest(String username) {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -159,50 +158,6 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             progressBar.setVisibility(View.GONE);
         }, e -> {
             Log.e(TAG, "Error sending follow back request", e);
-            Toast.makeText(getContext(), "Error sending follow request", Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.GONE);
-        });
-    }
-
-    private void showFollowBackDialog(String username) {
-        // First check if already following this user
-        participantRepository.isFollowing(currentUsername, username, isFollowing -> {
-            if (isFollowing) {
-                // Already following, no need to show dialog
-                return;
-            }
-
-            // Check if a follow request exists
-            participantRepository.checkFollowRequestExists(currentUsername, username, requestExists -> {
-                if (requestExists) {
-                    // Follow request already sent, no need to show dialog
-                    return;
-                }
-
-                // Show follow back dialog
-                if (getContext() != null) {
-                    new AlertDialog.Builder(getContext())
-                            .setTitle("Follow Back")
-                            .setMessage("Do you want to follow " + username + " back?")
-                            .setPositiveButton("Follow", (dialog, which) -> {
-                                followUser(username);
-                            })
-                            .setNegativeButton("Not Now", null)
-                            .show();
-                }
-            }, e -> Log.e(TAG, "Error checking follow request", e));
-        }, e -> Log.e(TAG, "Error checking following status", e));
-    }
-
-    private void followUser(String username) {
-        progressBar.setVisibility(View.VISIBLE);
-
-        // Send follow request
-        participantRepository.sendFollowRequest(currentUsername, username, unused -> {
-            Toast.makeText(getContext(), "Follow request sent", Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.GONE);
-        }, e -> {
-            Log.e(TAG, "Error sending follow request", e);
             Toast.makeText(getContext(), "Error sending follow request", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
         });

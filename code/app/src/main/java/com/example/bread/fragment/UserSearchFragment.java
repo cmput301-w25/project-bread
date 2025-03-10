@@ -110,7 +110,7 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
 
             // Filter out the current user from results
             for (Participant participant : participants) {
-                if (!participant.getUsername().equals(currentUsername)) {
+                if (!participant.getUsername().toLowerCase().equals(currentUsername.toLowerCase())) {
                     userList.add(participant);
                 }
             }

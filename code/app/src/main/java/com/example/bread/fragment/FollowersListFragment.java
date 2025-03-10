@@ -16,7 +16,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,7 +34,7 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
     private static final String ARG_TYPE = "type"; // "followers" or "following"
 
     private String username;
-    private String type; // "followers" or "following"
+    private ParticipantRepository.ListType listType;
 
     private TextView titleTextView;
     private RecyclerView usersRecyclerView;
@@ -68,7 +67,10 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
 
         if (getArguments() != null) {
             username = getArguments().getString(ARG_USERNAME);
-            type = getArguments().getString(ARG_TYPE);
+            String type = getArguments().getString(ARG_TYPE);
+            listType = "followers".equals(type) ?
+                    ParticipantRepository.ListType.FOLLOWERS :
+                    ParticipantRepository.ListType.FOLLOWING;
         }
     }
 
@@ -85,11 +87,12 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         emptyView = view.findViewById(R.id.empty_view);
 
         // Set title based on type
-        String title = type.equals("followers") ? "Followers" : "Following";
+        String title = listType == ParticipantRepository.ListType.FOLLOWERS ? "Followers" : "Following";
         titleTextView.setText(title);
 
         // Set up RecyclerView
-        followerAdapter = new FollowerAdapter(filteredList, this, type);
+        String typeString = listType == ParticipantRepository.ListType.FOLLOWERS ? "followers" : "following";
+        followerAdapter = new FollowerAdapter(filteredList, this, typeString);
         usersRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         usersRecyclerView.setAdapter(followerAdapter);
 
@@ -117,7 +120,7 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         progressBar.setVisibility(View.VISIBLE);
         emptyView.setVisibility(View.GONE);
 
-        if (type.equals("followers")) {
+        if (listType == ParticipantRepository.ListType.FOLLOWERS) {
             participantRepository.fetchFollowers(username, followers -> {
                 loadParticipants(followers);
             }, e -> {
@@ -184,7 +187,7 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         } else {
             for (Participant participant : originalList) {
                 if (participant.getUsername().toLowerCase().contains(query) ||
-                        (participant.getFirstName() + " " + participant.getLastName()).toLowerCase().contains(query)) {
+                        participant.getDisplayName().toLowerCase().contains(query)) {
                     filteredList.add(participant);
                 }
             }
@@ -196,7 +199,8 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
 
     private void updateEmptyView() {
         if (filteredList.isEmpty()) {
-            String message = type.equals("followers") ? "No followers found" : "Not following anyone";
+            String message = listType == ParticipantRepository.ListType.FOLLOWERS ?
+                    "No followers found" : "Not following anyone";
             emptyView.setText(message);
             emptyView.setVisibility(View.VISIBLE);
             usersRecyclerView.setVisibility(View.GONE);
@@ -217,8 +221,8 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
     @Override
     public void onRemoveClick(Participant participant, int position) {
         // Show confirmation dialog
-        String action = type.equals("followers") ? "remove" : "unfollow";
-        String message = type.equals("followers")
+        String action = listType == ParticipantRepository.ListType.FOLLOWERS ? "remove" : "unfollow";
+        String message = listType == ParticipantRepository.ListType.FOLLOWERS
                 ? "Are you sure you want to remove " + participant.getUsername() + " from your followers?"
                 : "Are you sure you want to unfollow " + participant.getUsername() + "?";
 
@@ -227,7 +231,7 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
                 .setMessage(message)
                 .setPositiveButton("Yes", (dialog, which) -> {
                     // Perform the removal based on the list type
-                    if (type.equals("followers")) {
+                    if (listType == ParticipantRepository.ListType.FOLLOWERS) {
                         removeFollower(participant, position);
                     } else {
                         unfollowUser(participant, position);

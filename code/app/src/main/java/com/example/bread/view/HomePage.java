@@ -3,14 +3,12 @@ package com.example.bread.view;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
 import com.example.bread.databinding.ActivityHomePageBinding;
-
 import com.example.bread.fragment.FollowRequestsFragment;
 import com.example.bread.fragment.HistoryFragment;
 import com.example.bread.fragment.HomeFragment;
@@ -61,6 +59,10 @@ public class HomePage extends AppCompatActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.frame_layout, fragment);
         transaction.commit();
+    }
+
+    public void selectHomeNavigation() {
+        binding.bottomNavigationView.setSelectedItemId(R.id.home);
     }
 
     // Method to navigate to specific fragments

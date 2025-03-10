@@ -11,20 +11,20 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bread.R;
+import com.example.bread.model.FollowRequest;
 import com.example.bread.model.Participant;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.ImageHandler;
 
 import java.util.List;
-import java.util.Map;
 
 public class FollowRequestAdapter extends RecyclerView.Adapter<FollowRequestAdapter.RequestViewHolder> {
 
-    private final List<Map<String, Object>> requestsList;
+    private final List<FollowRequest> requestsList;
     private final RequestActionListener listener;
     private final ParticipantRepository participantRepository;
 
-    public FollowRequestAdapter(List<Map<String, Object>> requestsList, RequestActionListener listener, ParticipantRepository participantRepository) {
+    public FollowRequestAdapter(List<FollowRequest> requestsList, RequestActionListener listener, ParticipantRepository participantRepository) {
         this.requestsList = requestsList;
         this.listener = listener;
         this.participantRepository = participantRepository;
@@ -39,7 +39,7 @@ public class FollowRequestAdapter extends RecyclerView.Adapter<FollowRequestAdap
 
     @Override
     public void onBindViewHolder(@NonNull RequestViewHolder holder, int position) {
-        Map<String, Object> request = requestsList.get(position);
+        FollowRequest request = requestsList.get(position);
         holder.bind(request, position);
     }
 
@@ -67,15 +67,15 @@ public class FollowRequestAdapter extends RecyclerView.Adapter<FollowRequestAdap
             declineButton = itemView.findViewById(R.id.decline_button);
         }
 
-        void bind(Map<String, Object> request, int position) {
-            String requestorUsername = (String) request.get("fromUsername");
+        void bind(FollowRequest request, int position) {
+            String requestorUsername = request.getFromUsername();
             usernameText.setText(requestorUsername);
 
             // Load user details
             participantRepository.fetchBaseParticipant(requestorUsername, participant -> {
                 if (participant != null) {
                     // Set full name
-                    nameText.setText(participant.getFirstName() + " " + participant.getLastName());
+                    nameText.setText(participant.getDisplayName());
 
                     // Set profile image if available
                     if (participant.getProfilePicture() != null) {
