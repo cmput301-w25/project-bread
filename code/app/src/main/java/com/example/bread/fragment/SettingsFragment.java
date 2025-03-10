@@ -14,16 +14,12 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import com.example.bread.R;
-import com.example.bread.model.Participant;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.view.LoginPage;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import java.util.Objects;
 
 public class SettingsFragment extends Fragment {
