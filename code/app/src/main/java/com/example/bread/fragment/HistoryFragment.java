@@ -62,7 +62,7 @@ public class HistoryFragment extends Fragment {
     private String searchKeyword = "";
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) { //LANDYS
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_history, container, false);
 
         moodEventListView = view.findViewById(R.id.historyListView);
