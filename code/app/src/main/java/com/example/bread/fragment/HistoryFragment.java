@@ -117,9 +117,6 @@ public class HistoryFragment extends Fragment {
         moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
-                        moodEvents.stream()
-                                .filter(event -> event.getTimestamp() != null)
-                                .forEach(moodEventArrayList::add);
                         moodEventArrayList.addAll(moodEvents);
                         moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
 

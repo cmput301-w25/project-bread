@@ -88,9 +88,6 @@ public class HomeFragment extends Fragment {
 
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
-                        moodEvents.stream()
-                                .filter(event -> event.getTimestamp() != null)
-                                .forEach(moodEventArrayList::add);
                         moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
 
                         // Save all mood events for filtering
