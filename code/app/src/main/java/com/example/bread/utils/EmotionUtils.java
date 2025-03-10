@@ -16,7 +16,7 @@ public class EmotionUtils {
         emotionEmoticonMap.put(MoodEvent.EmotionalState.FEARFUL, "😨");
         emotionEmoticonMap.put(MoodEvent.EmotionalState.SHAMEFUL, "😞");
         emotionEmoticonMap.put(MoodEvent.EmotionalState.SURPRISED, "😲");
-        emotionEmoticonMap.put(MoodEvent.EmotionalState.NONE, "❓");
+
     }
     public static String getEmoticon(MoodEvent.EmotionalState emotion) {
         return emotionEmoticonMap.getOrDefault(emotion, "❓");
@@ -42,7 +42,6 @@ public class EmotionUtils {
                 return R.color.shamefulColor;
             case SURPRISED:
                 return R.color.surprisedColor;
-            case NONE:
             default:
                 return R.color.noneColor;
         }
