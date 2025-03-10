@@ -14,6 +14,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -66,7 +67,7 @@ public class MoodEventRepository {
     public void listenForEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
         getMoodEventCollRef()
                 .whereEqualTo("participantRef", participantRef)
-                .orderBy("timestamp", Query.Direction.DESCENDING) // Order by timestamp to get newest first
+                // Removed the orderBy("timestamp", Query.Direction.DESCENDING) to avoid index requirement
                 .limit(MAX_EVENTS_PER_USER) // Limit query to improve performance
                 .addSnapshotListener((value, error) -> {
                     if (error != null) {
@@ -83,6 +84,23 @@ public class MoodEventRepository {
                                 moodEvents.add(moodEvent);
                             }
                         }
+
+                        // Sort in memory instead of in the query
+                        Collections.sort(moodEvents, (a, b) -> {
+                            // Handle null timestamp cases
+                            if (a.getTimestamp() == null && b.getTimestamp() == null) {
+                                return 0;
+                            }
+                            if (a.getTimestamp() == null) {
+                                return 1; // Nulls last
+                            }
+                            if (b.getTimestamp() == null) {
+                                return -1; // Nulls last
+                            }
+                            // Sort most recent first (descending)
+                            return b.getTimestamp().compareTo(a.getTimestamp());
+                        });
+
                         onSuccessListener.onSuccess(moodEvents);
                     } else {
                         onSuccessListener.onSuccess(new ArrayList<>()); // Return empty list instead of null
@@ -123,9 +141,9 @@ public class MoodEventRepository {
             final int LIMIT_TOTAL_EVENTS = 50; // Limit total events returned
 
             // Create query - using whereIn allows us to fetch events from multiple users at once
+            // Removed the orderBy to avoid index requirement
             Query query = getMoodEventCollRef()
                     .whereIn("participantRef", participantRefs)
-                    .orderBy("timestamp", Query.Direction.DESCENDING)
                     .limit(LIMIT_TOTAL_EVENTS);
 
             // Set up snapshot listener to get real-time updates
@@ -145,6 +163,23 @@ public class MoodEventRepository {
                             allMoodEvents.add(moodEvent);
                         }
                     }
+
+                    // Sort in memory by timestamp (descending - newest first)
+                    Collections.sort(allMoodEvents, (a, b) -> {
+                        // Handle null timestamp cases
+                        if (a.getTimestamp() == null && b.getTimestamp() == null) {
+                            return 0;
+                        }
+                        if (a.getTimestamp() == null) {
+                            return 1; // Nulls last
+                        }
+                        if (b.getTimestamp() == null) {
+                            return -1; // Nulls last
+                        }
+                        // Sort most recent first (descending)
+                        return b.getTimestamp().compareTo(a.getTimestamp());
+                    });
+
                     onSuccessListener.onSuccess(allMoodEvents);
                 } else {
                     onSuccessListener.onSuccess(new ArrayList<>());
@@ -153,7 +188,6 @@ public class MoodEventRepository {
 
         }, onFailureListener);
     }
-
     /**
      * Adds a mood event to the database
      * @param moodEvent The mood event to be added
