@@ -20,9 +20,7 @@ import com.example.bread.model.MoodEvent.SocialSituation;
 import java.text.SimpleDateFormat;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link ProfileFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Represents the profile page of the app, where users can view their profile information.
  */
 public class ProfileFragment extends Fragment {
 

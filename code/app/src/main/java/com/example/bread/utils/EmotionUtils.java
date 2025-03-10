@@ -1,11 +1,16 @@
 package com.example.bread.utils;
 
-import com.example.bread.model.MoodEvent;
-import java.util.HashMap;
 import com.example.bread.R;
+import com.example.bread.model.MoodEvent;
 
+import java.util.HashMap;
+
+/**
+ * Utility class for handling emotions and their corresponding emoticons and colors.
+ */
 public class EmotionUtils {
     private static final HashMap<MoodEvent.EmotionalState, String> emotionEmoticonMap = new HashMap<>();
+
     static {
         emotionEmoticonMap.put(MoodEvent.EmotionalState.HAPPY, "😃");
         emotionEmoticonMap.put(MoodEvent.EmotionalState.SAD, "😢");
@@ -18,10 +23,23 @@ public class EmotionUtils {
         emotionEmoticonMap.put(MoodEvent.EmotionalState.SURPRISED, "😲");
 
     }
+
+    /**
+     * Returns the emoticon corresponding to the given emotional state.
+     *
+     * @param emotion the emotional state
+     * @return the emoticon corresponding to the emotional state
+     */
     public static String getEmoticon(MoodEvent.EmotionalState emotion) {
         return emotionEmoticonMap.getOrDefault(emotion, "❓");
     }
 
+    /**
+     * Returns the color resource corresponding to the given emotional state.
+     *
+     * @param emotion the emotional state
+     * @return the color resource corresponding to the emotional state
+     */
     public static int getColorResource(MoodEvent.EmotionalState emotion) {
         switch (emotion) {
             case HAPPY:

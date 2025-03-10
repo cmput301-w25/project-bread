@@ -37,6 +37,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Represents the history page of the app, where users can view their mood events and apply filters.
+ */
 public class HistoryFragment extends Fragment {
 
     private static final String TAG = "HistoryFragment";

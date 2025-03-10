@@ -29,6 +29,9 @@ import com.google.firebase.firestore.DocumentReference;
 
 import java.util.Map;
 
+/**
+ * Represents the fragment where users can add a mood event to their history.
+ */
 public class AddMoodEventFragment extends Fragment {
     private static final String TAG = "AddMoodEventFragment";
     private Spinner emotionalStateSpinner, socialSituationSpinner;

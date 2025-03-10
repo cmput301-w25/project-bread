@@ -35,6 +35,9 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Represents the home page of the app, where users can view mood events from users they follow.
+ */
 public class HomeFragment extends Fragment {
 
     private static final String TAG = "HomeFragment";
