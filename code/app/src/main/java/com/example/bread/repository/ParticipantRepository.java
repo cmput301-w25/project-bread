@@ -218,6 +218,18 @@ public class ParticipantRepository {
     public void checkIfAlreadyFollowing(@NonNull String username, String followingUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
     }
 
+    /**
+     * Send a follow request from one user to another
+     *
+     * TODO: this method might change based on farhan's pr
+     * When those changes occur, make sure to preserve the notification integration:
+     * NotificationService.sendFollowRequestNotification(fromUsername, toUsername);
+     *
+     * Where and When-  The notification MUST be called in the onSuccessListener after
+     * the follow request has been successfully saved to Firestore but before
+     * triggering the original onSuccessListener callback to ensure notifications
+     * are only sent for successful requests.
+     */
     public void sendFollowRequest(@NonNull String fromUsername, @NonNull String toUsername,
                                   @NonNull OnSuccessListener<Void> onSuccessListener,
                                   OnFailureListener onFailureListener) {

@@ -69,28 +69,5 @@ public class NotificationUtils {
         }
     }
 
-    /**
-     * Get the FCM token for this device
-     */
-    //https://www.youtube.com/watch?v=NF0RzhXDRKw&t=198s
-    //took inspiration from above link on how to get the FCM token.
-    public static void getFCMToken(OnTokenReceiveListener listener) {
-        FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
-                        Log.w(TAG, "Fetching FCM registration token failed", task.getException());
-                        listener.onTokenReceive(null);
-                        return;
-                    }
 
-                    // Get new FCM registration token
-                    String token = task.getResult();
-                    Log.d(TAG, "FCM Token: " + token);
-                    listener.onTokenReceive(token);
-                });
-    }
-
-    public interface OnTokenReceiveListener {
-        void onTokenReceive(String token);
-    }
 }

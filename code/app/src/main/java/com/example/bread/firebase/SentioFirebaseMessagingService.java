@@ -13,7 +13,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
 
-public class MyFirebaseMessagingService extends FirebaseMessagingService {
+public class SentioFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";
 
     @Override

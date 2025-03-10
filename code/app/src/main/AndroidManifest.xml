@@ -44,7 +44,7 @@
 
         <!-- FCM Service -->
         <service
-            android:name=".firebase.MyFirebaseMessagingService"
+            android:name=".firebase.SentioFirebaseMessagingService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -54,7 +54,7 @@
         <!-- Default notification icon -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_notification" />
+            android:resource="@mipmap/sound_wave_layer" />
 
 
 
