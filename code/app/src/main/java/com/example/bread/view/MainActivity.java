@@ -12,6 +12,9 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.bread.R;
 
+/**
+ * Represents the main activity of the app, where the user is redirected to the login page if they
+ */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";

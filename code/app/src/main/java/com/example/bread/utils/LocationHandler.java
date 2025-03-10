@@ -19,6 +19,10 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
+/**
+ * A singleton class that handles location-related tasks, such as fetching the user's location and
+ * permission handling. This class uses the {@link FusedLocationProviderClient} to get the user's location.
+ */
 public class LocationHandler {
     private static final String TAG = "LocationHandler";
     private static LocationHandler instance;

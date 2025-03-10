@@ -25,6 +25,9 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Represents the login page of the app, where users can sign in with their email and password.
+ */
 public class LoginPage extends AppCompatActivity {
 
     private static final String TAG = "LoginPage";

@@ -11,9 +11,8 @@ import android.view.ViewGroup;
 import com.example.bread.R;
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link MapFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Represents the map page of the app, where users can view a map of their location and nearby
+ * mood events.
  */
 public class MapFragment extends Fragment {
 

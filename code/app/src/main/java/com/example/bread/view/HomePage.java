@@ -14,6 +14,9 @@ import com.example.bread.fragment.HomeFragment;
 import com.example.bread.fragment.MapFragment;
 import com.example.bread.fragment.ProfileFragment;
 
+/**
+ * Represents the home page of the app, where users can navigate to different fragments.
+ */
 public class HomePage extends AppCompatActivity {
 
     ActivityHomePageBinding binding;

@@ -22,6 +22,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import java.util.Objects;
 
+/**
+ * Represents the settings page of the app, where users can edit their account details, and log out.
+ */
 public class SettingsFragment extends Fragment {
 
     private static final String TAG = "SettingsFragment";
