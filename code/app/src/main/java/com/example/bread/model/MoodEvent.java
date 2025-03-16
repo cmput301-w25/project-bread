@@ -129,14 +129,15 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
     @Override
     public String toString() {
         return "MoodEvent{" +
-                "id='" + id + '\'' +
-                ", timestamp='" + timestamp + '\'' +
-                ", title='" + title + '\'' +
-                ", reason='" + reason + '\'' +
-                ", trigger='" + trigger + '\'' +
-                ", participantRef=" + participantRef +
+                "id=" + id +
+                ", timestamp=" + timestamp +
+                ", title=" + title +
+                ", reason=" + reason +
+                ", trigger=" + trigger +
+                ", participantRef=" + participantRef.getPath() +
                 ", emotionalState=" + emotionalState +
                 ", socialSituation=" + socialSituation +
+                ", geoInfo=" + geoInfo +
                 '}';
     }
 
