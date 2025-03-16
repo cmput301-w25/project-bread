@@ -1,9 +1,15 @@
 package com.example.bread.fragment;
 
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.ext.SdkExtensions;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,10 +17,18 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.RequiresExtension;
 import androidx.fragment.app.Fragment;
 import com.example.bread.R;
 import com.example.bread.controller.HistoryMoodEventArrayAdapter;
@@ -23,12 +37,16 @@ import com.example.bread.model.MoodEvent.EmotionalState;
 import com.example.bread.model.MoodEvent.SocialSituation;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
+import com.example.bread.utils.ImageHandler;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+
+import org.w3c.dom.Text;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,6 +54,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 
 /**
  * Represents the history page of the app, where users can view their mood events and apply filters.
@@ -53,6 +72,12 @@ public class HistoryFragment extends Fragment {
 
     private String username;
     private DocumentReference participantRef;
+
+    // Image related variables
+    private ImageButton editImage;
+    private ActivityResultLauncher<Intent> resultLauncher;
+    private String imageBase64;
+    private ImageHandler imageHandler;
 
     // Filter-related variables
     private FloatingActionButton filterButton;
@@ -86,6 +111,9 @@ public class HistoryFragment extends Fragment {
         if (filterButton != null) {
             filterButton.setOnClickListener(v -> showFilterDialog());
         }
+
+        // Image editing, required to ensure it is available throughout whole lifecycle
+        registerResult();
 
         return view;
     }
@@ -194,6 +222,8 @@ public class HistoryFragment extends Fragment {
         TextView dateTextView = dialogView.findViewById(R.id.detail_date);
         TextView reasonTextView = dialogView.findViewById(R.id.detail_reason);
         TextView socialSituationTextView = dialogView.findViewById(R.id.detail_social_situation);
+        ImageView moodImageView = dialogView.findViewById(R.id.mood_event_image);
+        TextView imageSelection = dialogView.findViewById(R.id.image_selection);
 
         // Set the data
         emotionTextView.setText(moodEvent.getEmotionalState().toString());
@@ -209,6 +239,18 @@ public class HistoryFragment extends Fragment {
         // Set social situation
         SocialSituation situation = moodEvent.getSocialSituation();
         socialSituationTextView.setText(situation != null ? situation.toString() : "Not specified");
+
+        // Set image
+        String imageBase64 = moodEvent.getAttachedImage();
+        if (imageBase64 == null || imageBase64.isEmpty()) {
+            moodImageView.setVisibility(View.GONE);  // Hide if image not uploaded
+            imageSelection.setText("No image uploaded.");
+        } else {
+            Bitmap bitmap = ImageHandler.base64ToBitmap(imageBase64);
+            moodImageView.setImageBitmap(bitmap);
+            moodImageView.setVisibility(View.VISIBLE);  // Show when image is uploaded
+            imageSelection.setText("");
+        }
 
         builder.setView(dialogView);
         builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
@@ -240,9 +282,12 @@ public class HistoryFragment extends Fragment {
         EditText reasonEditText = dialogView.findViewById(R.id.edit_reason);
         Spinner emotionSpinner = dialogView.findViewById(R.id.edit_emotion_spinner);
         Spinner socialSituationSpinner = dialogView.findViewById(R.id.edit_social_situation_spinner);
+        editImage = dialogView.findViewById(R.id.image_edit_button);
+        Button deleteImageButton = dialogView.findViewById(R.id.delete_image_button);
 
         titleEditText.setText(moodEvent.getTitle() != null ? moodEvent.getTitle() : "");
         reasonEditText.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "");
+        imageBase64 = moodEvent.getAttachedImage();
 
         ArrayAdapter<EmotionalState> emotionAdapter = new ArrayAdapter<>(
                 getContext(),
@@ -251,6 +296,11 @@ public class HistoryFragment extends Fragment {
         );
         emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         emotionSpinner.setAdapter(emotionAdapter);
+
+        if (moodEvent.getAttachedImage() != null){
+            // If image already assigned it is displayed on image button, and blank if not
+            editImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
+        }
 
         if (moodEvent.getEmotionalState() != null) {
             emotionSpinner.setSelection(emotionAdapter.getPosition(moodEvent.getEmotionalState()));
@@ -267,6 +317,17 @@ public class HistoryFragment extends Fragment {
         if (moodEvent.getSocialSituation() != null) {
             socialSituationSpinner.setSelection(socialAdapter.getPosition(moodEvent.getSocialSituation()));
         }
+
+        // Calls pickImage() when user chooses to change their image
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2) {
+            editImage.setOnClickListener(v -> pickImage());
+        }
+
+        deleteImageButton.setOnClickListener(v -> {
+            imageBase64 = null;
+            editImage.setImageDrawable(null);
+            editImage.setImageResource(R.drawable.camera_icon);
+        });
 
         // **Validation Listeners**
         titleEditText.setOnFocusChangeListener((v, hasFocus) -> {
@@ -297,8 +358,6 @@ public class HistoryFragment extends Fragment {
                 }
             }
         });
-
-
 
         // **Override Save Button to Enforce Validation**
         builder.setPositiveButton("Save", null); // We override it later to prevent closing
@@ -348,6 +407,7 @@ public class HistoryFragment extends Fragment {
             moodEvent.setEmotionalState(newEmotionalState);
             moodEvent.setReason(newReason);
             moodEvent.setSocialSituation(newSocialSituation);
+            moodEvent.setAttachedImage(imageBase64);
 
             // Save to Firebase
             moodsRepo.updateMoodEvent(moodEvent,
@@ -373,6 +433,49 @@ public class HistoryFragment extends Fragment {
                     }
             );
         });
+    }
+    // Edit / add image related functions
+    /**
+     *
+     */
+    private void registerResult(){
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getData() == null) {
+                            Log.e(TAG, "No image selected.");
+                            return;
+                        }
+                        try {
+                            Uri imageUri = result.getData().getData();
+                            if (imageUri != null){
+                                // Changes image on the button if user changes image
+                                editImage.setImageURI(imageUri);
+                                // Assigns new image to our global variable that is then assigned to moodEvent
+                                imageBase64 = imageHandler.compressImageToBase64(requireContext(), result.getData().getData());
+                                Log.d(TAG, "Image selected and converted: " + imageBase64);
+                            }
+                            else{
+                                Log.e(TAG, "No image selected.");
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "User did not change image.");
+                        }
+                    }
+                }
+        );
+    }
+
+    /**
+     * Allows user to pick an image from camera roll
+     * Uses resultLauncher to launch image picking activity
+     */
+    @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
+    private void pickImage(){
+        Intent intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
+        resultLauncher.launch(intent);
     }
 
     // Filter-related methods
