@@ -1,14 +1,25 @@
 package com.example.bread.fragment;
 
+import android.content.Context;
+import android.location.Location;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import com.example.bread.R;
+import com.example.bread.model.MoodEvent;
+import com.example.bread.repository.MoodEventRepository;
+import com.example.bread.repository.ParticipantRepository;
+import com.example.bread.utils.LocationHandler;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 /**
  * Represents the map page of the app, where users can view a map of their location and nearby
@@ -16,50 +27,104 @@ import com.example.bread.R;
  */
 public class MapFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String TAG = "MapFragment";
+    private FirebaseAuth mAuth;
+    private MoodEventRepository moodEventRepo;
+    private ParticipantRepository participantRepo;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    /**
+     * These two fields are used to handle location permissions and fetching the user's location.
+     * They are required in all the activities that need to fetch the user's location.
+     * Always call stopLocationUpdates() in the onDestroy() / onStop() method of the activity.
+     */
+    private LocationHandler locationHandler;
+    private ActivityResultLauncher<String> locationPermissionLauncher;
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+    }
 
     public MapFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MapFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static MapFragment newInstance(String param1, String param2) {
-        MapFragment fragment = new MapFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static MapFragment newInstance() {
+        return new MapFragment();
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+        mAuth = FirebaseAuth.getInstance();
+        moodEventRepo = new MoodEventRepository();
+        participantRepo = new ParticipantRepository();
+        locationHandler = LocationHandler.getInstance(requireContext());
+        locationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                locationHandler.fetchUserLocation();
+            } else {
+                Log.e(TAG, "Location permission denied - cannot fetch location");
+            }
+        });
+        locationHandler.requestLocationPermission(locationPermissionLauncher);
+
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_map, container, false);
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+
+        fetchInRadiusMoodEvents();
+
+        return view;
+    }
+
+    private void fetchInRadiusMoodEvents() {
+        Location currentLocation = locationHandler.getLastLocation();
+        if (currentLocation == null) {
+            Log.i(TAG, "Location not available yet, waiting for location callback");
+            locationHandler.fetchUserLocation(location -> {
+                Log.i(TAG, "Location callback received, fetching mood events");
+                doFetchInRadiusMoodEvents(location);
+            });
+        } else {
+            Log.i(TAG, "Location already available, fetching mood events");
+            doFetchInRadiusMoodEvents(currentLocation);
+        }
+    }
+
+    private void doFetchInRadiusMoodEvents(@NonNull Location currentLocation) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Log.e(TAG, "Cannot fetch mood events without a signed-in user");
+            return;
+        }
+        String username = user.getDisplayName();
+        if (username == null) {
+            Log.e(TAG, "Cannot fetch mood events without a username");
+            return;
+        }
+        moodEventRepo.fetchForInRadiusEvents(participantRepo.getParticipantRef(username), currentLocation, 5.0, moodEvents -> {
+            for (MoodEvent moodEvent : moodEvents) {
+                Log.d(TAG, "Fetched mood event: " + moodEvent.toString());
+            }
+        }, e -> {
+            Log.e(TAG, "Failed to fetch mood events", e);
+        });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.i(TAG, "Fragment view destroyed, stopping location updates");
+        locationHandler.stopLocationUpdates();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        locationPermissionLauncher = null;
     }
 }

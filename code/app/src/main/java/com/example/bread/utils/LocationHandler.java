@@ -45,6 +45,10 @@ public class LocationHandler {
         return instance;
     }
 
+    public interface OnLocationAvailableCallback {
+        void onLocationAvailable(Location location);
+    }
+
     /**
      * Check if we already have FINE_LOCATION permission; if not, request it via the given launcher.
      * If we do have it, immediately fetch the user location.
@@ -78,6 +82,34 @@ public class LocationHandler {
                     if (location != null) {
                         lastLocation = location;
                         Log.d(TAG, "fetchUserLocation Success: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
+                    } else {
+                        Log.d(TAG, "Last location is null. Requesting updates...");
+                        requestLocationUpdates();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error trying to get last location: ", e);
+                    requestLocationUpdates();
+                });
+    }
+
+    /**
+     * Fetch the user's location and call the given callback with the result.
+     */
+    @SuppressLint("MissingPermission")
+    public void fetchUserLocation(@NonNull OnLocationAvailableCallback callback) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "fetchUserLocation called without location permission!");
+            return;
+        }
+
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        lastLocation = location;
+                        Log.d(TAG, "fetchUserLocation Success: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
+                        callback.onLocationAvailable(lastLocation);
                     } else {
                         Log.d(TAG, "Last location is null. Requesting updates...");
                         requestLocationUpdates();
