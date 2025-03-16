@@ -319,7 +319,7 @@ public class AddMoodEventFragment extends Fragment {
      * Allows user to pick an image from camera roll
      * Uses resultLauncher to launch image picking activity
      */
-    @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2) //---------------------------
+    @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
     private void pickImage(){
         Intent intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
         resultLauncher.launch(intent);

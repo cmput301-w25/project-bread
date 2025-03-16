@@ -67,6 +67,9 @@ public class MoodEventEditTest {
         onView(withId(R.id.edit_reason)).check(matches(isDisplayed()));
         onView(withId(R.id.edit_emotion_spinner)).check(matches(isDisplayed()));
         onView(withId(R.id.edit_social_situation_spinner)).check(matches(isDisplayed()));
+        onView(withId(R.id.image_edit_button)).check(matches(isDisplayed()));
+        onView(withId(R.id.delete_image_button)).check(matches(isDisplayed()));
+
 
         // Close the dialog
         onView(withText("Cancel")).perform(click());

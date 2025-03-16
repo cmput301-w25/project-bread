@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
@@ -131,6 +132,7 @@ public class MoodEventAddTest {
         onView(withId(R.id.socialSituationSpinner)).check(matches(isDisplayed()));
         onView(withId(R.id.locationCheckbox)).check(matches(isDisplayed()));
         onView(withId(R.id.saveButton)).check(matches(isDisplayed()));
+        onView(withId(R.id.imageAdd)).check(matches(isDisplayed()));
     }
 
     @Test
@@ -203,7 +205,7 @@ public class MoodEventAddTest {
 
     @After
     public void tearDownAuth() {
-        String projectId = "temp-bread";  //SET TO YOUR PROJECT ID
+        String projectId = "project-db";  //SET TO YOUR PROJECT ID
         URL url = null;
         try {
             url = new URL("http://10.0.2.2:9099/emulator/v1/projects/"+projectId+"/accounts");
@@ -228,7 +230,7 @@ public class MoodEventAddTest {
 
     @After
     public void tearDownDb() {
-        String projectId = "temp-bread"; //SET TO YOUR PROJECT ID
+        String projectId = "project-db"; //SET TO YOUR PROJECT ID
         URL url = null;
         try {
             url = new URL("http://10.0.2.2:8080/emulator/v1/projects/"+projectId+"/databases/(default)/documents");

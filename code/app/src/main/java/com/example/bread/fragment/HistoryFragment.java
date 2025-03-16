@@ -246,7 +246,7 @@ public class HistoryFragment extends Fragment {
             moodImageView.setVisibility(View.GONE);  // Hide if image not uploaded
             imageSelection.setText("No image uploaded.");
         } else {
-            Bitmap bitmap = ImageHandler.base64ToBitmap(imageBase64);
+            Bitmap bitmap = imageHandler.base64ToBitmap(imageBase64);
             moodImageView.setImageBitmap(bitmap);
             moodImageView.setVisibility(View.VISIBLE);  // Show when image is uploaded
             imageSelection.setText("");
@@ -299,7 +299,7 @@ public class HistoryFragment extends Fragment {
 
         if (moodEvent.getAttachedImage() != null){
             // If image already assigned it is displayed on image button, and blank if not
-            editImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
+            editImage.setImageBitmap(imageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
         }
 
         if (moodEvent.getEmotionalState() != null) {
