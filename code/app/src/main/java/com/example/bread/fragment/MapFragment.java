@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
+import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.LocationHandler;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -29,6 +30,7 @@ public class MapFragment extends Fragment {
     private static final String TAG = "MapFragment";
     private FirebaseAuth mAuth;
     private MoodEventRepository moodEventRepo;
+    private ParticipantRepository participantRepository;
 
     /**
      * These two fields are used to handle location permissions and fetching the user's location.
@@ -56,6 +58,7 @@ public class MapFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         moodEventRepo = new MoodEventRepository();
+        participantRepository = new ParticipantRepository();
         locationHandler = LocationHandler.getInstance(requireContext());
         locationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
@@ -73,12 +76,37 @@ public class MapFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_map, container, false);
 
-        fetchInRadiusMoodEvents();
+        // TODO: alternate between these two methods to display events on the map based on user selected filter
+        fetchSelfMoodEvents();
+        fetchInRadiusMoodEventsFromFollowing();
 
         return view;
     }
 
-    private void fetchInRadiusMoodEvents() {
+    private void fetchSelfMoodEvents() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Log.e(TAG, "Cannot fetch mood events without a signed-in user");
+            return;
+        }
+        String username = user.getDisplayName();
+        if (username == null) {
+            Log.e(TAG, "Cannot fetch mood events without a username");
+            return;
+        }
+        moodEventRepo.fetchEventsWithParticipantRef(participantRepository.getParticipantRef(username), moodEvents -> {
+            for (MoodEvent event : moodEvents) {
+                if (event.getGeoInfo() != null) {
+                    // TODO: collect these events here in a combined list to display on the map
+                    Log.d(TAG, "Fetched mood event: " + event);
+                }
+            }
+        }, e -> {
+            Log.e(TAG, "Failed to fetch mood events", e);
+        });
+    }
+
+    private void fetchInRadiusMoodEventsFromFollowing() {
         Location currentLocation = locationHandler.getLastLocation();
         if (currentLocation == null) {
             Log.i(TAG, "Location not available yet, waiting for location callback");
@@ -103,8 +131,8 @@ public class MapFragment extends Fragment {
             Log.e(TAG, "Cannot fetch mood events without a username");
             return;
         }
-        moodEventRepo.fetchForInRadiusEvents(username, currentLocation, 5.0, moodEvents -> {
-            // TODO: populate the map with the fetched mood events
+        moodEventRepo.fetchForInRadiusEventsFromFollowing(username, currentLocation, 5.0, moodEvents -> {
+            // TODO: collect these events here in a combined list to display on the map
             for (MoodEvent moodEvent : moodEvents) {
                 Log.d(TAG, "Fetched mood event: " + moodEvent.toString());
             }
