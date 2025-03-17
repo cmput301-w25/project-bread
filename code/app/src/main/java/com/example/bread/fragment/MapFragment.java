@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
-import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.LocationHandler;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,7 +29,6 @@ public class MapFragment extends Fragment {
     private static final String TAG = "MapFragment";
     private FirebaseAuth mAuth;
     private MoodEventRepository moodEventRepo;
-    private ParticipantRepository participantRepo;
 
     /**
      * These two fields are used to handle location permissions and fetching the user's location.
@@ -58,7 +56,6 @@ public class MapFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mAuth = FirebaseAuth.getInstance();
         moodEventRepo = new MoodEventRepository();
-        participantRepo = new ParticipantRepository();
         locationHandler = LocationHandler.getInstance(requireContext());
         locationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
@@ -106,7 +103,8 @@ public class MapFragment extends Fragment {
             Log.e(TAG, "Cannot fetch mood events without a username");
             return;
         }
-        moodEventRepo.fetchForInRadiusEvents(participantRepo.getParticipantRef(username), currentLocation, 5.0, moodEvents -> {
+        moodEventRepo.fetchForInRadiusEvents(username, currentLocation, 5.0, moodEvents -> {
+            // TODO: populate the map with the fetched mood events
             for (MoodEvent moodEvent : moodEvents) {
                 Log.d(TAG, "Fetched mood event: " + moodEvent.toString());
             }
