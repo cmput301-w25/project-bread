@@ -55,8 +55,6 @@ public class AddMoodEventFragment extends Fragment {
     private ImageButton uploadImage;
     private ActivityResultLauncher<Intent> resultLauncher;
     private String imageBase64;
-    private ImageHandler imageHandler;
-
 
     private ActivityResultLauncher<String> requestPermissionLauncher;
 
@@ -300,7 +298,7 @@ public class AddMoodEventFragment extends Fragment {
                             Uri imageUri = result.getData().getData();
                             if (imageUri != null){
                                 uploadImage.setImageURI(imageUri);
-                                imageBase64 = imageHandler.compressImageToBase64(requireContext(), result.getData().getData());
+                                imageBase64 = ImageHandler.compressImageToBase64(requireContext(), result.getData().getData());
                                 Log.d(TAG, "Image selected and converted: " + imageBase64);
                             }
                             else{

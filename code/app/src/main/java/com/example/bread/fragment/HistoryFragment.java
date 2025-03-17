@@ -44,9 +44,6 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
-
-import org.w3c.dom.Text;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -77,7 +74,6 @@ public class HistoryFragment extends Fragment {
     private ImageButton editImage;
     private ActivityResultLauncher<Intent> resultLauncher;
     private String imageBase64;
-    private ImageHandler imageHandler;
 
     // Filter-related variables
     private FloatingActionButton filterButton;
@@ -246,7 +242,7 @@ public class HistoryFragment extends Fragment {
             moodImageView.setVisibility(View.GONE);  // Hide if image not uploaded
             imageSelection.setText("No image uploaded.");
         } else {
-            Bitmap bitmap = imageHandler.base64ToBitmap(imageBase64);
+            Bitmap bitmap = ImageHandler.base64ToBitmap(imageBase64);
             moodImageView.setImageBitmap(bitmap);
             moodImageView.setVisibility(View.VISIBLE);  // Show when image is uploaded
             imageSelection.setText("");
@@ -299,7 +295,7 @@ public class HistoryFragment extends Fragment {
 
         if (moodEvent.getAttachedImage() != null){
             // If image already assigned it is displayed on image button, and blank if not
-            editImage.setImageBitmap(imageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
+            editImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
         }
 
         if (moodEvent.getEmotionalState() != null) {
@@ -454,7 +450,7 @@ public class HistoryFragment extends Fragment {
                                 // Changes image on the button if user changes image
                                 editImage.setImageURI(imageUri);
                                 // Assigns new image to our global variable that is then assigned to moodEvent
-                                imageBase64 = imageHandler.compressImageToBase64(requireContext(), result.getData().getData());
+                                imageBase64 = ImageHandler.compressImageToBase64(requireContext(), result.getData().getData());
                                 Log.d(TAG, "Image selected and converted: " + imageBase64);
                             }
                             else{
