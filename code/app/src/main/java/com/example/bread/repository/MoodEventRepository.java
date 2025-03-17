@@ -22,8 +22,12 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -129,7 +133,7 @@ public class MoodEventRepository {
     }
 
     /**
-     * Fetches all mood events from the database that are within a certain radius of the given location
+     * Fetches all mood events in the radius of the given location that the participant is following
      *
      * <p>
      * Referenced <a href="https://firebase.google.com/docs/firestore/solutions/geoqueries#query_geohashes">Firebase Geo-hashes</a>
@@ -140,7 +144,8 @@ public class MoodEventRepository {
      * @param onSuccessListener listener to be called when the mood events are successfully fetched
      * @param onFailureListener listener to be called when the mood events cannot be fetched
      */
-    public void fetchForInRadiusEvents(@NonNull DocumentReference participantRef, @NonNull Location location, double radius, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
+    public void fetchForInRadiusEvents(@NonNull String username, @NonNull Location location, double radius, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
+        ParticipantRepository participantRepository = new ParticipantRepository();
         GeoLocation center = new GeoLocation(location.getLatitude(), location.getLongitude());
         // Query all the bounds for the given location and radius
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radius * 1000);
@@ -166,12 +171,31 @@ public class MoodEventRepository {
 
                         GeoLocation docLocation = new GeoLocation(lat, lng);
                         double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
-                        if (distanceInM <= radius && !Objects.requireNonNull(doc.get("participantRef")).equals(participantRef)) {
+                        if (distanceInM <= radius && !Objects.requireNonNull(doc.get("participantRef")).equals(participantRepository.getParticipantRef(username))) {
                             matchingDocs.add(doc.toObject(MoodEvent.class));
                         }
+
                     }
                 }
-                onSuccessListener.onSuccess(matchingDocs);
+
+                participantRepository.fetchFollowing(username, following -> {
+                    Set<String> followingSet = new HashSet<>(following);
+                    List<MoodEvent> filteredByFollowing = new ArrayList<>();
+                    for (MoodEvent event : matchingDocs) {
+                        if (followingSet.contains(event.getParticipantRef().getId())) {
+                            filteredByFollowing.add(event);
+                        }
+                    }
+
+                    Map<String, MoodEvent> mostRecentByUser = new HashMap<>();
+                    for (MoodEvent event : filteredByFollowing) {
+                        String user = event.getParticipantRef().getId();
+                        if (!mostRecentByUser.containsKey(user) || event.getTimestamp().after(mostRecentByUser.get(user).getTimestamp())) {
+                            mostRecentByUser.put(user, event);
+                        }
+                    }
+                    onSuccessListener.onSuccess(new ArrayList<>(mostRecentByUser.values()));
+                }, onFailureListener);
             }
         });
     }
