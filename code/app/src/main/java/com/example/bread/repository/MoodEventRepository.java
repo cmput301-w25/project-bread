@@ -37,6 +37,10 @@ public class MoodEventRepository {
         firebaseService = new FirebaseService();
     }
 
+    public MoodEventRepository(FirebaseService firebaseService) {
+        this.firebaseService = firebaseService;
+    }
+
     private CollectionReference getMoodEventCollRef() {
         return firebaseService.getDb().collection("moodEvents");
     }
@@ -212,7 +216,6 @@ public class MoodEventRepository {
             onFailureListener.onFailure(new IllegalArgumentException("Mood event ID cannot be null"));
             return;
         }
-        Log.d("MoodEventRepository", "Updating mood event with ID: " + moodEvent.getId());
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to update mood event: " + moodEvent.getId(), e));
