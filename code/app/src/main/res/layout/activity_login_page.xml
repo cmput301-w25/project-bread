@@ -49,6 +49,18 @@
         app:layout_constraintTop_toBottomOf="@+id/sentio_logo"
         app:layout_constraintVertical_bias="0.0" />
 
+    <TextView
+        android:id="@+id/email_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Email:"
+        android:textColor="@color/white"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/login_email_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.243"
+        app:layout_constraintStart_toStartOf="parent" />
+
     <EditText
         android:id="@+id/login_email_text"
         android:layout_width="229dp"
@@ -67,14 +79,15 @@
         app:layout_constraintTop_toBottomOf="@+id/login_tagline" />
 
     <TextView
-        android:id="@+id/email_text"
+        android:id="@+id/password_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Email:"
+        android:text="Password:"
         android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/login_email_text"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/login_password_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.243"
+        app:layout_constraintHorizontal_bias="0.266"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
@@ -93,41 +106,38 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/login_email_text" />
 
-    <TextView
-        android:id="@+id/password_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Password:"
-        android:textColor="@color/white"
-        app:layout_constraintBottom_toTopOf="@+id/login_password_text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.266"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <Button
         android:id="@+id/login_button"
         android:layout_width="229dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
+        android:backgroundTint="#454545"
         android:text="Login"
         android:textColor="@color/white"
-        android:backgroundTint="#454545"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/login_password_text" />
 
-    <Button
+    <TextView
         android:id="@+id/login_signup_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="72dp"
+        android:autoLink="none"
+        android:clickable="true"
+        android:focusable="true"
+        android:paddingTop="16dp"
         android:text="Sign Up"
-        android:textColor="@color/white"
-        android:backgroundTint="#454545"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login_button" />
-
+        app:layout_constraintTop_toTopOf="@+id/login_button"
+        app:layout_constraintVertical_bias="0.031" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

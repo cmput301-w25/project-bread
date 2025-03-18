@@ -126,7 +126,7 @@
         android:layout_width="229dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="42dp"
-        android:text="Sign Up"
+        android:text="Create Account"
         android:backgroundTint="#454545"
         android:textColor="@color/white"
         app:layout_constraintBottom_toBottomOf="parent"
