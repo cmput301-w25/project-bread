@@ -6,6 +6,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.bread.firebase.FirebaseService;
+import com.example.bread.model.Comment;
 import com.example.bread.model.MoodEvent;
 import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
@@ -242,5 +243,40 @@ public class MoodEventRepository {
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to update mood event: " + moodEvent.getId(), e));
+    }
+
+    /**
+     * Fetches all comments for the given mood event
+     *
+     * @param moodEvent         The mood event whose comments are to be fetched
+     * @param onSuccessListener The listener to be called when the comments are successfully fetched
+     * @param onFailureListener The listener to be called when the comments cannot be fetched
+     */
+    public void fetchComments(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<List<Comment>> onSuccessListener, OnFailureListener onFailureListener) {
+        getMoodEventCollRef().document(moodEvent.getId()).collection("comments").get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.isEmpty()) {
+                        Log.e("MoodEventRepository", "No comments found for mood event: " + moodEvent);
+                        onSuccessListener.onSuccess(new ArrayList<>());
+                        return;
+                    }
+                    List<Comment> comments = queryDocumentSnapshots.toObjects(Comment.class);
+                    onSuccessListener.onSuccess(comments);
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch comments for mood event: " + moodEvent, e));
+    }
+
+    /**
+     * Adds a comment to the given mood event
+     *
+     * @param moodEvent         The mood event to which the comment is to be added
+     * @param comment           The comment to be added
+     * @param onSuccessListener The listener to be called when the comment is successfully added
+     * @param onFailureListener The listener to be called when the comment cannot be added
+     */
+    public void addComment(@NonNull MoodEvent moodEvent, @NonNull Comment comment, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        getMoodEventCollRef().document(moodEvent.getId()).collection("comments").document(comment.getId()).set(comment)
+                .addOnSuccessListener(onSuccessListener)
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add comment: " + comment, e));
     }
 }
