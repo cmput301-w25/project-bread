@@ -23,9 +23,14 @@ import java.util.Objects;
  */
 public class ParticipantRepository {
     private final FirebaseService firebaseService;
+    private final String TAG = "ParticipantRepository";
 
     public ParticipantRepository() {
         firebaseService = new FirebaseService();
+    }
+
+    public ParticipantRepository(FirebaseService firebaseService) {
+        this.firebaseService = firebaseService;
     }
 
     private CollectionReference getParticipantCollRef() {
@@ -45,11 +50,11 @@ public class ParticipantRepository {
                         Participant participant = documentSnapshot.toObject(Participant.class);
                         onSuccessListener.onSuccess(participant);
                     } else {
-                        Log.e("ParticipantRepository", "Participant with username: " + username + " does not exist");
+                        Log.e(TAG, "Participant with username: " + username + " does not exist");
                         onSuccessListener.onSuccess(null);
                     }
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch participant with username: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch participant with username: " + username, e));
     }
 
     /**
@@ -65,11 +70,11 @@ public class ParticipantRepository {
                         Participant participant = documentSnapshot.toObject(Participant.class);
                         fetchFollowersAndFollowing(Objects.requireNonNull(participant), onSuccessListener, onFailureListener);
                     } else {
-                        Log.e("ParticipantRepository", "Participant with username: " + username + " does not exist");
+                        Log.e(TAG, "Participant with username: " + username + " does not exist");
                         onSuccessListener.onSuccess(null);
                     }
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch participant with username: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch participant with username: " + username, e));
     }
 
     /**
@@ -85,7 +90,7 @@ public class ParticipantRepository {
                         Participant participant = documentSnapshot.toObject(Participant.class);
                         onSuccessListener.onSuccess(participant);
                     } else {
-                        Log.e("ParticipantRepository", "Participant with reference: " + participantRef + " does not exist");
+                        Log.e(TAG, "Participant with reference: " + participantRef + " does not exist");
                         onSuccessListener.onSuccess(null);
                     }
                 })
@@ -114,7 +119,7 @@ public class ParticipantRepository {
                 participant.setFollowers(followers);
                 onSuccessListener.onSuccess(participant);
             }, onFailureListener);
-        }, onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch following for participant: " + participant.getUsername(), e));
+        }, onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch following for participant: " + participant.getUsername(), e));
     }
 
     /**
@@ -132,7 +137,7 @@ public class ParticipantRepository {
                     }
                     onSuccessListener.onSuccess(followers);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch followers for participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch followers for participant: " + username, e));
     }
 
     /**
@@ -150,7 +155,7 @@ public class ParticipantRepository {
                     }
                     onSuccessListener.onSuccess(following);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to fetch following for participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch following for participant: " + username, e));
     }
 
     /**
@@ -162,7 +167,7 @@ public class ParticipantRepository {
     public void addParticipant(@NonNull Participant participant, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getParticipantCollRef().document(participant.getUsername()).set(participant)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add participant: " + participant, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add participant: " + participant, e));
     }
 
     /**
@@ -179,7 +184,7 @@ public class ParticipantRepository {
         follower.put("username", followerUsername);
         getParticipantCollRef().document(username).collection("followers").document(followerUsername).set(follower)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add follower: " + followerUsername + " to participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add follower: " + followerUsername + " to participant: " + username, e));
     }
 
     /**
@@ -196,7 +201,7 @@ public class ParticipantRepository {
         following.put("username", followingUsername);
         getParticipantCollRef().document(username).collection("following").document(followingUsername).set(following)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to add following: " + followingUsername + " to participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add following: " + followingUsername + " to participant: " + username, e));
     }
 
     /**
@@ -208,7 +213,7 @@ public class ParticipantRepository {
     public void checkIfUsernameExists(@NonNull String username, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
         getParticipantCollRef().document(username).get()
                 .addOnSuccessListener(documentSnapshot -> onSuccessListener.onSuccess(documentSnapshot.exists()))
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e("ParticipantRepository", "Failed to check if username exists: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to check if username exists: " + username, e));
     }
 
     public void checkIfAlreadyFollowed(@NonNull String username, String followerUsername, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
