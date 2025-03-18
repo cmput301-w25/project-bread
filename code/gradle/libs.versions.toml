@@ -9,7 +9,9 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 material = "1.12.0"
+mapsSecret = "2.0.1"
 activity = "1.10.0"
+googlemaps = "18.1.0"
 constraintlayout = "2.2.0"
 playServicesLocation = "21.3.0"
 firebaseAuth = "23.2.0"
@@ -27,9 +29,10 @@ junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.re
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterApi" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+google-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "googlemaps" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-
+map-secret = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "mapsSecret" }

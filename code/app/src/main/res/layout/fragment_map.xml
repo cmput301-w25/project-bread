@@ -39,16 +39,27 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.049" />
 
-        <TextView
-            android:id="@+id/textView3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Map Page"
+        <FrameLayout
+            android:id="@+id/frame_layout"
+            android:layout_width="339dp"
+            android:layout_height="539dp"
+            android:background="@drawable/map_rounded"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/sentio_logo"
+            app:layout_constraintVertical_bias="0.362" />
 
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/filter_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_baseline_filter_list_24"
+            android:backgroundTint="#F8B64C"
+            app:tint="@color/black"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

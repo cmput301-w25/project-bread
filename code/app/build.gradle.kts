@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
+    alias(libs.plugins.map.secret)
 }
 
 android {
@@ -57,11 +58,16 @@ dependencies {
     // Google Services
     implementation(libs.play.services.location)
 
-    // testing
+    // Testing
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
 
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Map
+    implementation(libs.google.maps)
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }
