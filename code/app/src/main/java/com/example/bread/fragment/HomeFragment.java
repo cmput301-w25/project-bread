@@ -87,8 +87,7 @@ public class HomeFragment extends Fragment {
         if (user != null) {
             String username = user.getDisplayName();
             if (username != null) {
-                moodEventRepository.listenForEventsFromFollowing(username, moodEvents -> {
-
+                moodEventRepository.fetchForEventsFromFollowing(username, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
