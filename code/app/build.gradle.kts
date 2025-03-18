@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
@@ -14,7 +16,21 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        val localProperties = Properties()
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            localPropertiesFile.inputStream().use { localProperties.load(it) }
+        }
+
+        val firebaseProjectId = localProperties.getProperty("FIREBASE_PROJECT_ID")
+
+        buildConfigField("String", "FIREBASE_PROJECT_ID", "\"${firebaseProjectId}\"")
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -34,10 +50,6 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-
-    tasks.withType<Test>{
-        useJUnitPlatform()
     }
 }
 
@@ -61,6 +73,11 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)
+
+    // mockito
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.inline)
+    implementation(libs.byte.buddy)
 
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

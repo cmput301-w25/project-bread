@@ -205,7 +205,11 @@ public class MoodEventAddTest {
 
     @After
     public void tearDownAuth() {
+<<<<<<< HEAD
         String projectId = "project-db";  //SET TO YOUR PROJECT ID
+=======
+        String projectId = BuildConfig.FIREBASE_PROJECT_ID;
+>>>>>>> 0b0d127179e3dc0bad5527b4da54b867abc57556
         URL url = null;
         try {
             url = new URL("http://10.0.2.2:9099/emulator/v1/projects/"+projectId+"/accounts");
@@ -230,7 +234,7 @@ public class MoodEventAddTest {
 
     @After
     public void tearDownDb() {
-        String projectId = "project-db"; //SET TO YOUR PROJECT ID
+        String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         URL url = null;
         try {
             url = new URL("http://10.0.2.2:8080/emulator/v1/projects/"+projectId+"/databases/(default)/documents");

@@ -20,6 +20,14 @@ public class FirebaseService {
     }
 
     /**
+     * Constructor for FirebaseService that takes a Firestore database instance.
+     * @param db the Firestore database instance
+     */
+    public FirebaseService(FirebaseFirestore db) {
+        this.db = db;
+    }
+
+    /**
      * Returns the Firestore database instance.
      *
      * @return the Firestore database instance
