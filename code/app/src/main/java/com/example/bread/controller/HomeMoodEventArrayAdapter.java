@@ -17,9 +17,9 @@ import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
+import com.example.bread.utils.TimestampUtils;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * Adapter class for the HomeFragment ListView
@@ -31,9 +31,10 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
     static class ViewHolder {
         TextView username;
-        TextView reason;
+        TextView title;
         TextView date;
         TextView mood;
+        TextView socialSituation;
         ImageView profilePic;
         ConstraintLayout eventLayout;
     }
@@ -47,11 +48,12 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             convertView = LayoutInflater.from(context).inflate(R.layout.layout_event_home, parent, false);
             holder = new ViewHolder();
             holder.username = convertView.findViewById(R.id.textUsername);
-            holder.reason = convertView.findViewById(R.id.textReason);
+            holder.title = convertView.findViewById(R.id.textTitle);
             holder.date = convertView.findViewById(R.id.textDate);
             holder.mood = convertView.findViewById(R.id.textMood);
-            holder.profilePic = convertView.findViewById(R.id.imageProfile);
+            holder.profilePic = convertView.findViewById(R.id.profile_image_home);
             holder.eventLayout = convertView.findViewById(R.id.homeConstraintLayout);
+            holder.socialSituation = convertView.findViewById(R.id.textSocialSituation);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -74,9 +76,14 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
                 holder.username.setText("Unknown");
                 holder.profilePic.setImageResource(R.drawable.ic_baseline_profile_24);
             });
-            holder.reason.setText(moodEvent.getReason());
-            holder.date.setText(transformTimestamp(moodEvent.getTimestamp()));
-            holder.mood.setText(EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+            holder.title.setText(moodEvent.getTitle());
+            holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
+            holder.mood.setText(moodEvent.getEmotionalState().toString().toLowerCase() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+            if (moodEvent.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
+                holder.socialSituation.setText(moodEvent.getSocialSituation().toString());
+            } else {
+                holder.socialSituation.setVisibility(View.INVISIBLE);
+            }
 
             convertView.setOnClickListener(v -> {
                 if (clickListener != null) {
@@ -85,20 +92,5 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             });
         }
         return convertView;
-    }
-
-    private String transformTimestamp(Date timestamp) {
-        // Show hours ago if less than 24 hours, otherwise show how many days ago
-        if (timestamp == null) {
-            return "";
-        }
-        long diff = new Date().getTime() - timestamp.getTime();
-        long hours = diff / (60 * 60 * 1000);
-        if (hours < 24) {
-            return hours + " hours ago";
-        } else {
-            long days = hours / 24;
-            return days + " days ago";
-        }
     }
 }
