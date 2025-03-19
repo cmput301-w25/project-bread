@@ -1,5 +1,6 @@
 package com.example.bread.controller;
 
+import android.annotation.SuppressLint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -91,11 +92,12 @@ public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             cardLayout = itemView.findViewById(R.id.event_layout);
         }
 
+        @SuppressLint("SetTextI18n")
         public void bind(MoodEvent event) {
             usernameText.setText(event.getParticipantRef().getId());
             eventTitle.setText(event.getTitle());
             timestampText.setText(TimestampUtils.transformTimestamp(event.getTimestamp()));
-            emotionalStateText.setText(event.getEmotionalState().toString());
+            emotionalStateText.setText(event.getEmotionalState().toString().toLowerCase() + " " + EmotionUtils.getEmoticon(event.getEmotionalState()));
             socialSituationText.setText(event.getSocialSituation().toString());
             reasonText.setText(event.getReason());
             if (event.getAttachedImage() != null) {
