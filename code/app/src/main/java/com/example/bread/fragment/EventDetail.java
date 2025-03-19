@@ -12,25 +12,22 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bread.R;
-import com.example.bread.controller.CommentAdapter;
+import com.example.bread.controller.EventDetailAdapter;
 import com.example.bread.model.Comment;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
-import com.example.bread.utils.ImageHandler;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 
-import java.util.Date;
 import java.util.Objects;
 
 
@@ -44,10 +41,9 @@ public class EventDetail extends Fragment {
 
     private MoodEvent moodEvent;
 
-    private TextView usernameText, titleText, timestampText, emotionText, socialSituationText, reasonText;
-    private ImageView userImage, moodImage, closeImage;
-    private RecyclerView commentRecyclerView;
-    private CommentAdapter commentAdapter;
+    private ImageView closeImage;
+    private RecyclerView eventRecyclerView;
+    private EventDetailAdapter eventDetailAdapter;
     private FloatingActionButton addCommentButton;
 
     public EventDetail() {
@@ -84,30 +80,10 @@ public class EventDetail extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_event_detail, container, false);
-        usernameText = view.findViewById(R.id.username_text);
-        titleText = view.findViewById(R.id.event_title);
-        timestampText = view.findViewById(R.id.timestamp_text);
-        emotionText = view.findViewById(R.id.emotional_state_text);
-        socialSituationText = view.findViewById(R.id.social_situation_text);
-        reasonText = view.findViewById(R.id.reason_text);
-        userImage = view.findViewById(R.id.profile_image);
-        moodImage = view.findViewById(R.id.event_image);
         closeImage = view.findViewById(R.id.close_button);
-        commentRecyclerView = view.findViewById(R.id.comments_recycler_view);
+        eventRecyclerView = view.findViewById(R.id.main_recycler_view);
         addCommentButton = view.findViewById(R.id.add_comment_fab);
-
-        // Set the text views to the mood event's details
-        usernameText.setText(moodEvent.getParticipantRef().getId());
-        titleText.setText(moodEvent.getTitle());
-        timestampText.setText(transformTimestamp(moodEvent.getTimestamp()));
-        emotionText.setText(moodEvent.getEmotionalState().toString());
-        socialSituationText.setText(moodEvent.getSocialSituation().toString());
-        reasonText.setText(moodEvent.getReason());
-        if (moodEvent.getAttachedImage() != null) {
-            moodImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
-        }
 
         closeImage.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -123,7 +99,6 @@ public class EventDetail extends Fragment {
             }
         });
 
-        fetchEventCreator();
         fetchComments();
 
         return view;
@@ -167,33 +142,12 @@ public class EventDetail extends Fragment {
         return null;
     }
 
-    private String transformTimestamp(Date timestamp) {
-        // Show hours ago if less than 24 hours, otherwise show how many days ago
-        long diff = new Date().getTime() - timestamp.getTime();
-        long hours = diff / (60 * 60 * 1000);
-        if (hours < 24) {
-            return hours + " hours ago";
-        } else {
-            long days = hours / 24;
-            return days + " days ago";
-        }
-    }
-
-    private void fetchEventCreator() {
-        participantRepository.fetchParticipantByRef(moodEvent.getParticipantRef(), participant -> {
-            // Set the user's image
-            if (participant.getProfilePicture() != null) {
-                userImage.setImageBitmap(ImageHandler.base64ToBitmap(participant.getProfilePicture()));
-            }
-        }, e -> Log.e(TAG, "Error fetching participant", e));
-    }
-
     private void fetchComments() {
         moodEventRepository.fetchComments(moodEvent, comments -> {
             // Set the comments to the recycler view
-            commentAdapter = new CommentAdapter(comments);
-            commentRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-            commentRecyclerView.setAdapter(commentAdapter);
+            eventDetailAdapter = new EventDetailAdapter(moodEvent, comments, participantRepository);
+            eventRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            eventRecyclerView.setAdapter(eventDetailAdapter);
         }, e -> Log.e(TAG, "Error fetching comments", e));
     }
 }
