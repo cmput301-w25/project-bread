@@ -117,7 +117,7 @@ public class HistoryFragment extends Fragment {
      * Sorts mood events by date and time added
      */
     private void loadMoodEvents() {
-        moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
+        moodsRepo.fetchEventsWithParticipantRef(participantRef, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
