@@ -86,61 +86,49 @@
                         app:layout_constraintTop_toBottomOf="@id/profile_image_container" />
 
                     <TextView
-                        android:id="@+id/emotional_state_label"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/black"
-                        android:layout_marginTop="12dp"
-                        android:text="Emotional State:"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/event_title" />
-
-                    <TextView
                         android:id="@+id/emotional_state_text"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:textColor="@color/black"
-                        android:text="Happy"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/emotional_state_label"
-                        app:layout_constraintTop_toTopOf="@id/emotional_state_label" />
-
-                    <TextView
-                        android:id="@+id/social_situation_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:text="Social Situation:"
-                        android:textColor="@color/black"
-                        android:textStyle="bold"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/flair_background"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="4dp"
+                        android:text="Happy"
+                        android:textColor="@color/white"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/emotional_state_label" />
+                        app:layout_constraintTop_toBottomOf="@+id/event_title" />
+
+                    <!-- Event Image -->
 
                     <TextView
                         android:id="@+id/social_situation_text"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:textColor="@color/black"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginStart="10dp"
+                        android:background="@drawable/flair_background"
+                        android:paddingHorizontal="8dp"
+                        android:paddingVertical="4dp"
                         android:text="With Friends"
+                        android:textColor="@color/white"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/social_situation_label"
-                        app:layout_constraintTop_toTopOf="@id/social_situation_label" />
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toEndOf="@+id/emotional_state_text"
+                        app:layout_constraintTop_toBottomOf="@+id/event_title" />
 
-                    <!-- Event Image -->
                     <ImageView
                         android:id="@+id/event_image"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="16dp"
                         android:adjustViewBounds="true"
                         android:scaleType="fitCenter"
                         android:visibility="visible"
+                        android:layout_marginTop="16dp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/social_situation_label" />
+                        app:layout_constraintTop_toBottomOf="@+id/social_situation_text" />
 
                     <!-- Event Reason -->
                     <TextView
@@ -149,7 +137,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:textColor="@color/black"
-                        android:text="Reason:"
+                        android:text="Reason"
                         android:textStyle="bold"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@id/event_image" />
