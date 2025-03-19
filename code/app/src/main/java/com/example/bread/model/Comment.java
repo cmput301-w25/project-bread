@@ -2,6 +2,7 @@ package com.example.bread.model;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.ServerTimestamp;
 
 import java.io.Serializable;
@@ -15,6 +16,7 @@ import java.util.UUID;
 public class Comment implements Serializable, Comparable<Comment> {
 
     private String id;
+    private DocumentReference participantRef;
     @ServerTimestamp
     private Date timestamp;
     private String text;
@@ -30,9 +32,10 @@ public class Comment implements Serializable, Comparable<Comment> {
      *
      * @param text the text of the comment
      */
-    public Comment(String text) {
+    public Comment(@NonNull DocumentReference participantRef, String text) {
         this.id = UUID.randomUUID().toString();
         this.text = text;
+        this.participantRef = participantRef;
     }
 
     /**
@@ -89,6 +92,14 @@ public class Comment implements Serializable, Comparable<Comment> {
         this.text = text;
     }
 
+    public DocumentReference getParticipantRef() {
+        return participantRef;
+    }
+
+    public void setParticipantRef(DocumentReference participantRef) {
+        this.participantRef = participantRef;
+    }
+
     @Override
     public int compareTo(Comment o) {
         return 0;
@@ -97,6 +108,11 @@ public class Comment implements Serializable, Comparable<Comment> {
     @NonNull
     @Override
     public String toString() {
-        return super.toString();
+        return "Comment{" +
+                "id='" + id + '\'' +
+                ", participantRef=" + participantRef +
+                ", timestamp=" + timestamp +
+                ", text='" + text + '\'' +
+                '}';
     }
 }
