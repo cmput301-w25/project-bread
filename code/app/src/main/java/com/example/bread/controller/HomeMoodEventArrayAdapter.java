@@ -19,6 +19,7 @@ import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Adapter class for the HomeFragment ListView
@@ -74,7 +75,7 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
                 holder.profilePic.setImageResource(R.drawable.ic_baseline_profile_24);
             });
             holder.reason.setText(moodEvent.getReason());
-            holder.date.setText(moodEvent.getTimestamp().toString());
+            holder.date.setText(transformTimestamp(moodEvent.getTimestamp()));
             holder.mood.setText(EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
 
             convertView.setOnClickListener(v -> {
@@ -84,5 +85,20 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             });
         }
         return convertView;
+    }
+
+    private String transformTimestamp(Date timestamp) {
+        // Show hours ago if less than 24 hours, otherwise show how many days ago
+        if (timestamp == null) {
+            return "";
+        }
+        long diff = new Date().getTime() - timestamp.getTime();
+        long hours = diff / (60 * 60 * 1000);
+        if (hours < 24) {
+            return hours + " hours ago";
+        } else {
+            long days = hours / 24;
+            return days + " days ago";
+        }
     }
 }

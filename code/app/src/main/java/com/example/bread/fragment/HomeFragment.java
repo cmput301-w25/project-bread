@@ -122,7 +122,7 @@ public class HomeFragment extends Fragment {
         EventDetail fragment = EventDetail.newInstance(moodEvent);
         FragmentManager fragmentManager = getParentFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.frame_layout, fragment);
+        transaction.add(R.id.frame_layout, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
