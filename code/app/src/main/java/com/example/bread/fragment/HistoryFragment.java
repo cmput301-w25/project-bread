@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,9 +15,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.fragment.app.Fragment;
-
 import com.example.bread.R;
 import com.example.bread.controller.HistoryMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
@@ -32,7 +29,6 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -41,8 +37,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Represents the history page of the app, where users can view their mood events and apply filters.
+ */
 public class HistoryFragment extends Fragment {
 
+    private static final String TAG = "HistoryFragment";
     private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
     private HistoryMoodEventArrayAdapter moodArrayAdapter;
@@ -62,7 +62,7 @@ public class HistoryFragment extends Fragment {
     private String searchKeyword = "";
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) { //LANDYS
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_history, container, false);
 
         moodEventListView = view.findViewById(R.id.historyListView);
@@ -96,17 +96,17 @@ public class HistoryFragment extends Fragment {
      * Uses loadMoodEvents() to find mood events corresponding to user
      */
     private void fetchParticipantAndLoadEvents() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser(); //https://firebase.google.com/docs/auth/android/manage-users
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             username = currentUser.getDisplayName();
             if (username == null) {
-                Log.e("HistoryFragment", "Username is null. Cannot load mood events.");
+                Log.e(TAG, "Username is null. Cannot load mood events.");
                 return;
             }
             participantRef = userRepo.getParticipantRef(username);
             loadMoodEvents();
         } else {
-            Log.e("HistoryFragment", "No authenticated user found.");
+            Log.e(TAG, "No authenticated user found.");
         }
     }
 
@@ -121,7 +121,10 @@ public class HistoryFragment extends Fragment {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
+<<<<<<< HEAD
                         //chatGPT prompt "how can i sort an ArrayList of events by timestamp Date object"
+=======
+>>>>>>> origin/main
                         moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
 
                         // Save all mood events for filtering

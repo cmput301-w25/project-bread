@@ -28,6 +28,11 @@ public abstract class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> {
 
     protected OnMoodEventClickListener clickListener;
 
+    /**
+     * Sets the click listener for mood events
+     *
+     * @param listener the listener to set
+     */
     public void setOnMoodEventClickListener(OnMoodEventClickListener listener) {
         this.clickListener = listener;
     }

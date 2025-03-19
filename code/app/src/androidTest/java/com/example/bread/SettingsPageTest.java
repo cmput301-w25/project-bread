@@ -1,50 +1,59 @@
 package com.example.bread;
 
-import static androidx.test.espresso.Espresso.onData;
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
-import static org.hamcrest.Matchers.anything;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
+import android.Manifest;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.LargeTest;
+import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-@RunWith(AndroidJUnit4.class)
-@LargeTest
-public class HomeFragmentActivityTest {
+public class SettingsPageTest {
+
+    DocumentReference p1Ref;
 
     @Rule
     public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
 
     @BeforeClass
     public static void testSetup() {
+        // Grant location permission
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "pm grant " + InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName() + " " + Manifest.permission.ACCESS_FINE_LOCATION);
+
+        // Connecting to emulators and creating test participant
         String androidLocalHost = "10.0.2.2";
         FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
         FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
@@ -69,59 +78,83 @@ public class HomeFragmentActivityTest {
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+
     }
 
     @Before
     public void seedDatabase() {
-        // Seed the database with some mood events
+        // Seed the database with user mood events
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference participants = db.collection("participants");
         Participant p1 = new Participant();
-        p1.setUsername("testUser");
-
         DocumentReference p1Ref = participants.document("testUser");
+
+        p1.setUsername("testUser");
+        p1.setFirstName("Test");
+        p1.setLastName("User");
+
         p1Ref.set(p1);
-        p1Ref.collection("following").document("testUser2").set(new HashMap<>() {
-            {
-                put("username", "testUser2");
-            }
-        });
 
-        Participant p2 = new Participant();
-        p2.setUsername("testUser2");
-
-        DocumentReference p2Ref = participants.document("testUser2");
-        p2Ref.set(p2);
-        p2Ref.collection("followers").document("testUser").set(new HashMap<>() {
-            {
-                put("username", "testUser");
-            }
-        });
-
-        CollectionReference moodEvents = db.collection("moodEvents");
-        MoodEvent[] events = {
-                new MoodEvent("Test Event 1", "test reason", MoodEvent.EmotionalState.HAPPY, p2Ref),
-                new MoodEvent("Test Event 2", "test reason", MoodEvent.EmotionalState.ANGRY, p2Ref),
-        };
-
-        for (MoodEvent event : events) {
-            moodEvents.add(event);
-        }
+        onView(withId(R.id.profile)).perform(click());
+        onView(withId(R.id.settings_button)).perform(click());
     }
 
     @Test
-    public void homeFragmentShowsEvents() {
+    public void userChangingNameTest() throws InterruptedException {
+        // Seed the database with user mood events
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference participants = db.collection("participants");
+        Participant p1 = new Participant();
+        p1Ref = participants.document("testUser");
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        p1.setUsername("testUser");
+        p1.setFirstName("Test");
+        p1.setLastName("User");
 
-        onData(anything()).inAdapterView(withId(R.id.homeListView)).atPosition(0).check(matches(isDisplayed()));
-        onData(anything()).inAdapterView(withId(R.id.homeListView)).atPosition(1).check(matches(isDisplayed()));
+        p1Ref.set(p1);
+
+        onView(withId(R.id.profile)).perform(click());
+        onView(withId(R.id.settings_button)).perform(click());
+
+        onView(withId(R.id.edit_account_button)).perform(click());
+        onView(withId(R.id.edit_firstname)).perform(ViewActions.typeText("1"));
+        onView(withId(R.id.edit_lastname)).perform(ViewActions.typeText("1"));
+        onView(withId(android.R.id.button1)).perform(click());
+
+        Thread.sleep(2000);
+
+        p1Ref.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+
+                    if (document.exists()) {
+                        Log.d("Settings Fragment", "DocumentSnapshot data: " + document.getData());
+                        String firstname = document.getString("firstName");
+                        String lastname = document.getString("lastName");
+
+                        assert(Objects.equals(firstname, "Test1"));
+                        assert(Objects.equals(lastname, "User1"));
+                    } else {
+                        Log.d("Settings Fragment", "No such document");
+                    }
+                } else {
+                    Log.d("Settings Fragment", "get failed with ", task.getException());
+                }
+            }
+        });
     }
 
+    @Test
+    public void logOutTest() throws InterruptedException {
+        onView(withId(R.id.log_out_button)).perform(click());
+        Thread.sleep(1000);
+        // Shows login page
+        onView(withId(R.id.login_email_text)).check(matches(isDisplayed()));
+    }
+
+    // Same teardown strategy developed in MoodHistoryFragmentTest
     @After
     public void tearDown() {
         clearFirestoreEmulator();
@@ -129,7 +162,7 @@ public class HomeFragmentActivityTest {
     }
 
     private void clearFirestoreEmulator() {
-        String projectId = "bread-2259c";
+        String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         String firestoreUrl = "http://10.0.2.2:8080/emulator/v1/projects/"
                 + projectId
                 + "/databases/(default)/documents";
@@ -152,7 +185,7 @@ public class HomeFragmentActivityTest {
     }
 
     private void clearAuthEmulator() {
-        String projectId = "bread-2259c";
+        String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"
                 + projectId
@@ -174,6 +207,4 @@ public class HomeFragmentActivityTest {
             }
         }
     }
-
-
 }

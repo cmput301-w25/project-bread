@@ -14,6 +14,9 @@ import com.example.bread.fragment.HomeFragment;
 import com.example.bread.fragment.MapFragment;
 import com.example.bread.fragment.ProfileFragment;
 
+/**
+ * Represents the home page of the app, where users can navigate to different fragments.
+ */
 public class HomePage extends AppCompatActivity {
 
     ActivityHomePageBinding binding;
@@ -23,8 +26,6 @@ public class HomePage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //followed the following video for navigation bar implementation, accessed on Feb 27 2025
-        //https://www.youtube.com/watch?v=jOFLmKMOcK0
         binding = ActivityHomePageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 

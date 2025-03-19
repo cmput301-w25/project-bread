@@ -31,6 +31,9 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 
 import java.util.regex.Pattern;
 
+/**
+ * Represents the signup page of the app, where users can create an account with their email and password.
+ */
 public class SignupPage extends AppCompatActivity {
 
     private static final String TAG = "SignupPage";
