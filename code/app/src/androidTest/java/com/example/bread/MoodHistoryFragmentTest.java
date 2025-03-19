@@ -150,7 +150,7 @@ public class MoodHistoryFragmentTest {
 
     @After
     public void tearDownAuth() {
-        String projectId = "project-db"; //set to your project ID
+        String projectId = "temp-bread"; //set to your project ID
         URL url = null;
         try {
             url = new URL("http://10.0.2.2:9099/emulator/v1/projects/+"+projectId+"/databases/%28default%29/documents");
@@ -175,7 +175,7 @@ public class MoodHistoryFragmentTest {
 
     @After
     public void tearDownDb() {
-        String projectId = "project-db"; //set to your project ID
+        String projectId = "temp-bread"; //set to your project ID
         URL url = null;
         try {
             url = new URL("http://10.0.2.2:8080/emulator/v1/projects/+"+projectId+"/databases/%28default%29/documents");
