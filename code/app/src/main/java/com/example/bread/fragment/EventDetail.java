@@ -89,7 +89,9 @@ public class EventDetail extends Fragment {
         closeImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getParentFragmentManager().beginTransaction().remove(EventDetail.this).commit();
+                getParentFragmentManager().beginTransaction().setCustomAnimations(
+                        R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+                ).remove(EventDetail.this).commit();
             }
         });
 
