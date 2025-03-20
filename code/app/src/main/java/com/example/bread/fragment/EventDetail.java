@@ -28,6 +28,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 
@@ -144,6 +145,7 @@ public class EventDetail extends Fragment {
 
     private void fetchComments() {
         moodEventRepository.fetchComments(moodEvent, comments -> {
+            comments.sort(Comparator.naturalOrder());
             // Set the comments to the recycler view
             eventDetailAdapter = new EventDetailAdapter(moodEvent, comments, participantRepository);
             eventRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
