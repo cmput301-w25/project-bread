@@ -121,7 +121,9 @@ public class HomeFragment extends Fragment {
     private void showMoodDetailsDialog(MoodEvent moodEvent) {
         EventDetail fragment = EventDetail.newInstance(moodEvent);
         FragmentManager fragmentManager = getParentFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+        );
         transaction.add(R.id.frame_layout, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
