@@ -144,7 +144,7 @@ public class MoodEventRepository {
      * @param onSuccessListener listener to be called when the mood events are successfully fetched
      * @param onFailureListener listener to be called when the mood events cannot be fetched
      */
-    public void fetchForInRadiusEventsFromFollowing(@NonNull String username, @NonNull Location location, double radius, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
+    public void fetchForInRadiusEventsFromFollowing(@NonNull String username, @NonNull Location location, double radius, @NonNull OnSuccessListener<Map<String, MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
         GeoLocation center = new GeoLocation(location.getLatitude(), location.getLongitude());
         // Query all the bounds for the given location and radius
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radius * 1000);
@@ -193,7 +193,8 @@ public class MoodEventRepository {
                             mostRecentByUser.put(user, event);
                         }
                     }
-                    onSuccessListener.onSuccess(new ArrayList<>(mostRecentByUser.values()));
+//                    onSuccessListener.onSuccess(new ArrayList<>(mostRecentByUser.values()));
+                    onSuccessListener.onSuccess(mostRecentByUser);
                 }, onFailureListener);
             }
         });
