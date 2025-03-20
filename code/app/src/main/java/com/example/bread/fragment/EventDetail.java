@@ -122,7 +122,12 @@ public class EventDetail extends Fragment {
 
         addButton.setOnClickListener(v -> {
             String comment = commentText.getText().toString();
+            comment = comment.trim();
             if (!comment.isEmpty()) {
+                if (comment.length() > 300) {
+                    commentText.setError("Comment must be less than 400 characters");
+                    return;
+                }
                 moodEventRepository.addComment(moodEvent, new Comment(Objects.requireNonNull(currentUserRef()), comment), (x) -> {
                     fetchComments();
                     dialog.dismiss();
@@ -145,7 +150,7 @@ public class EventDetail extends Fragment {
 
     private void fetchComments() {
         moodEventRepository.fetchComments(moodEvent, comments -> {
-            comments.sort(Comparator.naturalOrder());
+            comments.sort(Comparator.reverseOrder());
             // Set the comments to the recycler view
             eventDetailAdapter = new EventDetailAdapter(moodEvent, comments, participantRepository);
             eventRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
