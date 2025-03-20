@@ -40,7 +40,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:backgroundTint="@color/settingsButton"
-        android:src="@drawable/ic_baseline_add_24"
+        android:src="@drawable/ic_event_comment"
         android:tint="@color/black"
         app:fabSize="normal" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
