@@ -92,17 +92,42 @@ public class Comment implements Serializable, Comparable<Comment> {
         this.text = text;
     }
 
+    /**
+     * Returns the reference to the participant who made the comment
+     *
+     * @return the reference to the participant who made the comment
+     */
     public DocumentReference getParticipantRef() {
         return participantRef;
     }
 
+    /**
+     * Sets the reference to the participant who made the comment
+     *
+     * @param participantRef reference to the participant who made the comment
+     */
     public void setParticipantRef(DocumentReference participantRef) {
         this.participantRef = participantRef;
     }
 
+    /**
+     * Compares this comment to another comment based on the timestamp.
+     *
+     * @param o the object to be compared.
+     * @return a negative integer, zero, or a positive integer as this object is less than, equal to, or greater than the specified object.
+     */
     @Override
     public int compareTo(Comment o) {
-        return 0;
+        if (this.timestamp == null && o.timestamp == null) {
+            return 0;
+        }
+        if (this.timestamp == null) {
+            return -1;
+        }
+        if (o.timestamp == null) {
+            return 1;
+        }
+        return this.timestamp.compareTo(o.timestamp);
     }
 
     @NonNull

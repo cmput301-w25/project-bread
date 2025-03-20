@@ -5,7 +5,8 @@ import java.util.Date;
 public final class TimestampUtils {
 
     // Private constructor to prevent instantiation.
-    private TimestampUtils() { }
+    private TimestampUtils() {
+    }
 
     /**
      * Transforms a given timestamp into a human-readable relative time string.
@@ -19,6 +20,6 @@ public final class TimestampUtils {
         }
         long diff = new Date().getTime() - timestamp.getTime();
         long hours = diff / (60 * 60 * 1000);
-        return (hours < 24) ? (hours + " hours ago") : ((hours / 24) + " days ago");
+        return (hours < 24) ? (hours + "h ago") : ((hours / 24) + "d ago");
     }
 }
