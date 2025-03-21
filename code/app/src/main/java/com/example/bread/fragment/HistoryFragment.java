@@ -37,6 +37,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Represents the history page of the app, where users can view their mood events and apply filters.
+ */
 public class HistoryFragment extends Fragment {
 
     private static final String TAG = "HistoryFragment";
@@ -114,7 +117,7 @@ public class HistoryFragment extends Fragment {
      * Sorts mood events by date and time added
      */
     private void loadMoodEvents() {
-        moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
+        moodsRepo.fetchEventsWithParticipantRef(participantRef, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);

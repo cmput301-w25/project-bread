@@ -35,10 +35,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Represents the profile page of the app, where users can view their profile information.
+ */
 public class ProfileFragment extends Fragment {
 
     private static final String TAG = "ProfileFragment";
@@ -240,9 +242,6 @@ public class ProfileFragment extends Fragment {
             Log.e(TAG, "Error sending follow back request", e);
         });
     }
-
-// Here's the fix for ProfileFragment.java, focusing on the loadRecentMoodEvent method
-// which had the issues mentioned in the comments
 
     private void loadRecentMoodEvent() {
         if (currentUsername == null) return;

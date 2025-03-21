@@ -23,6 +23,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,6 +48,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * Represents the home page of the app, where users can view mood events from users they follow.
+ */
 public class HomeFragment extends Fragment implements UserAdapter.UserInteractionListener {
 
     private static final String TAG = "HomeFragment";
@@ -83,7 +88,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
 
     // Filter-related variables
     private FloatingActionButton filterButton;
-    private ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
+    private final ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
     private boolean isFilteringByWeek = false;
     private MoodEvent.EmotionalState selectedEmotionalState = null;
     private String searchKeyword = "";
@@ -258,29 +263,17 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
                 moodsLoadingIndicator.setVisibility(View.VISIBLE);
                 emptyMoodsView.setVisibility(View.GONE);
                 moodEventListView.setVisibility(View.GONE);
-
-                moodEventRepository.listenForEventsFromFollowing(username, moodEvents -> {
-                    if (moodEventArrayList != null) {
+                
+                // Use fetchForEventsFromFollowing from main branch, but retain the handling for null timestamps
+                moodEventRepository.fetchForEventsFromFollowing(username, moodEvents -> {
+                    if (moodEvents != null) {
                         moodEventArrayList.clear();
-
+                        
                         // Add all events without filtering null timestamps
                         moodEventArrayList.addAll(moodEvents);
-
-                        // Sort by date (newest first) - now done in the fragment
-                        moodEventArrayList.sort((a, b) -> {
-                            // Handle null timestamp cases
-                            if (a.getTimestamp() == null && b.getTimestamp() == null) {
-                                return 0;
-                            }
-                            if (a.getTimestamp() == null) {
-                                return 1; // Nulls last
-                            }
-                            if (b.getTimestamp() == null) {
-                                return -1; // Nulls last
-                            }
-                            // Sort most recent first (descending)
-                            return b.getTimestamp().compareTo(a.getTimestamp());
-                        });
+                        
+                        // Use Comparator.reverseOrder as suggested by the senior dev
+                        moodEventArrayList.sort(Comparator.reverseOrder());
 
                         // Save all mood events for filtering
                         allMoodEvents.clear();
@@ -394,8 +387,13 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
     }
 
     private void showMoodDetailsDialog(MoodEvent moodEvent) {
-        // TODO: launch a new fragment to show more details about the mood event
-        Log.d(TAG, "Clicked on mood event: " + moodEvent);
+        // Using the main branch approach with EventDetail fragment
+        EventDetail fragment = EventDetail.newInstance(moodEvent);
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.add(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     @Override
@@ -479,7 +477,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                TextView text = view.findViewById(android.R.id.text1);
                 text.setTextColor(Color.WHITE);
                 return view;
             }
@@ -487,7 +485,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                TextView text = view.findViewById(android.R.id.text1);
                 text.setTextColor(Color.WHITE);
                 text.setPadding(16, 16, 16, 16);
                 return view;

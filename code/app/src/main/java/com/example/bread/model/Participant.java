@@ -3,15 +3,18 @@ package com.example.bread.model;
 import androidx.annotation.NonNull;
 
 import com.google.firebase.firestore.Exclude;
+import com.google.firebase.firestore.IgnoreExtraProperties;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Model class representing a participant (user) in the application.
- * Contains user information, profile data, and relationship metadata.
+ * Represents a participant in the app, containing user profile information such as username,
+ * email, first name, last name, and profile picture. Implements {@link Serializable} to allow
+ * easy storage and retrieval from the database.
  */
+@IgnoreExtraProperties
 public class Participant implements Serializable {
     private String username;
     private String email;
@@ -29,7 +32,7 @@ public class Participant implements Serializable {
     private List<FollowRequest> followRequests;
 
     /**
-     * Default constructor initializing empty lists and counters
+     * Default constructor required for Firestore serialization.
      */
     public Participant() {
         this.followers = new ArrayList<>();
@@ -40,12 +43,12 @@ public class Participant implements Serializable {
     }
 
     /**
-     * Create a new participant with basic user information
+     * Constructs a Participant with the specified details.
      *
-     * @param username  The unique username for the participant
-     * @param email     The email address of the participant
-     * @param firstName The first name of the participant
-     * @param lastName  The last name of the participant
+     * @param username  the username of the participant
+     * @param email     the email address of the participant
+     * @param firstName the first name of the participant
+     * @param lastName  the last name of the participant
      */
     public Participant(String username, String email, String firstName, String lastName) {
         this.username = username;
@@ -60,9 +63,9 @@ public class Participant implements Serializable {
     }
 
     /**
-     * Returns a string representation of the participant
+     * Returns a string representation of the Participant.
      *
-     * @return String representation with participant details
+     * @return a string containing the participant's details.
      */
     @NonNull
     @Override
@@ -78,90 +81,92 @@ public class Participant implements Serializable {
     }
 
     /**
-     * Get the username of the participant
+     * Gets the username of the participant.
      *
-     * @return The username
+     * @return the username as a String.
      */
     public String getUsername() {
         return username;
     }
 
     /**
-     * Set the username of the participant
+     * Sets the username of the participant.
      *
-     * @param username The username to set
+     * @param username the username to set.
      */
     public void setUsername(String username) {
         this.username = username;
     }
 
     /**
-     * Get the email address of the participant
+     * Gets the email address of the participant.
      *
-     * @return The email address
+     * @return the email address as a String.
      */
     public String getEmail() {
         return email;
     }
 
     /**
-     * Set the email address of the participant
+     * Sets the email address of the participant.
      *
-     * @param email The email address to set
+     * @param email the email address to set.
      */
     public void setEmail(String email) {
         this.email = email;
     }
 
     /**
-     * Get the first name of the participant
+     * Gets the first name of the participant.
      *
-     * @return The first name
+     * @return the first name as a String.
      */
     public String getFirstName() {
         return firstName;
     }
 
     /**
-     * Set the first name of the participant
+     * Sets the first name of the participant.
      *
-     * @param firstName The first name to set
+     * @param firstName the first name to set.
      */
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
 
     /**
-     * Get the last name of the participant
+     * Gets the last name of the participant.
      *
-     * @return The last name
+     * @return the last name as a String.
      */
     public String getLastName() {
         return lastName;
     }
 
     /**
-     * Set the last name of the participant
+     * Sets the last name of the participant.
      *
-     * @param lastName The last name to set
+     * @param lastName the last name to set.
      */
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
 
     /**
-     * Get the list of followers for this participant
+     * Gets the list of followers for the participant.
+     * This field is excluded from Firestore storage.
      *
-     * @return List of follower usernames
+     * @return a list of usernames representing followers.
      */
     public List<String> getFollowers() {
         return followers;
     }
 
     /**
-     * Set the list of followers and update the follower count
+     * Sets the list of followers for the participant and updates the follower count.
+     * This field is excluded from Firestore storage.
      *
-     * @param followers List of follower usernames
+     * @param followers a list of usernames representing followers.
      */
     public void setFollowers(List<String> followers) {
         this.followers = followers;
@@ -169,18 +174,20 @@ public class Participant implements Serializable {
     }
 
     /**
-     * Get the list of users this participant is following
+     * Gets the list of users that the participant is following.
+     * This field is excluded from Firestore storage.
      *
-     * @return List of following usernames
+     * @return a list of usernames representing following users.
      */
     public List<String> getFollowing() {
         return following;
     }
 
     /**
-     * Set the list of following and update the following count
+     * Sets the list of users that the participant is following and updates the following count.
+     * This field is excluded from Firestore storage.
      *
-     * @param following List of following usernames
+     * @param following a list of usernames representing following users.
      */
     public void setFollowing(List<String> following) {
         this.following = following;
@@ -188,91 +195,93 @@ public class Participant implements Serializable {
     }
 
     /**
-     * Get the profile picture as a Base64 encoded string
+     * Gets the URL of the participant's profile picture.
      *
-     * @return Base64 encoded profile picture string or null if not set
+     * @return the profile picture URL as a String.
      */
     public String getProfilePicture() {
         return profilePicture;
     }
 
     /**
-     * Set the profile picture as a Base64 encoded string
+     * Sets the URL of the participant's profile picture.
      *
-     * @param profilePicture Base64 encoded profile picture string
+     * @param profilePicture the profile picture URL to set.
      */
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
     }
 
     /**
-     * Get the list of follow requests for this participant
+     * Gets the list of follow requests for this participant.
+     * This field is excluded from Firestore storage.
      *
-     * @return List of FollowRequest objects
+     * @return List of FollowRequest objects.
      */
     public List<FollowRequest> getFollowRequests() {
         return followRequests;
     }
 
     /**
-     * Set the list of follow requests
+     * Sets the list of follow requests.
+     * This field is excluded from Firestore storage.
      *
-     * @param followRequests List of FollowRequest objects
+     * @param followRequests List of FollowRequest objects.
      */
     public void setFollowRequests(List<FollowRequest> followRequests) {
         this.followRequests = followRequests;
     }
 
     /**
-     * Get a formatted display name combining first and last name
+     * Gets a formatted display name combining first and last name.
      *
-     * @return Formatted display name
+     * @return Formatted display name.
      */
     public String getDisplayName() {
         return capitalize(firstName) + " " + capitalize(lastName);
     }
 
     /**
-     * Get the follower count
+     * Gets the follower count.
      *
-     * @return Number of followers
+     * @return Number of followers.
      */
     public int getFollowerCount() {
         return followerCount;
     }
 
     /**
-     * Set the follower count
+     * Sets the follower count.
      *
-     * @param followerCount The count to set
+     * @param followerCount The count to set.
      */
     public void setFollowerCount(int followerCount) {
         this.followerCount = followerCount;
     }
 
     /**
-     * Get the following count
+     * Gets the following count.
      *
-     * @return Number of users being followed
+     * @return Number of users being followed.
      */
     public int getFollowingCount() {
         return followingCount;
     }
 
     /**
-     * Set the following count
+     * Sets the following count.
      *
-     * @param followingCount The count to set
+     * @param followingCount The count to set.
      */
     public void setFollowingCount(int followingCount) {
         this.followingCount = followingCount;
     }
 
     /**
-     * Helper method to capitalize the first letter of a string
+     * Helper method to capitalize the first letter of a string.
      *
-     * @param input The input string
-     * @return String with first letter capitalized
+     * @param input The input string.
+     * @return String with first letter capitalized.
      */
     private String capitalize(String input) {
         if (input == null || input.isEmpty()) {

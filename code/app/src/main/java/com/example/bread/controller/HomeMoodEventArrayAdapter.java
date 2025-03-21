@@ -1,8 +1,7 @@
-package com.example.bread.controller;
+\package com.example.bread.controller;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.text.format.DateUtils;
 import android.util.LruCache;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +19,7 @@ import com.example.bread.model.Participant;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
+import com.example.bread.utils.TimestampUtils;
 
 import java.util.ArrayList;
 
@@ -28,7 +28,7 @@ import java.util.ArrayList;
  */
 public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
-    // Cache for participants should be shared across instances
+    // Cache for participants should be shared across instances to address the senior's comment
     private static final LruCache<String, Participant> participantCache = new LruCache<>(50);
     private final ParticipantRepository userRepo;
 
@@ -39,9 +39,10 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
     static class ViewHolder {
         TextView username;
-        TextView reason;
+        TextView title;
         TextView date;
         TextView mood;
+        TextView socialSituation;
         ImageView profilePic;
         ConstraintLayout eventLayout;
     }
@@ -55,60 +56,62 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             convertView = LayoutInflater.from(context).inflate(R.layout.layout_event_home, parent, false);
             holder = new ViewHolder();
             holder.username = convertView.findViewById(R.id.textUsername);
-            holder.reason = convertView.findViewById(R.id.textReason);
+            holder.title = convertView.findViewById(R.id.textTitle);
             holder.date = convertView.findViewById(R.id.textDate);
             holder.mood = convertView.findViewById(R.id.textMood);
-            holder.profilePic = convertView.findViewById(R.id.imageProfile);
+            holder.profilePic = convertView.findViewById(R.id.profile_image_home);
             holder.eventLayout = convertView.findViewById(R.id.homeConstraintLayout);
+            holder.socialSituation = convertView.findViewById(R.id.textSocialSituation);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
         MoodEvent moodEvent = getItem(position);
-        if (moodEvent == null) {
-            return convertView;
-        }
-
-        // Set background color based on emotional state
-        int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
-        holder.eventLayout.setBackgroundResource(colorResId);
-
-        // Set reason text
-        holder.reason.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "");
-
-        // Format and set date
-        if (moodEvent.getTimestamp() != null) {
-            String formattedDate = formatTimeAgo(moodEvent.getTimestamp().getTime());
-            holder.date.setText(formattedDate);
-        } else {
-            holder.date.setText("");
-        }
-
-        // Set emoticon
-        holder.mood.setText(EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
-
-        // Set default profile image first
-        holder.profilePic.setImageResource(R.drawable.ic_baseline_profile_24);
-
-        // Set default username while loading
-        holder.username.setText("Loading...");
-
-        // Load participant information from cache or network
-        loadParticipantInfo(moodEvent, holder);
-
-        // Set click listener
-        convertView.setOnClickListener(v -> {
-            if (clickListener != null) {
-                clickListener.onMoodEventClick(moodEvent);
+        if (moodEvent != null) {
+            // Set background color based on emotional state
+            int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
+            holder.eventLayout.setBackgroundResource(colorResId);
+            
+            // Load participant info with caching (the improvement requested by senior)
+            loadParticipantInfo(moodEvent, holder);
+            
+            // Set other mood event data
+            holder.title.setText(moodEvent.getTitle());
+            
+            // Use TimestampUtils from main branch but handle null timestamps
+            if (moodEvent.getTimestamp() != null) {
+                holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
+            } else {
+                holder.date.setText(""); // Handle null timestamp case
             }
-        });
+            
+            holder.mood.setText(moodEvent.getEmotionalState().toString().toLowerCase() + " " + 
+                                EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+            
+            // Handle social situation display
+            if (moodEvent.getSocialSituation() != null && moodEvent.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
+                holder.socialSituation.setText(moodEvent.getSocialSituation().toString());
+                holder.socialSituation.setVisibility(View.VISIBLE);
+            } else {
+                holder.socialSituation.setVisibility(View.INVISIBLE);
+            }
+
+            // Set click listener
+            convertView.setOnClickListener(v -> {
+                if (clickListener != null) {
+                    clickListener.onMoodEventClick(moodEvent);
+                }
+            });
+        }
 
         return convertView;
     }
 
     /**
      * Loads participant information from cache or network
+     * This method addresses the senior's comment about caching and avoiding
+     * unnecessary network calls
      *
      * @param moodEvent The mood event containing the participant reference
      * @param holder    The ViewHolder to update with participant data
@@ -116,6 +119,7 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
     private void loadParticipantInfo(MoodEvent moodEvent, ViewHolder holder) {
         if (moodEvent.getParticipantRef() == null) {
             holder.username.setText("Unknown");
+            holder.profilePic.setImageResource(R.drawable.ic_baseline_profile_24);
             return;
         }
 
@@ -124,61 +128,40 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
         // Try to get from cache first
         Participant cachedParticipant = participantCache.get(refPath);
         if (cachedParticipant != null) {
-            updateViewWithParticipant(holder, cachedParticipant);
+            // Use cached data
+            holder.username.setText(cachedParticipant.getUsername());
+            
+            // Set profile picture if available
+            String base64Image = cachedParticipant.getProfilePicture();
+            if (base64Image != null) {
+                holder.profilePic.setImageBitmap(ImageHandler.base64ToBitmap(base64Image));
+            } else {
+                holder.profilePic.setImageResource(R.drawable.ic_baseline_profile_24);
+            }
             return;
         }
 
-        // Not in cache, load from network (no need for a background thread since Firebase calls are async)
+        // Set defaults while loading
+        holder.username.setText("Loading...");
+        holder.profilePic.setImageResource(R.drawable.ic_baseline_profile_24);
+
+        // Not in cache, load from network (Firebase calls are already async)
         userRepo.fetchParticipantByRef(moodEvent.getParticipantRef(), participant -> {
-            // Cache the result
             if (participant != null) {
+                // Cache the participant for future use
                 participantCache.put(refPath, participant);
-                updateViewWithParticipant(holder, participant);
+                
+                // Update UI with participant data
+                holder.username.setText(participant.getUsername());
+                String base64Image = participant.getProfilePicture();
+                if (base64Image != null) {
+                    holder.profilePic.setImageBitmap(ImageHandler.base64ToBitmap(base64Image));
+                }
+            } else {
+                holder.username.setText("Unknown");
             }
         }, e -> {
-            // Handle error
             holder.username.setText("Unknown");
         });
-    }
-
-    /**
-     * Updates view with participant data
-     *
-     * @param holder      The ViewHolder to update
-     * @param participant The participant data
-     */
-    private void updateViewWithParticipant(ViewHolder holder, Participant participant) {
-        holder.username.setText(participant.getUsername());
-
-        // Set profile picture if available
-        String base64Image = participant.getProfilePicture();
-        if (base64Image != null) {
-            holder.profilePic.setImageBitmap(ImageHandler.base64ToBitmap(base64Image));
-        } else {
-            holder.profilePic.setImageResource(R.drawable.ic_baseline_profile_24);
-        }
-    }
-
-    /**
-     * Formats a timestamp as a relative time string (e.g., "5 minutes ago")
-     *
-     * @param timeMillis The time in milliseconds
-     * @return A formatted relative time string
-     */
-    private String formatTimeAgo(long timeMillis) {
-        CharSequence relativeTime = DateUtils.getRelativeDateTimeString(
-                context,
-                timeMillis,
-                DateUtils.MINUTE_IN_MILLIS,
-                DateUtils.WEEK_IN_MILLIS,
-                0);
-
-        // If very recent, simplify to "Just now"
-        long diff = System.currentTimeMillis() - timeMillis;
-        if (diff < DateUtils.MINUTE_IN_MILLIS) {
-            return "Just now";
-        }
-
-        return relativeTime.toString();
     }
 }

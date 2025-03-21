@@ -273,7 +273,7 @@ public class HomeFilterUITest {
     }
 
     private void clearFirestoreEmulator() {
-        String projectId = "project-db"; // Change to your project ID
+        String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         String firestoreUrl = "http://10.0.2.2:8080/emulator/v1/projects/"
                 + projectId
                 + "/databases/(default)/documents";
@@ -296,7 +296,7 @@ public class HomeFilterUITest {
     }
 
     private void clearAuthEmulator() {
-        String projectId = "project-db"; // Change to your project ID
+        String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"
                 + projectId

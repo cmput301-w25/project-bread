@@ -19,6 +19,10 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
+/**
+ * A singleton class that handles location-related tasks, such as fetching the user's location and
+ * permission handling. This class uses the {@link FusedLocationProviderClient} to get the user's location.
+ */
 public class LocationHandler {
     private static final String TAG = "LocationHandler";
     private static LocationHandler instance;
@@ -39,6 +43,10 @@ public class LocationHandler {
             instance = new LocationHandler(context);
         }
         return instance;
+    }
+
+    public interface OnLocationAvailableCallback {
+        void onLocationAvailable(Location location);
     }
 
     /**
@@ -74,6 +82,34 @@ public class LocationHandler {
                     if (location != null) {
                         lastLocation = location;
                         Log.d(TAG, "fetchUserLocation Success: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
+                    } else {
+                        Log.d(TAG, "Last location is null. Requesting updates...");
+                        requestLocationUpdates();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error trying to get last location: ", e);
+                    requestLocationUpdates();
+                });
+    }
+
+    /**
+     * Fetch the user's location and call the given callback with the result.
+     */
+    @SuppressLint("MissingPermission")
+    public void fetchUserLocation(@NonNull OnLocationAvailableCallback callback) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            Log.w(TAG, "fetchUserLocation called without location permission!");
+            return;
+        }
+
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        lastLocation = location;
+                        Log.d(TAG, "fetchUserLocation Success: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
+                        callback.onLocationAvailable(lastLocation);
                     } else {
                         Log.d(TAG, "Last location is null. Requesting updates...");
                         requestLocationUpdates();
