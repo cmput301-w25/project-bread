@@ -22,23 +22,18 @@ import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
 
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * Adapter class for the HomeFragment ListView
  */
 public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
-    // Create a cache for participants to avoid repeated network calls
-    private final LruCache<String, Participant> participantCache;
+    // Cache for participants should be shared across instances
+    private static final LruCache<String, Participant> participantCache = new LruCache<>(50);
     private final ParticipantRepository userRepo;
-    private final Executor executor = Executors.newSingleThreadExecutor();
 
     public HomeMoodEventArrayAdapter(@NonNull Context context, ArrayList<MoodEvent> events) {
         super(context, events);
-        // Initialize cache with capacity for 50 participants
-        participantCache = new LruCache<>(50);
         userRepo = new ParticipantRepository();
     }
 
@@ -116,7 +111,7 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
      * Loads participant information from cache or network
      *
      * @param moodEvent The mood event containing the participant reference
-     * @param holder The ViewHolder to update with participant data
+     * @param holder    The ViewHolder to update with participant data
      */
     private void loadParticipantInfo(MoodEvent moodEvent, ViewHolder holder) {
         if (moodEvent.getParticipantRef() == null) {
@@ -133,45 +128,23 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             return;
         }
 
-        // Not in cache, load from network on background thread
-        executor.execute(() -> {
-            userRepo.fetchParticipantByRef(moodEvent.getParticipantRef(), participant -> {
-                // Cache the result
-                if (participant != null) {
-                    participantCache.put(refPath, participant);
-
-                    // Update UI on main thread
-                    if (context != null) {
-                        try {
-                            if (context instanceof android.app.Activity) {
-                                ((android.app.Activity) context).runOnUiThread(() ->
-                                        updateViewWithParticipant(holder, participant));
-                            }
-                        } catch (Exception e) {
-                            // Activity might be destroyed, ignore
-                        }
-                    }
-                }
-            }, e -> {
-                // Handle error on main thread
-                if (context != null) {
-                    try {
-                        if (context instanceof android.app.Activity) {
-                            ((android.app.Activity) context).runOnUiThread(() ->
-                                    holder.username.setText("Unknown"));
-                        }
-                    } catch (Exception ex) {
-                        // Activity might be destroyed, ignore
-                    }
-                }
-            });
+        // Not in cache, load from network (no need for a background thread since Firebase calls are async)
+        userRepo.fetchParticipantByRef(moodEvent.getParticipantRef(), participant -> {
+            // Cache the result
+            if (participant != null) {
+                participantCache.put(refPath, participant);
+                updateViewWithParticipant(holder, participant);
+            }
+        }, e -> {
+            // Handle error
+            holder.username.setText("Unknown");
         });
     }
 
     /**
      * Updates view with participant data
      *
-     * @param holder The ViewHolder to update
+     * @param holder      The ViewHolder to update
      * @param participant The participant data
      */
     private void updateViewWithParticipant(ViewHolder holder, Participant participant) {

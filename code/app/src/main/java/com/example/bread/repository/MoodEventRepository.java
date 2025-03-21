@@ -14,9 +14,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Repository class for handling mood events in the database
@@ -24,7 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MoodEventRepository {
     private final FirebaseService firebaseService;
     private static final String TAG = "MoodEventRepository";
-    private static final int MAX_EVENTS_PER_USER = 20; // Limit number of events fetched per user
 
     public MoodEventRepository() {
         firebaseService = new FirebaseService();
@@ -36,15 +33,19 @@ public class MoodEventRepository {
 
     /**
      * Fetches all mood events from the database with the given participant reference
+     *
      * @param participantRef The reference to the participant whose mood events are to be fetched
      * @param onSuccessListener The listener to be called when the mood events are successfully fetched
      * @param onFailureListener The listener to be called when the mood events cannot be fetched
+     * @param limit Optional parameter to limit the number of results
      */
-    public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
+    public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef,
+                                              @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener,
+                                              OnFailureListener onFailureListener,
+                                              int limit) {
         getMoodEventCollRef()
                 .whereEqualTo("participantRef", participantRef)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .limit(MAX_EVENTS_PER_USER) // Limit query to improve performance
+                .limit(limit)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
@@ -55,67 +56,93 @@ public class MoodEventRepository {
                     List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
                     onSuccessListener.onSuccess(moodEvents);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch mood events with participantRef: " + participantRef, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to fetch mood events with participantRef: " + participantRef, e));
     }
 
     /**
-     * Listens for all mood events from the database with the given participant reference
+     * Fetches all mood events from the database with the given participant reference
+     * Uses default limit of 20 events
+     *
      * @param participantRef The reference to the participant whose mood events are to be fetched
      * @param onSuccessListener The listener to be called when the mood events are successfully fetched
      * @param onFailureListener The listener to be called when the mood events cannot be fetched
      */
-    public void listenForEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
-        getMoodEventCollRef()
+    public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef,
+                                              @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener,
+                                              OnFailureListener onFailureListener) {
+        fetchEventsWithParticipantRef(participantRef, onSuccessListener, onFailureListener, 20);
+    }
+
+    /**
+     * Listens for all mood events from the database with the given participant reference
+     *
+     * @param participantRef The reference to the participant whose mood events are to be fetched
+     * @param onSuccessListener The listener to be called when the mood events are successfully fetched
+     * @param onFailureListener The listener to be called when the mood events cannot be fetched
+     * @param limit Optional parameter to limit the number of results
+     */
+    public void listenForEventsWithParticipantRef(@NonNull DocumentReference participantRef,
+                                                  @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener,
+                                                  @NonNull OnFailureListener onFailureListener,
+                                                  int limit) {
+        // Start with a base query on participantRef
+        Query query = getMoodEventCollRef()
                 .whereEqualTo("participantRef", participantRef)
-                // Removed the orderBy("timestamp", Query.Direction.DESCENDING) to avoid index requirement
-                .limit(MAX_EVENTS_PER_USER) // Limit query to improve performance
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        onFailureListener.onFailure(error);
-                        return;
-                    }
-                    if (value != null) {
-                        List<MoodEvent> moodEvents = new ArrayList<>();
-                        for (DocumentSnapshot doc : value.getDocuments()) {
-                            MoodEvent moodEvent = doc.toObject(MoodEvent.class);
-                            if (moodEvent != null) {
-                                // Explicitly set the ID from the document
-                                moodEvent.setId(doc.getId());
-                                moodEvents.add(moodEvent);
-                            }
-                        }
+                .limit(limit);
 
-                        // Sort in memory instead of in the query
-                        Collections.sort(moodEvents, (a, b) -> {
-                            // Handle null timestamp cases
-                            if (a.getTimestamp() == null && b.getTimestamp() == null) {
-                                return 0;
-                            }
-                            if (a.getTimestamp() == null) {
-                                return 1; // Nulls last
-                            }
-                            if (b.getTimestamp() == null) {
-                                return -1; // Nulls last
-                            }
-                            // Sort most recent first (descending)
-                            return b.getTimestamp().compareTo(a.getTimestamp());
-                        });
-
-                        onSuccessListener.onSuccess(moodEvents);
-                    } else {
-                        onSuccessListener.onSuccess(new ArrayList<>()); // Return empty list instead of null
+        query.addSnapshotListener((value, error) -> {
+            if (error != null) {
+                onFailureListener.onFailure(error);
+                return;
+            }
+            if (value != null) {
+                List<MoodEvent> moodEvents = new ArrayList<>();
+                for (DocumentSnapshot doc : value.getDocuments()) {
+                    MoodEvent moodEvent = doc.toObject(MoodEvent.class);
+                    if (moodEvent != null) {
+                        // Explicitly set the ID from the document
+                        moodEvent.setId(doc.getId());
+                        moodEvents.add(moodEvent);
                     }
-                });
+                }
+
+                // Return the events without sorting - let caller handle sorting
+                onSuccessListener.onSuccess(moodEvents);
+            } else {
+                onSuccessListener.onSuccess(new ArrayList<>());
+            }
+        });
+    }
+
+    /**
+     * Listens for all mood events from the database with the given participant reference
+     * Uses default limit of 20 events
+     *
+     * @param participantRef The reference to the participant whose mood events are to be fetched
+     * @param onSuccessListener The listener to be called when the mood events are successfully fetched
+     * @param onFailureListener The listener to be called when the mood events cannot be fetched
+     */
+    public void listenForEventsWithParticipantRef(@NonNull DocumentReference participantRef,
+                                                  @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener,
+                                                  @NonNull OnFailureListener onFailureListener) {
+        listenForEventsWithParticipantRef(participantRef, onSuccessListener, onFailureListener, 20);
     }
 
     /**
      * Listens for all mood events that are created by the participants that the given participant is following
-     * Optimized version that batches queries and limits results
+     *
      * @param username The username of the participant whose following's mood events are to be fetched
      * @param onSuccessListener The listener to be called when the mood events are successfully fetched
      * @param onFailureListener The listener to be called when the mood events cannot be fetched
+     * @param maxFollowing Optional parameter to limit the number of followed users to query
+     * @param totalEventsLimit Optional parameter to limit the total number of events returned
      */
-    public void listenForEventsFromFollowing(@NonNull String username, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
+    public void listenForEventsFromFollowing(@NonNull String username,
+                                             @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener,
+                                             @NonNull OnFailureListener onFailureListener,
+                                             int maxFollowing,
+                                             int totalEventsLimit) {
         ParticipantRepository participantRepository = new ParticipantRepository();
 
         participantRepository.fetchFollowing(username, following -> {
@@ -132,19 +159,14 @@ public class MoodEventRepository {
             }
 
             // If following list is large, limit it to prevent performance issues
-            final int MAX_FOLLOWING = 50; // Max number of users to query
-            if (participantRefs.size() > MAX_FOLLOWING) {
-                participantRefs = participantRefs.subList(0, MAX_FOLLOWING);
+            if (participantRefs.size() > maxFollowing) {
+                participantRefs = participantRefs.subList(0, maxFollowing);
             }
 
-            // Use whereIn to batch query just the followed users' events (not including user's own moods)
-            final int LIMIT_TOTAL_EVENTS = 50; // Limit total events returned
-
-            // Create query - using whereIn allows us to fetch events from multiple users at once
-            // Removed the orderBy to avoid index requirement
+            // Use whereIn to batch query just the followed users' events
             Query query = getMoodEventCollRef()
                     .whereIn("participantRef", participantRefs)
-                    .limit(LIMIT_TOTAL_EVENTS);
+                    .limit(totalEventsLimit);
 
             // Set up snapshot listener to get real-time updates
             query.addSnapshotListener((value, error) -> {
@@ -164,22 +186,7 @@ public class MoodEventRepository {
                         }
                     }
 
-                    // Sort in memory by timestamp (descending - newest first)
-                    Collections.sort(allMoodEvents, (a, b) -> {
-                        // Handle null timestamp cases
-                        if (a.getTimestamp() == null && b.getTimestamp() == null) {
-                            return 0;
-                        }
-                        if (a.getTimestamp() == null) {
-                            return 1; // Nulls last
-                        }
-                        if (b.getTimestamp() == null) {
-                            return -1; // Nulls last
-                        }
-                        // Sort most recent first (descending)
-                        return b.getTimestamp().compareTo(a.getTimestamp());
-                    });
-
+                    // Return the events without sorting - let caller handle sorting
                     onSuccessListener.onSuccess(allMoodEvents);
                 } else {
                     onSuccessListener.onSuccess(new ArrayList<>());
@@ -188,8 +195,24 @@ public class MoodEventRepository {
 
         }, onFailureListener);
     }
+
+    /**
+     * Listens for all mood events that are created by the participants that the given participant is following
+     * Uses default limits (50 following users, 50 total events)
+     *
+     * @param username The username of the participant whose following's mood events are to be fetched
+     * @param onSuccessListener The listener to be called when the mood events are successfully fetched
+     * @param onFailureListener The listener to be called when the mood events cannot be fetched
+     */
+    public void listenForEventsFromFollowing(@NonNull String username,
+                                             @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener,
+                                             @NonNull OnFailureListener onFailureListener) {
+        listenForEventsFromFollowing(username, onSuccessListener, onFailureListener, 50, 50);
+    }
+
     /**
      * Adds a mood event to the database
+     *
      * @param moodEvent The mood event to be added
      * @param onSuccessListener The listener to be called when the mood event is successfully added
      * @param onFailureListener The listener to be called when the mood event cannot be added
@@ -197,11 +220,13 @@ public class MoodEventRepository {
     public void addMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add mood event: " + moodEvent, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to add mood event: " + moodEvent, e));
     }
 
     /**
      * Deletes a mood event from the database
+     *
      * @param moodEvent The mood event to be deleted
      * @param onSuccessListener The listener to be called when the mood event is successfully deleted
      * @param onFailureListener The listener to be called when the mood event cannot be deleted
@@ -209,24 +234,30 @@ public class MoodEventRepository {
     public void deleteMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).delete()
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to delete mood event: " + moodEvent, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to delete mood event: " + moodEvent, e));
     }
 
     /**
      * Updates a mood event in the database
+     *
      * @param moodEvent The mood event to be updated
      * @param onSuccessListener The listener to be called when the mood event is successfully updated
      * @param onFailureListener The listener to be called when the mood event cannot be updated
      */
     public void updateMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
-        // need to add check if the mood event id is null
+        // Need to add check if the mood event id is null
         if (moodEvent.getId() == null) {
-            onFailureListener.onFailure(new IllegalArgumentException("Mood event ID cannot be null"));
+            if (onFailureListener != null) {
+                onFailureListener.onFailure(new IllegalArgumentException("Mood event ID cannot be null"));
+            }
             return;
         }
+
         Log.d("MoodEventRepository", "Updating mood event with ID: " + moodEvent.getId());
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to update mood event: " + moodEvent.getId(), e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to update mood event: " + moodEvent.getId(), e));
     }
 }

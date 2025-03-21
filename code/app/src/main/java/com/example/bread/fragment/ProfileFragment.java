@@ -36,6 +36,7 @@ import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public class ProfileFragment extends Fragment {
@@ -240,22 +241,19 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+// Here's the fix for ProfileFragment.java, focusing on the loadRecentMoodEvent method
+// which had the issues mentioned in the comments
+
     private void loadRecentMoodEvent() {
         if (currentUsername == null) return;
 
         DocumentReference participantRef = participantRepository.getParticipantRef(currentUsername);
         moodEventRepository.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
             userMoodEvents.clear();
+            userMoodEvents.addAll(moodEvents);
 
-            for (MoodEvent event : moodEvents) {
-                if (event.getTimestamp() != null) {
-                    userMoodEvents.add(event);
-                }
-            }
-
-            // Sort by date (newest first)
-            Collections.sort(userMoodEvents);
-            Collections.reverse(userMoodEvents);
+            // Sort by date (newest first) using Comparator.reverseOrder
+            userMoodEvents.sort(Comparator.reverseOrder());
 
             // Display most recent mood event
             updateRecentMoodEvent();

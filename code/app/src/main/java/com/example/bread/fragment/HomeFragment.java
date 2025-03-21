@@ -41,7 +41,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -255,95 +255,73 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
             String username = user.getDisplayName();
             if (username != null) {
                 // Show loading state
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        moodsLoadingIndicator.setVisibility(View.VISIBLE);
-                        emptyMoodsView.setVisibility(View.GONE);
-                        moodEventListView.setVisibility(View.GONE);
-                    });
-                }
+                moodsLoadingIndicator.setVisibility(View.VISIBLE);
+                emptyMoodsView.setVisibility(View.GONE);
+                moodEventListView.setVisibility(View.GONE);
 
                 moodEventRepository.listenForEventsFromFollowing(username, moodEvents -> {
-                    // Update on UI thread to prevent crashes
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            try {
-                                if (moodEventArrayList != null) {
-                                    moodEventArrayList.clear();
+                    if (moodEventArrayList != null) {
+                        moodEventArrayList.clear();
 
-                                    // Add all events with valid timestamps
-                                    ArrayList<MoodEvent> validEvents = new ArrayList<>();
-                                    for (MoodEvent event : moodEvents) {
-                                        if (event.getTimestamp() != null) {
-                                            validEvents.add(event);
-                                        }
-                                    }
+                        // Add all events without filtering null timestamps
+                        moodEventArrayList.addAll(moodEvents);
 
-                                    // Sort by date (newest first)
-                                    Collections.sort(validEvents);
-                                    Collections.reverse(validEvents);
-
-                                    // Update the list
-                                    moodEventArrayList.addAll(validEvents);
-
-                                    // Save all mood events for filtering
-                                    allMoodEvents.clear();
-                                    allMoodEvents.addAll(moodEventArrayList);
-
-                                    // Reapply any existing filters
-                                    if (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty()) {
-                                        applyFilters();
-                                    } else {
-                                        if (moodEventArrayAdapter != null) {
-                                            moodEventArrayAdapter.notifyDataSetChanged();
-                                        }
-                                    }
-
-                                    // Hide loading indicator and show appropriate views
-                                    moodsLoadingIndicator.setVisibility(View.GONE);
-
-                                    if (moodEventArrayList.isEmpty()) {
-                                        emptyMoodsView.setVisibility(View.VISIBLE);
-                                        moodEventListView.setVisibility(View.GONE);
-                                    } else {
-                                        emptyMoodsView.setVisibility(View.GONE);
-                                        moodEventListView.setVisibility(View.VISIBLE);
-                                    }
-                                }
-                            } catch (Exception e) {
-                                // Handle any exceptions during the UI update
-                                Log.e(TAG, "Error updating UI with mood events", e);
-                                moodsLoadingIndicator.setVisibility(View.GONE);
-
-                                // Only show error if we couldn't load any events
-                                if (moodEventArrayList.isEmpty()) {
-                                    Toast.makeText(getContext(), "Failed to load mood events", Toast.LENGTH_SHORT).show();
-                                    emptyMoodsView.setVisibility(View.VISIBLE);
-                                    moodEventListView.setVisibility(View.GONE);
-                                }
+                        // Sort by date (newest first) - now done in the fragment
+                        moodEventArrayList.sort((a, b) -> {
+                            // Handle null timestamp cases
+                            if (a.getTimestamp() == null && b.getTimestamp() == null) {
+                                return 0;
                             }
+                            if (a.getTimestamp() == null) {
+                                return 1; // Nulls last
+                            }
+                            if (b.getTimestamp() == null) {
+                                return -1; // Nulls last
+                            }
+                            // Sort most recent first (descending)
+                            return b.getTimestamp().compareTo(a.getTimestamp());
                         });
+
+                        // Save all mood events for filtering
+                        allMoodEvents.clear();
+                        allMoodEvents.addAll(moodEventArrayList);
+
+                        // Reapply any existing filters
+                        if (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty()) {
+                            applyFilters();
+                        } else {
+                            if (moodEventArrayAdapter != null) {
+                                moodEventArrayAdapter.notifyDataSetChanged();
+                            }
+                        }
+
+                        // Hide loading indicator and show appropriate views
+                        moodsLoadingIndicator.setVisibility(View.GONE);
+
+                        if (moodEventArrayList.isEmpty()) {
+                            emptyMoodsView.setVisibility(View.VISIBLE);
+                            moodEventListView.setVisibility(View.GONE);
+                        } else {
+                            emptyMoodsView.setVisibility(View.GONE);
+                            moodEventListView.setVisibility(View.VISIBLE);
+                        }
                     }
                 }, e -> {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            Log.e(TAG, "Failed to fetch mood events for user: " + username, e);
+                    Log.e(TAG, "Failed to fetch mood events for user: " + username, e);
 
-                            // Only show error toast if we have no existing events
-                            if (moodEventArrayList.isEmpty()) {
-                                Toast.makeText(getContext(), "Failed to fetch mood events", Toast.LENGTH_SHORT).show();
-                            }
+                    // Only show error toast if we have no existing events
+                    if (moodEventArrayList.isEmpty()) {
+                        Toast.makeText(getContext(), "Failed to fetch mood events", Toast.LENGTH_SHORT).show();
+                    }
 
-                            // Hide loading indicator and show empty view on error
-                            moodsLoadingIndicator.setVisibility(View.GONE);
-                            if (moodEventArrayList.isEmpty()) {
-                                emptyMoodsView.setVisibility(View.VISIBLE);
-                                moodEventListView.setVisibility(View.GONE);
-                            } else {
-                                emptyMoodsView.setVisibility(View.GONE);
-                                moodEventListView.setVisibility(View.VISIBLE);
-                            }
-                        });
+                    // Hide loading indicator and show empty view on error
+                    moodsLoadingIndicator.setVisibility(View.GONE);
+                    if (moodEventArrayList.isEmpty()) {
+                        emptyMoodsView.setVisibility(View.VISIBLE);
+                        moodEventListView.setVisibility(View.GONE);
+                    } else {
+                        emptyMoodsView.setVisibility(View.GONE);
+                        moodEventListView.setVisibility(View.VISIBLE);
                     }
                 });
             }
@@ -366,51 +344,33 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
 
         try {
             participantRepository.searchUsersByUsername(query, participants -> {
-                // Update UI on the main thread
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        try {
-                            userList.clear();
+                userList.clear();
 
-                            // Filter out the current user from results
-                            if (participants != null) {
-                                for (Participant participant : participants) {
-                                    if (participant != null && participant.getUsername() != null &&
-                                            currentUsername != null &&
-                                            !participant.getUsername().toLowerCase().equals(currentUsername.toLowerCase())) {
-                                        userList.add(participant);
-                                    }
-                                }
-                            }
-
-                            if (userAdapter != null) {
-                                userAdapter.notifyDataSetChanged();
-                            }
-                            updateSearchEmptyView();
-                            searchProgressBar.setVisibility(View.GONE);
-                            isSearching.set(false);
-                        } catch (Exception e) {
-                            Log.e(TAG, "Error updating search results UI", e);
-                            searchProgressBar.setVisibility(View.GONE);
-                            isSearching.set(false);
+                // Filter out the current user from results
+                if (participants != null) {
+                    for (Participant participant : participants) {
+                        if (participant != null && participant.getUsername() != null &&
+                                currentUsername != null &&
+                                !participant.getUsername().toLowerCase().equals(currentUsername.toLowerCase())) {
+                            userList.add(participant);
                         }
-                    });
-                } else {
-                    isSearching.set(false);
+                    }
                 }
+
+                if (userAdapter != null) {
+                    userAdapter.notifyDataSetChanged();
+                }
+                updateSearchEmptyView();
+                searchProgressBar.setVisibility(View.GONE);
+                isSearching.set(false);
             }, e -> {
-                // Handle error on the main thread
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        Log.e(TAG, "Error searching users", e);
-                        Toast.makeText(getContext(), "Error searching users", Toast.LENGTH_SHORT).show();
-                        searchProgressBar.setVisibility(View.GONE);
-                        isSearching.set(false);
-                        updateSearchEmptyView();
-                    });
-                } else {
-                    isSearching.set(false);
+                Log.e(TAG, "Error searching users", e);
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Error searching users", Toast.LENGTH_SHORT).show();
                 }
+                searchProgressBar.setVisibility(View.GONE);
+                isSearching.set(false);
+                updateSearchEmptyView();
             });
         } catch (Exception e) {
             Log.e(TAG, "Exception during search", e);
@@ -447,62 +407,38 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
         // First check if already following
         participantRepository.isFollowing(currentUsername, participant.getUsername(), isFollowing -> {
             if (isFollowing) {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getContext(), "You are already following this user", Toast.LENGTH_SHORT).show();
-                        searchProgressBar.setVisibility(View.GONE);
-                    });
-                }
+                searchProgressBar.setVisibility(View.GONE);
+                Toast.makeText(getContext(), "You are already following this user", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // Then check if a follow request already exists
             participantRepository.checkFollowRequestExists(currentUsername, participant.getUsername(), requestExists -> {
                 if (requestExists) {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            Toast.makeText(getContext(), "Follow request already sent", Toast.LENGTH_SHORT).show();
-                            searchProgressBar.setVisibility(View.GONE);
-                        });
-                    }
+                    searchProgressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Follow request already sent", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 // Send follow request
                 participantRepository.sendFollowRequest(currentUsername, participant.getUsername(), unused -> {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            Toast.makeText(getContext(), "Follow request sent", Toast.LENGTH_SHORT).show();
-                            updateFollowButtonState(participant.getUsername());
-                            searchProgressBar.setVisibility(View.GONE);
-                        });
-                    }
+                    searchProgressBar.setVisibility(View.GONE);
+                    Toast.makeText(getContext(), "Follow request sent", Toast.LENGTH_SHORT).show();
+                    updateFollowButtonState(participant.getUsername());
                 }, e -> {
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            Log.e(TAG, "Error sending follow request", e);
-                            Toast.makeText(getContext(), "Error sending follow request", Toast.LENGTH_SHORT).show();
-                            searchProgressBar.setVisibility(View.GONE);
-                        });
-                    }
+                    searchProgressBar.setVisibility(View.GONE);
+                    Log.e(TAG, "Error sending follow request", e);
+                    Toast.makeText(getContext(), "Error sending follow request", Toast.LENGTH_SHORT).show();
                 });
             }, e -> {
-                if (getActivity() != null) {
-                    getActivity().runOnUiThread(() -> {
-                        Log.e(TAG, "Error checking follow request", e);
-                        Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
-                        searchProgressBar.setVisibility(View.GONE);
-                    });
-                }
+                searchProgressBar.setVisibility(View.GONE);
+                Log.e(TAG, "Error checking follow request", e);
+                Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
             });
         }, e -> {
-            if (getActivity() != null) {
-                getActivity().runOnUiThread(() -> {
-                    Log.e(TAG, "Error checking follow status", e);
-                    Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
-                    searchProgressBar.setVisibility(View.GONE);
-                });
-            }
+            searchProgressBar.setVisibility(View.GONE);
+            Log.e(TAG, "Error checking follow status", e);
+            Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -650,7 +586,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
         Date oneWeekAgo = calendar.getTime();
 
         for (MoodEvent event : events) {
-            if (event.getTimestamp().after(oneWeekAgo)) {
+            if (event.getTimestamp() != null && event.getTimestamp().after(oneWeekAgo)) {
                 filteredList.add(event);
             }
         }
@@ -689,7 +625,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
         if (!allMoodEvents.isEmpty()) {
             moodEventArrayList.clear();
             moodEventArrayList.addAll(allMoodEvents);
-            moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
+            moodEventArrayList.sort(Comparator.reverseOrder());  // Using Comparator.reverseOrder() as requested
 
             Log.d(TAG, "Mood events size after reset: " + moodEventArrayList.size());
 

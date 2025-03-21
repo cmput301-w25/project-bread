@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Repository class for handling participants in the database
@@ -39,7 +38,7 @@ public class ParticipantRepository {
         firebaseService = new FirebaseService();
     }
 
-    public CollectionReference getParticipantCollRef() {
+    private CollectionReference getParticipantCollRef() {
         return firebaseService.getDb().collection("participants");
     }
 
@@ -217,12 +216,14 @@ public class ParticipantRepository {
         follower.put("username", followerUsername);
         getParticipantCollRef().document(username).collection("followers").document(followerUsername).set(follower)
                 .addOnSuccessListener(aVoid -> {
-                    // Update the follower count after adding
-                    fetchFollowers(username, followers -> {
-                        onSuccessListener.onSuccess(aVoid);
-                    }, e -> onSuccessListener.onSuccess(aVoid));
+                    // Directly increment the follower count by 1
+                    getParticipantCollRef().document(username).update("followerCount",
+                            com.google.firebase.firestore.FieldValue.increment(1));
+
+                    onSuccessListener.onSuccess(aVoid);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add follower: " + followerUsername + " to participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to add follower: " + followerUsername + " to participant: " + username, e));
     }
 
     /**
@@ -238,12 +239,14 @@ public class ParticipantRepository {
         following.put("username", followingUsername);
         getParticipantCollRef().document(username).collection("following").document(followingUsername).set(following)
                 .addOnSuccessListener(aVoid -> {
-                    // Update the following count after adding
-                    fetchFollowing(username, followingList -> {
-                        onSuccessListener.onSuccess(aVoid);
-                    }, e -> onSuccessListener.onSuccess(aVoid));
+                    // Directly increment the following count by 1
+                    getParticipantCollRef().document(username).update("followingCount",
+                            com.google.firebase.firestore.FieldValue.increment(1));
+
+                    onSuccessListener.onSuccess(aVoid);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add following: " + followingUsername + " to participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to add following: " + followingUsername + " to participant: " + username, e));
     }
 
     /**
@@ -293,7 +296,7 @@ public class ParticipantRepository {
     public void acceptFollowRequest(@NonNull String username, @NonNull String requestorUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         // Update request status to accepted
         getParticipantCollRef().document(username).collection("followRequests").document(requestorUsername)
-                .update("status", "accepted")
+                .update("status", FollowRequest.RequestStatus.ACCEPTED.getValue())
                 .addOnSuccessListener(aVoid -> {
                     // Add follower relationship
                     addFollower(username, requestorUsername, unused -> {
@@ -333,6 +336,8 @@ public class ParticipantRepository {
      * <p>
      * This method uses a Firestore range query with a special Unicode character that sorts
      * after all other characters to find all usernames that start with the given prefix.
+     * We use '\uf8ff' which is a high code point in the Unicode range that sorts after
+     * all common Unicode characters, allowing us to create a range query for string prefixes.
      *
      * @param usernamePrefix    The prefix to search for
      * @param onSuccessListener The listener to be called when participants are successfully found
@@ -411,6 +416,51 @@ public class ParticipantRepository {
     }
 
     /**
+     * Modifies the follow relationship between users.
+     * Can be used for both removing a follower or unfollowing a user.
+     *
+     * @param username          The username of the first participant
+     * @param otherUsername     The username of the other participant
+     * @param isRemovingFollower True if removing follower, false if unfollowing
+     * @param onSuccessListener The listener to be called when the operation succeeds
+     * @param onFailureListener The listener to be called when the operation fails
+     */
+    private void modifyFollowRelationship(@NonNull String username, @NonNull String otherUsername,
+                                          boolean isRemovingFollower, @NonNull OnSuccessListener<Void> onSuccessListener,
+                                          OnFailureListener onFailureListener) {
+        // Define which user is the follower and which is being followed based on operation type
+        String followerUsername = isRemovingFollower ? otherUsername : username;
+        String followedUsername = isRemovingFollower ? username : otherUsername;
+
+        // Remove connection from both sides
+        getParticipantCollRef().document(followedUsername).collection("followers").document(followerUsername).delete()
+                .addOnSuccessListener(unused -> {
+                    // Decrement follower count
+                    getParticipantCollRef().document(followedUsername).update("followerCount",
+                            com.google.firebase.firestore.FieldValue.increment(-1));
+
+                    // Remove the corresponding following relationship
+                    getParticipantCollRef().document(followerUsername).collection("following").document(followedUsername).delete()
+                            .addOnSuccessListener(aVoid -> {
+                                // Decrement following count
+                                getParticipantCollRef().document(followerUsername).update("followingCount",
+                                        com.google.firebase.firestore.FieldValue.increment(-1));
+
+                                // Delete any previous request to allow new requests
+                                deleteFollowRequest(followedUsername, followerUsername, onSuccessListener, e -> {
+                                    // Still consider success even if request delete fails
+                                    Log.w(TAG, "Failed to delete follow request, but relationship was modified", e);
+                                    onSuccessListener.onSuccess(null);
+                                });
+                            })
+                            .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                                    Log.e(TAG, "Failed to remove " + followedUsername + " from " + followerUsername + "'s following", e));
+                })
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to remove " + followerUsername + " from " + followedUsername + "'s followers", e));
+    }
+
+    /**
      * Remove a follower from the participant's followers
      *
      * @param username          The username of the participant removing the follower
@@ -419,24 +469,7 @@ public class ParticipantRepository {
      * @param onFailureListener The listener to be called when the follower cannot be removed
      */
     public void removeFollower(@NonNull String username, @NonNull String followerUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
-        // Remove follower from user's followers collection
-        getParticipantCollRef().document(username).collection("followers").document(followerUsername).delete()
-                .addOnSuccessListener(unused -> {
-                    // Also remove user from follower's following collection
-                    getParticipantCollRef().document(followerUsername).collection("following").document(username).delete()
-                            .addOnSuccessListener(aVoid -> {
-                                // Also delete any previous follow request documents to allow new requests
-                                deleteFollowRequest(username, followerUsername, onSuccessListener, e -> {
-                                    // Still consider success even if request delete fails
-                                    Log.w(TAG, "Failed to delete follow request after removing follower", e);
-                                    onSuccessListener.onSuccess(null);
-                                });
-                            })
-                            .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                                    Log.e(TAG, "Failed to remove " + username + " from " + followerUsername + "'s following", e));
-                })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                        Log.e(TAG, "Failed to remove " + followerUsername + " from " + username + "'s followers", e));
+        modifyFollowRelationship(username, followerUsername, true, onSuccessListener, onFailureListener);
     }
 
     /**
@@ -448,24 +481,7 @@ public class ParticipantRepository {
      * @param onFailureListener The listener to be called when unfollowing fails
      */
     public void unfollowUser(@NonNull String username, @NonNull String targetUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
-        // Remove target from user's following collection
-        getParticipantCollRef().document(username).collection("following").document(targetUsername).delete()
-                .addOnSuccessListener(unused -> {
-                    // Also remove user from target's followers collection
-                    getParticipantCollRef().document(targetUsername).collection("followers").document(username).delete()
-                            .addOnSuccessListener(aVoid -> {
-                                // Also delete any previous follow request documents to allow new requests
-                                deleteFollowRequest(targetUsername, username, onSuccessListener, e -> {
-                                    // Still consider success even if request delete fails
-                                    Log.w(TAG, "Failed to delete follow request after unfollowing", e);
-                                    onSuccessListener.onSuccess(null);
-                                });
-                            })
-                            .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                                    Log.e(TAG, "Failed to remove " + username + " from " + targetUsername + "'s followers", e));
-                })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                        Log.e(TAG, "Failed to remove " + targetUsername + " from " + username + "'s following", e));
+        modifyFollowRelationship(username, targetUsername, false, onSuccessListener, onFailureListener);
     }
 
     /**
