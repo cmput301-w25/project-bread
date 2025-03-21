@@ -256,7 +256,6 @@ public class MoodEventRepository {
         getMoodEventCollRef().document(moodEvent.getId()).collection("comments").get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
-                        Log.e("MoodEventRepository", "No comments found for mood event: " + moodEvent);
                         onSuccessListener.onSuccess(new ArrayList<>());
                         return;
                     }
