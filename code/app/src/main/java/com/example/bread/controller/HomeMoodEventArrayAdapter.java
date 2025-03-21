@@ -78,7 +78,7 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             });
             holder.title.setText(moodEvent.getTitle());
             holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
-            holder.mood.setText(moodEvent.getEmotionalState().toString().toLowerCase() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+            holder.mood.setText(moodEvent.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
             if (moodEvent.getSocialSituation() != null && moodEvent.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
                 holder.socialSituation.setText(moodEvent.getSocialSituation().toString());
             } else {

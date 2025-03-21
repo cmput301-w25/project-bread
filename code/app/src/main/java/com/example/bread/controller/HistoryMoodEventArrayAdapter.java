@@ -82,7 +82,7 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
             holder.eventLayout.setBackgroundResource(colorResId);
             holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
             holder.titleText.setText(moodEvent.getTitle());
-            holder.moodText.setText(moodEvent.getEmotionalState().toString().toLowerCase() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+            holder.moodText.setText(moodEvent.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
 
             convertView.setOnClickListener(v -> {
                 if (clickListener != null) {
