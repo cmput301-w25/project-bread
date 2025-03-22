@@ -12,8 +12,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,7 +64,8 @@ public class ParticipantRepository {
                         onSuccessListener.onSuccess(null);
                     }
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch participant with username: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to fetch participant with username: " + username, e));
     }
 
     /**
@@ -85,7 +86,8 @@ public class ParticipantRepository {
                         onSuccessListener.onSuccess(null);
                     }
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch participant with username: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to fetch participant with username: " + username, e));
     }
 
     /**
@@ -133,7 +135,8 @@ public class ParticipantRepository {
                 participant.setFollowers(followers);
                 onSuccessListener.onSuccess(participant);
             }, onFailureListener);
-        }, onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch following for participant: " + participant.getUsername(), e));
+        }, onFailureListener != null ? onFailureListener : e ->
+                Log.e(TAG, "Failed to fetch following for participant: " + participant.getUsername(), e));
     }
 
     /**
@@ -154,7 +157,8 @@ public class ParticipantRepository {
                     updateFollowerCount(username, followers.size());
                     onSuccessListener.onSuccess(followers);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch followers for participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to fetch followers for participant: " + username, e));
     }
 
     /**
@@ -175,7 +179,8 @@ public class ParticipantRepository {
                     updateFollowingCount(username, following.size());
                     onSuccessListener.onSuccess(following);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch following for participant: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to fetch following for participant: " + username, e));
     }
 
     /**
@@ -204,7 +209,8 @@ public class ParticipantRepository {
     public void addParticipant(@NonNull Participant participant, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getParticipantCollRef().document(participant.getUsername()).set(participant)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add participant: " + participant, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to add participant: " + participant, e));
     }
 
     /**
@@ -220,10 +226,8 @@ public class ParticipantRepository {
         follower.put("username", followerUsername);
         getParticipantCollRef().document(username).collection("followers").document(followerUsername).set(follower)
                 .addOnSuccessListener(aVoid -> {
-                    // Directly increment the follower count by 1
-                    getParticipantCollRef().document(username).update("followerCount",
-                            com.google.firebase.firestore.FieldValue.increment(1));
-
+                    // Increment the follower count by 1
+                    getParticipantCollRef().document(username).update("followerCount", FieldValue.increment(1));
                     onSuccessListener.onSuccess(aVoid);
                 })
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
@@ -243,10 +247,8 @@ public class ParticipantRepository {
         following.put("username", followingUsername);
         getParticipantCollRef().document(username).collection("following").document(followingUsername).set(following)
                 .addOnSuccessListener(aVoid -> {
-                    // Directly increment the following count by 1
-                    getParticipantCollRef().document(username).update("followingCount",
-                            com.google.firebase.firestore.FieldValue.increment(1));
-
+                    // Increment the following count by 1
+                    getParticipantCollRef().document(username).update("followingCount", FieldValue.increment(1));
                     onSuccessListener.onSuccess(aVoid);
                 })
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
@@ -378,7 +380,8 @@ public class ParticipantRepository {
     public void checkIfUsernameExists(@NonNull String username, @NonNull OnSuccessListener<Boolean> onSuccessListener, OnFailureListener onFailureListener) {
         getParticipantCollRef().document(username).get()
                 .addOnSuccessListener(documentSnapshot -> onSuccessListener.onSuccess(documentSnapshot.exists()))
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to check if username exists: " + username, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
+                        Log.e(TAG, "Failed to check if username exists: " + username, e));
     }
 
     /**
@@ -432,15 +435,13 @@ public class ParticipantRepository {
         getParticipantCollRef().document(username).collection("followers").document(followerUsername).delete()
                 .addOnSuccessListener(unused -> {
                     // Decrement follower count
-                    getParticipantCollRef().document(username).update("followerCount",
-                            com.google.firebase.firestore.FieldValue.increment(-1));
+                    getParticipantCollRef().document(username).update("followerCount", FieldValue.increment(-1));
 
                     // Remove user from follower's following collection
                     getParticipantCollRef().document(followerUsername).collection("following").document(username).delete()
                             .addOnSuccessListener(aVoid -> {
                                 // Decrement following count
-                                getParticipantCollRef().document(followerUsername).update("followingCount",
-                                        com.google.firebase.firestore.FieldValue.increment(-1));
+                                getParticipantCollRef().document(followerUsername).update("followingCount", FieldValue.increment(-1));
 
                                 // Delete any previous follow request documents to allow new requests
                                 deleteFollowRequest(username, followerUsername, onSuccessListener, e -> {
@@ -469,15 +470,13 @@ public class ParticipantRepository {
         getParticipantCollRef().document(username).collection("following").document(targetUsername).delete()
                 .addOnSuccessListener(unused -> {
                     // Decrement following count
-                    getParticipantCollRef().document(username).update("followingCount",
-                            com.google.firebase.firestore.FieldValue.increment(-1));
+                    getParticipantCollRef().document(username).update("followingCount", FieldValue.increment(-1));
 
                     // Remove user from target's followers collection
                     getParticipantCollRef().document(targetUsername).collection("followers").document(username).delete()
                             .addOnSuccessListener(aVoid -> {
                                 // Decrement follower count
-                                getParticipantCollRef().document(targetUsername).update("followerCount",
-                                        com.google.firebase.firestore.FieldValue.increment(-1));
+                                getParticipantCollRef().document(targetUsername).update("followerCount", FieldValue.increment(-1));
 
                                 // Delete any previous follow request documents to allow new requests
                                 deleteFollowRequest(targetUsername, username, onSuccessListener, e -> {
