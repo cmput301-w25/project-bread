@@ -69,7 +69,7 @@
         app:layout_constraintTop_toTopOf="@+id/apply_button"
         app:layout_constraintVertical_bias="1.0" />
 
-    <EditText
+    <Spinner
         android:id="@+id/emotional_state_text"
         android:layout_width="0dp"
         android:layout_height="48dp"

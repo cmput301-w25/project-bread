@@ -385,15 +385,20 @@ public class HistoryFragment extends Fragment {
         EditText keywordEditText = dialogView.findViewById(R.id.keyword_edit_text);
         Button applyButton = dialogView.findViewById(R.id.apply_button);
         Button resetButton = dialogView.findViewById(R.id.reset_button);
-        EditText emotionalStateText = dialogView.findViewById(R.id.emotional_state_text);
+        Spinner emotionalStateText = dialogView.findViewById(R.id.emotional_state_text);
 
         recentWeekSwitch.setChecked(isFilteringByWeek);
         keywordEditText.setText(searchKeyword);
 
+        Spinner emotionalStateSpinner = dialogView.findViewById(R.id.emotional_state_text);
+        ArrayAdapter<MoodEvent.EmotionalState> adapter = new ArrayAdapter<>(
+                getContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                MoodEvent.EmotionalState.values());
+        emotionalStateSpinner.setAdapter(adapter);
+
         if (selectedEmotionalState != null) {
-            emotionalStateText.setText(selectedEmotionalState.toString());
-        } else {
-            emotionalStateText.setText(""); // Clear if no state is selected
+            emotionalStateSpinner.setSelection(adapter.getPosition(selectedEmotionalState));
         }
 
         AlertDialog dialog = builder.create();
@@ -404,19 +409,7 @@ public class HistoryFragment extends Fragment {
 
         applyButton.setOnClickListener(v -> {
             isFilteringByWeek = recentWeekSwitch.isChecked();
-            String emotionalState = emotionalStateText.getText().toString().trim();
-
-            if (!emotionalState.isEmpty()) {
-                try {
-                    selectedEmotionalState = MoodEvent.EmotionalState.valueOf(emotionalState.toUpperCase()); // 💡 Added this line
-                } catch (IllegalArgumentException e) {
-                    Toast.makeText(getContext(), "Invalid emotional state", Toast.LENGTH_SHORT).show();
-                    return; // Prevent closing the dialog if the emotional state is invalid
-                }
-            } else {
-                selectedEmotionalState = null;
-            }
-
+            selectedEmotionalState = (MoodEvent.EmotionalState) emotionalStateSpinner.getSelectedItem();
             searchKeyword = keywordEditText.getText().toString().trim().toLowerCase();
             applyFilters();
             dialog.dismiss();
@@ -424,7 +417,7 @@ public class HistoryFragment extends Fragment {
 
         resetButton.setOnClickListener(v -> {
             recentWeekSwitch.setChecked(false);
-            emotionalStateText.setText("");
+            emotionalStateSpinner.setSelection(0);
             keywordEditText.setText("");
 
             isFilteringByWeek = false;
