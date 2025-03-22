@@ -226,7 +226,9 @@ public class AddMoodEventFragment extends Fragment {
                     Toast.makeText(requireContext(), "Mood saved!", Toast.LENGTH_SHORT).show();
                     // Navigate back to HomeFragment
                     requireActivity().getSupportFragmentManager()
-                            .beginTransaction()
+                            .beginTransaction().setCustomAnimations(
+                                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+                            )
                             .replace(R.id.frame_layout, new HomeFragment())
                             .commit();
 

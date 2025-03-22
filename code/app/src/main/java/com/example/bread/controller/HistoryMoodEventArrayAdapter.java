@@ -1,25 +1,23 @@
 package com.example.bread.controller;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.utils.EmotionUtils;
-import com.google.firebase.auth.FirebaseUser;
+import com.example.bread.utils.TimestampUtils;
 
-import java.text.Format;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,7 +27,6 @@ import java.util.Set;
 public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
     private final Set<MoodEvent> selectedEvents = new HashSet<>();
-    private String participantUsername;
 
     public HistoryMoodEventArrayAdapter(@NonNull Context context, ArrayList<MoodEvent> events) {
         super(context, events);
@@ -37,13 +34,14 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
     static class ViewHolder {
         CheckBox checkBox;
-        TextView emoticonTextView;
-        TextView username;
+        TextView socialSituation;
         TextView date;
-        TextView reason;
-        ImageView profilePic;
+        TextView moodText;
+        TextView titleText;
+        ConstraintLayout eventLayout;
     }
 
+    @SuppressLint("SetTextI18n")
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
@@ -52,27 +50,23 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
             convertView = LayoutInflater.from(context).inflate(R.layout.layout_event, parent, false);
             holder = new ViewHolder();
             holder.checkBox = convertView.findViewById(R.id.checkbox);
-            holder.emoticonTextView = convertView.findViewById(R.id.emoticon_text_view);
-            holder.username = convertView.findViewById(R.id.username);
+            holder.socialSituation = convertView.findViewById(R.id.history_social_situation_text);
             holder.date = convertView.findViewById(R.id.date);
-            holder.reason = convertView.findViewById(R.id.reason);
-            holder.profilePic = convertView.findViewById(R.id.profilePic);
+            holder.titleText = convertView.findViewById(R.id.history_title_text);
+            holder.moodText = convertView.findViewById(R.id.textMood);
+            holder.eventLayout = convertView.findViewById(R.id.historyConstraintLayout);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
         MoodEvent moodEvent = getItem(position);
 
-        FirebaseUser currentUser = mAuth.getCurrentUser(); //retrieving current user, https://stackoverflow.com/questions/35112204/get-current-user-firebase-android
-        if (currentUser != null) {
-            participantUsername = currentUser.getDisplayName();
-        }
         if (moodEvent != null) {
-            if (holder.emoticonTextView != null) {
-                holder.emoticonTextView.setText(EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+            if (moodEvent.getSocialSituation() != null && moodEvent.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
+                holder.socialSituation.setText(moodEvent.getSocialSituation().toString());
+            } else {
+                holder.socialSituation.setVisibility(View.INVISIBLE);
             }
-            int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
-            convertView.setBackgroundResource(colorResId);
             if (holder.checkBox != null) {
                 holder.checkBox.setOnCheckedChangeListener(null);
                 holder.checkBox.setChecked(selectedEvents.contains(moodEvent));
@@ -84,30 +78,12 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
                     }
                 });
             }
-            if (holder.username != null) {
-                holder.username.setText(participantUsername);
-            }
-            if (holder.date != null) {
-                Date eventDate = moodEvent.getTimestamp();
-                if (eventDate != null) {
-                    Format formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    String s = formatter.format(eventDate);
-                    holder.date.setText(s);
-                } else {
-                    holder.date.setText("Pending"); // Fallback for null timestamp
-                }
-            }
-            if (holder.reason != null) {
-                holder.reason.setText(moodEvent.getReason());
-            }
-            if (holder.profilePic != null) {
-                holder.profilePic.setImageResource(R.drawable.default_avatar);
-            }
-            if (currentUser != null) {
-                participantUsername = currentUser.getDisplayName();
-            }
+            int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
+            holder.eventLayout.setBackgroundResource(colorResId);
+            holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
+            holder.titleText.setText(moodEvent.getTitle());
+            holder.moodText.setText(moodEvent.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
 
-            // Add click listener for the item
             convertView.setOnClickListener(v -> {
                 if (clickListener != null) {
                     clickListener.onMoodEventClick(moodEvent);

@@ -97,7 +97,7 @@ public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             usernameText.setText(event.getParticipantRef().getId());
             eventTitle.setText(event.getTitle());
             timestampText.setText(TimestampUtils.transformTimestamp(event.getTimestamp()));
-            emotionalStateText.setText(event.getEmotionalState().toString().toLowerCase() + " " + EmotionUtils.getEmoticon(event.getEmotionalState()));
+            emotionalStateText.setText(event.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(event.getEmotionalState()));
             socialSituationText.setText(event.getSocialSituation().toString());
             reasonText.setText(event.getReason());
             if (event.getAttachedImage() != null) {
