@@ -19,7 +19,6 @@ import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -30,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Repository class for handling mood events in the database
@@ -60,27 +58,26 @@ public class MoodEventRepository {
      * @param onSuccessListener The listener to be called when the mood events are successfully fetched
      * @param onFailureListener The listener to be called when the mood events cannot be fetched
      */
-    public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef,
-                                              @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener,
-                                              OnFailureListener onFailureListener) {
+    public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
+        // Removed ordering by timestamp to avoid requiring a Firestore index
         getMoodEventCollRef()
                 .whereEqualTo("participantRef", participantRef)
-                .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
-                        Log.e(TAG, "No mood events found with participantRef: " + participantRef);
+                        Log.e("MoodEventRepository", "No mood events found with participantRef: " + participantRef);
                         onSuccessListener.onSuccess(new ArrayList<>());
                         return;
                     }
-                    List<MoodEvent> moodEvents = new ArrayList<>();
-                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        MoodEvent moodEvent = doc.toObject(MoodEvent.class);
-                        if (moodEvent != null) {
-                            moodEvent.setId(doc.getId());
-                            moodEvents.add(moodEvent);
-                        }
+                    List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
+
+                    // Ensure all IDs are set
+                    for (int i = 0; i < moodEvents.size(); i++) {
+                        DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(i);
+                        MoodEvent event = moodEvents.get(i);
+                        event.setId(doc.getId());
                     }
+
                     onSuccessListener.onSuccess(moodEvents);
                 })
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
@@ -88,53 +85,58 @@ public class MoodEventRepository {
     }
 
     /**
-     * Fetches all mood events that are created by the participants that the given participant is following
+     * fetches all mood events that are created by the participants that the given participant is following
      *
      * @param username          The username of the participant whose following's mood events are to be fetched
      * @param onSuccessListener The listener to be called when the mood events are successfully fetched
      * @param onFailureListener The listener to be called when the mood events cannot be fetched
      */
-    public void fetchForEventsFromFollowing(@NonNull String username, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
+    public void fetchForEventsFromFollowing(@NonNull String username, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
         participantRepository.fetchFollowing(username, following -> {
-            if (following == null || following.isEmpty()) {
-                // If not following anyone, return empty list
-                onSuccessListener.onSuccess(new ArrayList<>());
-                return;
-            }
-
             List<MoodEvent> allMoodEvents = new ArrayList<>();
-            AtomicInteger queriesRemaining = new AtomicInteger(following.size());
 
-            if (following.isEmpty()) {
+            // Handle the case of no followed users
+            if (following == null || following.isEmpty()) {
                 onSuccessListener.onSuccess(allMoodEvents);
                 return;
             }
 
+            // Counter to track when all queries are complete
+            final int[] queriesRemaining = {following.size()};
+
             for (String followingUsername : following) {
-                DocumentReference followingRef = participantRepository.getParticipantRef(followingUsername);
+                // Don't use orderBy to avoid Firestore index requirements
                 getMoodEventCollRef()
-                        .whereEqualTo("participantRef", followingRef)
-                        .orderBy("timestamp", Query.Direction.DESCENDING)
+                        .whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
                         .limit(MAX_EVENTS_PER_USER)
                         .get()
                         .addOnSuccessListener(queryDocumentSnapshots -> {
+                            List<MoodEvent> moodEvents = new ArrayList<>();
+
+                            // Process each document, setting the ID explicitly
                             for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                                MoodEvent moodEvent = doc.toObject(MoodEvent.class);
-                                if (moodEvent != null) {
-                                    moodEvent.setId(doc.getId());
-                                    synchronized (allMoodEvents) {
-                                        allMoodEvents.add(moodEvent);
-                                    }
+                                MoodEvent event = doc.toObject(MoodEvent.class);
+                                if (event != null) {
+                                    event.setId(doc.getId());
+                                    moodEvents.add(event);
                                 }
                             }
 
-                            if (queriesRemaining.decrementAndGet() == 0) {
+                            // Add to our combined results
+                            synchronized (allMoodEvents) {
+                                allMoodEvents.addAll(moodEvents);
+                            }
+
+                            // If all queries are complete, return the results
+                            if (queriesRemaining[0]-- <= 1) {
                                 onSuccessListener.onSuccess(allMoodEvents);
                             }
                         })
                         .addOnFailureListener(e -> {
-                            Log.e(TAG, "Error fetching mood events for: " + followingUsername, e);
-                            if (queriesRemaining.decrementAndGet() == 0) {
+                            Log.e(TAG, "Error fetching events for " + followingUsername, e);
+
+                            // Even on failure, decrement counter and check if done
+                            if (queriesRemaining[0]-- <= 1) {
                                 onSuccessListener.onSuccess(allMoodEvents);
                             }
                         });
@@ -144,6 +146,10 @@ public class MoodEventRepository {
 
     /**
      * Fetches all mood events in the radius of the given location that the participant is following
+     *
+     * <p>
+     * Referenced <a href="https://firebase.google.com/docs/firestore/solutions/geoqueries#query_geohashes">Firebase Geo-hashes</a>
+     * </p>
      *
      * @param username          username of the participant
      * @param location          current location of the user
@@ -167,7 +173,6 @@ public class MoodEventRepository {
             public void onComplete(@NonNull Task<List<Task<?>>> t) {
                 if (!t.isSuccessful()) {
                     onFailureListener.onFailure(t.getException() != null ? t.getException() : new Exception("Failed to fetch mood events in radius"));
-                    return;
                 }
                 List<MoodEvent> matchingDocs = new ArrayList<>();
                 for (Task<QuerySnapshot> task : tasks) {
@@ -179,12 +184,9 @@ public class MoodEventRepository {
                         GeoLocation docLocation = new GeoLocation(lat, lng);
                         double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
                         if (distanceInM <= radius && !Objects.requireNonNull(doc.get("participantRef")).equals(participantRepository.getParticipantRef(username))) {
-                            MoodEvent event = doc.toObject(MoodEvent.class);
-                            if (event != null) {
-                                event.setId(doc.getId());
-                                matchingDocs.add(event);
-                            }
+                            matchingDocs.add(doc.toObject(MoodEvent.class));
                         }
+
                     }
                 }
 
@@ -200,18 +202,12 @@ public class MoodEventRepository {
                     Map<String, MoodEvent> mostRecentByUser = new HashMap<>();
                     for (MoodEvent event : filteredByFollowing) {
                         String user = event.getParticipantRef().getId();
-                        if (!mostRecentByUser.containsKey(user) ||
-                                (event.getTimestamp() != null &&
-                                        mostRecentByUser.get(user).getTimestamp() != null &&
-                                        event.getTimestamp().after(mostRecentByUser.get(user).getTimestamp()))) {
+                        if (!mostRecentByUser.containsKey(user) || event.getTimestamp().after(mostRecentByUser.get(user).getTimestamp())) {
                             mostRecentByUser.put(user, event);
                         }
                     }
                     onSuccessListener.onSuccess(new ArrayList<>(mostRecentByUser.values()));
-                }, e -> {
-                    Log.e(TAG, "Error fetching following list", e);
-                    onFailureListener.onFailure(e);
-                });
+                }, onFailureListener);
             }
         });
     }
@@ -252,10 +248,9 @@ public class MoodEventRepository {
      * @param onFailureListener The listener to be called when the mood event cannot be updated
      */
     public void updateMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
+        // need to add check if the mood event id is null
         if (moodEvent.getId() == null) {
-            if (onFailureListener != null) {
-                onFailureListener.onFailure(new IllegalArgumentException("Mood event ID cannot be null"));
-            }
+            onFailureListener.onFailure(new IllegalArgumentException("Mood event ID cannot be null"));
             return;
         }
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
@@ -281,8 +276,7 @@ public class MoodEventRepository {
                     List<Comment> comments = queryDocumentSnapshots.toObjects(Comment.class);
                     onSuccessListener.onSuccess(comments);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                        Log.e(TAG, "Failed to fetch comments for mood event: " + moodEvent, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch comments for mood event: " + moodEvent, e));
     }
 
     /**
@@ -296,7 +290,6 @@ public class MoodEventRepository {
     public void addComment(@NonNull MoodEvent moodEvent, @NonNull Comment comment, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).collection("comments").document(comment.getId()).set(comment)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                        Log.e(TAG, "Failed to add comment: " + comment, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add comment: " + comment, e));
     }
 }
