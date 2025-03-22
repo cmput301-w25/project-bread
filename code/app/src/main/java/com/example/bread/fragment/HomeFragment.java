@@ -48,8 +48,7 @@ public class HomeFragment extends Fragment {
     private MoodEventRepository moodEventRepository;
     private FirebaseAuth mAuth;
 
-    ListView moodEventListView;
-
+    private ListView moodEventListView;
 
     // Filter-related variables
     private FloatingActionButton filterButton;
@@ -77,8 +76,6 @@ public class HomeFragment extends Fragment {
             filterButton.setOnClickListener(v -> showFilterDialog());
         }
 
-        // Note: To use clicking functionality, when you implement the ListView and adapter later,
-        // you'll need to add this line:
         moodEventArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
         fetchMoodEvents();
         return view;
@@ -102,8 +99,9 @@ public class HomeFragment extends Fragment {
                         // Reapply any existing filters
                         if (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty()) {
                             applyFilters();
+                        } else {
+                            moodEventArrayAdapter.notifyDataSetChanged();
                         }
-                        moodEventArrayAdapter.notifyDataSetChanged();
                     }
                 }, e -> {
                     Log.e(TAG, "Failed to fetch mood events for user: " + username, e);
@@ -222,8 +220,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void applyFilters() {
-        if (allMoodEvents.isEmpty()) {
-            Log.w(TAG, "allMoodEvents was empty, copying current mood events list");
+        if (allMoodEvents.isEmpty() && !moodEventArrayList.isEmpty()) {
             allMoodEvents.addAll(moodEventArrayList);
         }
 
@@ -241,16 +238,9 @@ public class HomeFragment extends Fragment {
             filteredList = filterByKeyword(filteredList, searchKeyword);
         }
 
-        Log.d(TAG, "Filtered list size: " + filteredList.size());
-
         moodEventArrayList.clear();
         moodEventArrayList.addAll(filteredList);
-
-        if (moodEventArrayAdapter != null) {
-            moodEventArrayAdapter.notifyDataSetChanged();
-        } else {
-            Log.e(TAG, "MoodEventArrayAdapter is null!");
-        }
+        moodEventArrayAdapter.notifyDataSetChanged();
 
         if (filteredList.isEmpty() && (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty())) {
             Toast.makeText(getContext(), "No mood events match the applied filters", Toast.LENGTH_SHORT).show();
@@ -264,7 +254,7 @@ public class HomeFragment extends Fragment {
         Date oneWeekAgo = calendar.getTime();
 
         for (MoodEvent event : events) {
-            if (event.getTimestamp().after(oneWeekAgo)) {
+            if (event.getTimestamp() != null && event.getTimestamp().after(oneWeekAgo)) {
                 filteredList.add(event);
             }
         }
@@ -297,24 +287,17 @@ public class HomeFragment extends Fragment {
     }
 
     private void resetFilters() {
-        Log.d(TAG, "Resetting filters...");
-        Log.d(TAG, "All mood events size: " + allMoodEvents.size());
-
         if (!allMoodEvents.isEmpty()) {
             moodEventArrayList.clear();
             moodEventArrayList.addAll(allMoodEvents);
-            moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
-
-            Log.d(TAG, "Mood events size after reset: " + moodEventArrayList.size());
-
-            if (moodEventArrayAdapter != null) {
-                moodEventArrayAdapter.notifyDataSetChanged();
-            } else {
-                Log.e(TAG, "MoodEventArrayAdapter is null!");
-            }
-        } else {
-            Log.e(TAG, "No events available to reset!");
+            moodEventArrayList.sort(Comparator.reverseOrder());
+            moodEventArrayAdapter.notifyDataSetChanged();
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        fetchMoodEvents();
+    }
 }
