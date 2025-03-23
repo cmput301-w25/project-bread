@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.bread.R;
@@ -36,6 +37,8 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
         TextView mood;
         TextView socialSituation;
         ImageView profilePic;
+        ImageView moodImage;
+        CardView miniImageHolder;
         ConstraintLayout eventLayout;
     }
 
@@ -54,6 +57,8 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             holder.profilePic = convertView.findViewById(R.id.profile_image_home);
             holder.eventLayout = convertView.findViewById(R.id.homeConstraintLayout);
             holder.socialSituation = convertView.findViewById(R.id.textSocialSituation);
+            holder.moodImage = convertView.findViewById(R.id.event_home_image);
+            holder.miniImageHolder = convertView.findViewById(R.id.event_home_image_holder);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -76,6 +81,12 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
                 holder.username.setText("Unknown");
                 holder.profilePic.setImageResource(R.drawable.ic_baseline_profile_24);
             });
+            if (moodEvent.getAttachedImage() != null) {
+                holder.moodImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
+            } else {
+                holder.moodImage.setVisibility(View.GONE);
+                holder.miniImageHolder.setVisibility(View.GONE);
+            }
             holder.title.setText(moodEvent.getTitle());
             holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
             holder.mood.setText(moodEvent.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
