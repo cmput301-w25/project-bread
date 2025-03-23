@@ -117,7 +117,7 @@ public class HistoryFragment extends Fragment {
      * Sorts mood events by date and time added
      */
     private void loadMoodEvents() {
-        moodsRepo.listenForEventsWithParticipantRef(participantRef, moodEvents -> {
+        moodsRepo.fetchEventsWithParticipantRef(participantRef, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
@@ -378,57 +378,28 @@ public class HistoryFragment extends Fragment {
     // Filter-related methods
     private void showFilterDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_filter_moods, null);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_history_filter_moods, null);
         builder.setView(dialogView);
 
         SwitchMaterial recentWeekSwitch = dialogView.findViewById(R.id.recent_week_switch);
-        Spinner moodSpinner = dialogView.findViewById(R.id.mood_spinner);
         EditText keywordEditText = dialogView.findViewById(R.id.keyword_edit_text);
         Button applyButton = dialogView.findViewById(R.id.apply_button);
         Button resetButton = dialogView.findViewById(R.id.reset_button);
-
-        List<String> moodOptions = new ArrayList<>();
-        moodOptions.add("All Moods");
-        for (MoodEvent.EmotionalState state : MoodEvent.EmotionalState.values()) {
-            if (state != MoodEvent.EmotionalState.NONE) {
-                moodOptions.add(state.toString());
-            }
-        }
-
-        ArrayAdapter<String> moodAdapter = new ArrayAdapter<String>(
-                getContext(),
-                android.R.layout.simple_spinner_item,
-                moodOptions
-        ) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
-                text.setTextColor(Color.WHITE);
-                return view;
-            }
-
-            @Override
-            public View getDropDownView(int position, View convertView, ViewGroup parent) {
-                View view = super.getDropDownView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
-                text.setTextColor(Color.WHITE);
-                text.setPadding(16, 16, 16, 16);
-                return view;
-            }
-        };
-
-        moodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        moodSpinner.setAdapter(moodAdapter);
+        Spinner emotionalStateText = dialogView.findViewById(R.id.emotional_state_text);
 
         recentWeekSwitch.setChecked(isFilteringByWeek);
-        if (selectedEmotionalState != null) {
-            int position = moodOptions.indexOf(selectedEmotionalState.toString());
-            if (position >= 0) {
-                moodSpinner.setSelection(position);
-            }
-        }
         keywordEditText.setText(searchKeyword);
+
+        Spinner emotionalStateSpinner = dialogView.findViewById(R.id.emotional_state_text);
+        ArrayAdapter<MoodEvent.EmotionalState> adapter = new ArrayAdapter<>(
+                getContext(),
+                android.R.layout.simple_spinner_dropdown_item,
+                MoodEvent.EmotionalState.values());
+        emotionalStateSpinner.setAdapter(adapter);
+
+        if (selectedEmotionalState != null) {
+            emotionalStateSpinner.setSelection(adapter.getPosition(selectedEmotionalState));
+        }
 
         AlertDialog dialog = builder.create();
         if (dialog.getWindow() != null) {
@@ -438,24 +409,15 @@ public class HistoryFragment extends Fragment {
 
         applyButton.setOnClickListener(v -> {
             isFilteringByWeek = recentWeekSwitch.isChecked();
-
-            int moodPosition = moodSpinner.getSelectedItemPosition();
-            if (moodPosition > 0) {
-                String selectedMood = moodOptions.get(moodPosition);
-                selectedEmotionalState = MoodEvent.EmotionalState.valueOf(selectedMood);
-            } else {
-                selectedEmotionalState = null;
-            }
-
+            selectedEmotionalState = (MoodEvent.EmotionalState) emotionalStateSpinner.getSelectedItem();
             searchKeyword = keywordEditText.getText().toString().trim().toLowerCase();
-
             applyFilters();
             dialog.dismiss();
         });
 
         resetButton.setOnClickListener(v -> {
             recentWeekSwitch.setChecked(false);
-            moodSpinner.setSelection(0);
+            emotionalStateSpinner.setSelection(0);
             keywordEditText.setText("");
 
             isFilteringByWeek = false;
