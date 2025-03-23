@@ -1,4 +1,386 @@
 <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/transparent">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/addMoodCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
+        app:cardPreventCornerOverlap="true">
+
+        <LinearLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Mood Event"
+                android:textSize="20sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="@font/righteous"
+                android:layout_gravity="center"
+                android:paddingBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="4dp"
+                android:text="Title"
+                android:textColor="#FFFFFF" />
+
+            <EditText
+                android:id="@+id/eventTitleEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_background"
+                android:hint="Ex: Party"
+                android:gravity="center_vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
+                android:text="Emotional State"
+                android:textColor="#FFFFFF" />
+
+            <Spinner
+                android:id="@+id/emotionalStateSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/spinner_rounded_background_with_arrow"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
+                android:text="Reason (optional)"
+                android:textColor="#FFFFFF" />
+
+            <EditText
+                android:id="@+id/reasonEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_background"
+                android:hint="Ex: Birthday"
+                android:gravity="center_vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
+                android:text="Social Situation (optional)"
+                android:textColor="#FFFFFF" />
+
+            <Spinner
+                android:id="@+id/socialSituationSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/spinner_rounded_background_with_arrow"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text=""
+                android:textColor="#FFFFFF" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/locationChip"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="Add Location"
+                    android:textColor="#FFFFFF"
+
+                    app:chipCornerRadius="27dp"
+                    app:chipStrokeWidth="1dp"
+                    app:checkedIcon="@drawable/ic_check"
+                    app:checkedIconEnabled="true"
+                    app:checkedIconTint="#f8b64c"
+                    />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/publicChip"
+                    style="@style/Widget.MaterialComponents.Chip.Choice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="56dp"
+                    android:text="Make Public"
+                    android:textColor="#FFFFFF"
+
+                    app:chipCornerRadius="27dp"
+                    app:chipStrokeWidth="1dp"
+                    app:checkedIcon="@drawable/ic_check"
+                    app:checkedIconEnabled="true"
+                    app:checkedIconTint="#f8b64c" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:paddingTop="8dp">
+
+                <Button
+                    android:id="@+id/cancelButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:backgroundTint="#808080"
+                    android:padding="8dp"
+                    android:text="Cancel"
+                    android:textColor="#FFFFFF" />
+
+                <Button
+                    android:id="@+id/saveButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#f8b64c"
+                    android:padding="8dp"
+                    android:text="Save Mood"
+                    android:textColor="#FFFFFF" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>
+
+<!--
+/////////////////////////////////////////////////////////////////////////////////
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="@android:color/transparent">
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/addMoodCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
+        app:cardPreventCornerOverlap="true">
+
+        <LinearLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add Mood Event"
+                android:textSize="20sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="@font/righteous"
+                android:layout_gravity="center"
+                android:paddingBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="4dp"
+                android:text="Title"
+                android:textColor="#FFFFFF" />
+
+            <EditText
+                android:id="@+id/eventTitleEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_background"
+                android:hint="Ex: Party"
+                android:gravity="center_vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
+                android:text="Emotional State"
+                android:textColor="#FFFFFF" />
+
+            <Spinner
+                android:id="@+id/emotionalStateSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/spinner_rounded_background_with_arrow"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
+                android:text="Reason (optional)"
+                android:textColor="#FFFFFF" />
+
+            <EditText
+                android:id="@+id/reasonEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_background"
+                android:hint="Ex: Birthday"
+                android:gravity="center_vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
+                android:text="Social Situation (optional)"
+                android:textColor="#FFFFFF" />
+
+            <Spinner
+                android:id="@+id/socialSituationSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/spinner_rounded_background_with_arrow"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text=""
+                android:textColor="#FFFFFF" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
+
+                <CheckBox
+                    android:id="@+id/locationCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:maxWidth="160dp"
+                    android:background="@drawable/rounded_background"
+                    android:buttonTint="#4CAF50"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="5dp"
+                    android:text="Attach Location"
+                    android:textColor="#FFFFFF" />
+
+                <CheckBox
+                    android:id="@+id/publicCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="16dp"
+                    android:background="@drawable/rounded_background"
+                    android:buttonTint="#4CAF50"
+                    android:checked="false"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:text="Make Public"
+                    android:textColor="#FFFFFF" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:paddingTop="8dp">
+
+                <Button
+                    android:id="@+id/cancelButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="16dp"
+                    android:backgroundTint="#808080"
+                    android:padding="8dp"
+                    android:text="Cancel"
+                    android:textColor="#FFFFFF" />
+
+                <Button
+                    android:id="@+id/saveButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#f97070"
+                    android:padding="8dp"
+                    android:text="Save Mood"
+                    android:textColor="#FFFFFF" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</LinearLayout>
+
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -14,10 +396,10 @@
         android:scaleX="0.75"
         android:scaleY="0.75"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.007"
         app:srcCompat="@mipmap/sound_wave_layer" />
 
@@ -35,143 +417,166 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.049" />
 
-    <LinearLayout
-        android:id="@+id/content_layout"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/addMoodCard"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@id/sentio_logo"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardUseCompatPadding="true"
+        app:cardPreventCornerOverlap="true"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingBottom="4dp"
-            android:text="Title"
-            android:textColor="#FFFFFF" />
-
-        <EditText
-            android:id="@+id/eventTitleEditText"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/rounded_background"
-            android:hint="Ex: Party"
-            android:padding="10dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:textColor="#FFFFFF" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="0.5">
 
         <LinearLayout
+            android:id="@+id/content_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="4dp" />
+            android:orientation="vertical"
+            android:padding="16dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="4dp"
-            android:text="Emotional State"
-            android:textColor="#FFFFFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingBottom="4dp"
+                android:text="Title"
+                android:textColor="#FFFFFF" />
 
-        <Spinner
-            android:id="@+id/emotionalStateSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/spinner_rounded_background_with_arrow"
-            android:padding="10dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:textColor="#FFFFFF" />
+            <EditText
+                android:id="@+id/eventTitleEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_background"
+                android:hint="Ex: Party"
+                android:gravity="center_vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="4dp"
-            android:text="Reason"
-            android:textColor="#FFFFFF" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="4dp" />
 
-        <EditText
-            android:id="@+id/reasonEditText"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/rounded_background"
-            android:hint="Ex: Birthday"
-            android:padding="10dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:textColor="#FFFFFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
+                android:text="Emotional State"
+                android:textColor="#FFFFFF" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="4dp"
-            android:text="Trigger"
-            android:textColor="#FFFFFF" />
+            <Spinner
+                android:id="@+id/emotionalStateSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/spinner_rounded_background_with_arrow"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
 
-        <EditText
-            android:id="@+id/triggerEditText"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/rounded_background"
-            android:hint="Optional"
-            android:padding="10dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:textColor="#FFFFFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
+                android:text="Reason (optional)"
+                android:textColor="#FFFFFF" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="4dp"
-            android:text="Social Situation (optional)"
-            android:textColor="#FFFFFF" />
+            <EditText
+                android:id="@+id/reasonEditText"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/rounded_background"
+                android:hint="Ex: Birthday"
+                android:gravity="center_vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
 
-        <Spinner
-            android:id="@+id/socialSituationSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:background="@drawable/spinner_rounded_background_with_arrow"
-            android:padding="10dp"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:textColor="#FFFFFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="8dp"
+                android:paddingBottom="4dp"
+                android:text="Social Situation (optional)"
+                android:textColor="#FFFFFF" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="3dp"
-            android:paddingBottom="3dp"
-            android:text=""
-            android:textColor="#FFFFFF" />
+            <Spinner
+                android:id="@+id/socialSituationSpinner"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:background="@drawable/spinner_rounded_background_with_arrow"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="20dp"
+                android:textColor="#FFFFFF" />
 
-        <CheckBox
-            android:id="@+id/locationCheckbox"
-            android:layout_width="157dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/rounded_background"
-            android:buttonTint="#4CAF50"
-            android:text="Include Location"
-            android:textColor="#FFFFFF" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text=""
+                android:textColor="#FFFFFF" />
 
-        <Button
-            android:id="@+id/saveButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:backgroundTint="#f97070"
-            android:padding="8dp"
-            android:text="Save Mood"
-            android:textColor="#FFFFFF" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="8dp">
 
-    </LinearLayout>
+                <CheckBox
+                    android:id="@+id/locationCheckbox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:maxWidth="160dp"
+                    android:background="@drawable/rounded_background"
+                    android:buttonTint="#4CAF50"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="5dp"
+                    android:text="Attach Location"
+                    android:textColor="#FFFFFF" />
+
+                <CheckBox
+                    android:id="@+id/publicCheckbox"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/rounded_background"
+                    android:buttonTint="#4CAF50"
+                    android:checked="false"
+                    android:paddingStart="0dp"
+                    android:paddingEnd="0dp"
+                    android:text="Make Public"
+                    android:textColor="#FFFFFF" />
+
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="0dp"
+                android:backgroundTint="#f97070"
+                android:padding="8dp"
+                android:text="Save Mood"
+                android:textColor="#FFFFFF" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+-->

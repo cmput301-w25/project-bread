@@ -121,10 +121,6 @@ public class HistoryFragment extends Fragment {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
-<<<<<<< HEAD
-                        //chatGPT prompt "how can i sort an ArrayList of events by timestamp Date object"
-=======
->>>>>>> origin/main
                         moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
 
                         // Save all mood events for filtering

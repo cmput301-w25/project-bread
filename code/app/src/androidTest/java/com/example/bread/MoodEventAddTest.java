@@ -99,7 +99,7 @@ public class MoodEventAddTest {
         // Fill in the mood event details
         onView(withId(R.id.eventTitleEditText)).perform(replaceText("Test Mood Event"));
         onView(withId(R.id.reasonEditText)).perform(replaceText("ReasonIsRandom"));
-        onView(withId(R.id.triggerEditText)).perform(replaceText("Test trigger"));
+
 
         // Select emotional state
         onView(withId(R.id.emotionalStateSpinner)).perform(click());
@@ -127,9 +127,10 @@ public class MoodEventAddTest {
         onView(withId(R.id.emotionalStateSpinner)).check(matches(isDisplayed()));
         onView(withId(R.id.eventTitleEditText)).check(matches(isDisplayed()));
         onView(withId(R.id.reasonEditText)).check(matches(isDisplayed()));
-        onView(withId(R.id.triggerEditText)).check(matches(isDisplayed()));
         onView(withId(R.id.socialSituationSpinner)).check(matches(isDisplayed()));
-        onView(withId(R.id.locationCheckbox)).check(matches(isDisplayed()));
+        onView(withId(R.id.locationChip)).check(matches(isDisplayed()));
+        onView(withId(R.id.publicChip)).check(matches(isDisplayed()));
+
         onView(withId(R.id.saveButton)).check(matches(isDisplayed()));
     }
 
@@ -152,33 +153,33 @@ public class MoodEventAddTest {
         onData(is(MoodEvent.EmotionalState.HAPPY)).perform(click());
 
         // Add a reason that is too long (> 20 chars)
-        onView(withId(R.id.reasonEditText)).perform(replaceText("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+        onView(withId(R.id.reasonEditText)).perform(replaceText("ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 
         // Click save button
         onView(withId(R.id.saveButton)).perform(click());
 
         // Verify error is shown
-        onView(withId(R.id.reasonEditText)).check(matches(hasErrorText(containsString("Reason must be 20 characters or fewer and 3 words or fewer"))));
+        onView(withId(R.id.reasonEditText)).check(matches(hasErrorText(containsString("Reason must be 200 characters or fewer"))));
     }
 
-    @Test
-    public void testReasonWordCountValidation() {
-        // Add a valid event title
-        onView(withId(R.id.eventTitleEditText)).perform(replaceText("Test Event"));
-
-        // Select a valid emotional state
-        onView(withId(R.id.emotionalStateSpinner)).perform(click());
-        onData(is(MoodEvent.EmotionalState.HAPPY)).perform(click());
-
-        // Add a reason with too many words (> 3 words)
-        onView(withId(R.id.reasonEditText)).perform(replaceText("Typing a lot of words"));
-
-        // Click save button
-        onView(withId(R.id.saveButton)).perform(click());
-
-        // Verify error is shown
-        onView(withId(R.id.reasonEditText)).check(matches(hasErrorText(containsString("Reason must be 20 characters or fewer and 3 words or fewer"))));
-    }
+//    @Test
+//    public void testReasonWordCountValidation() {
+//        // Add a valid event title
+//        onView(withId(R.id.eventTitleEditText)).perform(replaceText("Test Event"));
+//
+//        // Select a valid emotional state
+//        onView(withId(R.id.emotionalStateSpinner)).perform(click());
+//        onData(is(MoodEvent.EmotionalState.HAPPY)).perform(click());
+//
+//        // Add a reason with too many words (> 3 words)
+//        onView(withId(R.id.reasonEditText)).perform(replaceText("Typing a lot of words"));
+//
+//        // Click save button
+//        onView(withId(R.id.saveButton)).perform(click());
+//
+//        // Verify error is shown
+//        onView(withId(R.id.reasonEditText)).check(matches(hasErrorText(containsString("Reason must be 200 characters or fewer"))));
+//    }
 
     @Test
     public void testNoneEmotionalStateValidation() throws InterruptedException {
@@ -191,7 +192,7 @@ public class MoodEventAddTest {
         onView(withId(R.id.reasonEditText)).perform(replaceText("Some Reason"));
 
 
-        onView(withId(R.id.triggerEditText)).perform(replaceText("Some Trigger"));
+
         onView(withId(R.id.socialSituationSpinner)).perform(click());
         onData(is(MoodEvent.SocialSituation.ALONE)).perform(click());
         // Click save
