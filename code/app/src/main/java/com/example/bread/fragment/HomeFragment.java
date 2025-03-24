@@ -196,7 +196,7 @@ public class HomeFragment extends Fragment {
             int moodPosition = moodSpinner.getSelectedItemPosition();
             if (moodPosition > 0) {
                 String selectedMood = moodOptions.get(moodPosition);
-                selectedEmotionalState = MoodEvent.EmotionalState.valueOf(selectedMood);
+                selectedEmotionalState = MoodEvent.EmotionalState.valueOf(selectedMood.toUpperCase());
             } else {
                 selectedEmotionalState = null;
             }
