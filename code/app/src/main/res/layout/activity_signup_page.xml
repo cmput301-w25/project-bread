@@ -37,7 +37,7 @@
 
     <EditText
         android:id="@+id/signup_password_text"
-        android:layout_width="300dp"
+        android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginTop="32dp"
         android:background="@drawable/rounded_background_sign_log"
@@ -47,6 +47,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:textColor="@color/white"
+        android:layout_marginHorizontal="58dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -66,7 +67,7 @@
 
     <EditText
         android:id="@+id/signup_email_text"
-        android:layout_width="300dp"
+        android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginTop="32dp"
         android:background="@drawable/rounded_background_sign_log"
@@ -76,6 +77,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:textColor="@color/white"
+        android:layout_marginHorizontal="58dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -83,7 +85,7 @@
 
     <EditText
         android:id="@+id/signup_username_text"
-        android:layout_width="300dp"
+        android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginTop="32dp"
         android:background="@drawable/rounded_background_sign_log"
@@ -93,6 +95,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:textColor="@color/white"
+        android:layout_marginHorizontal="58dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -124,12 +127,13 @@
 
     <Button
         android:id="@+id/signup_button"
-        android:layout_width="229dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="42dp"
         android:text="Create Account"
         android:backgroundTint="#F8B64C"
         android:textColor="@color/black"
+        android:layout_marginHorizontal="58dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -153,7 +157,7 @@
 
     <EditText
         android:id="@+id/signup_lastname_text"
-        android:layout_width="300dp"
+        android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginTop="32dp"
         android:background="@drawable/rounded_background_sign_log"
@@ -163,6 +167,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:textColor="@color/white"
+        android:layout_marginHorizontal="58dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -170,7 +175,7 @@
 
     <EditText
         android:id="@+id/signup_firstname_text"
-        android:layout_width="300dp"
+        android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginTop="52dp"
         android:background="@drawable/rounded_background_sign_log"
@@ -180,6 +185,7 @@
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
         android:textColor="@color/white"
+        android:layout_marginHorizontal="58dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"

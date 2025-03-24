@@ -64,9 +64,10 @@
 
     <EditText
         android:id="@+id/login_email_text"
-        android:layout_width="229dp"
+        android:layout_width="0dp"
         android:layout_height="40dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="68dp"
+        android:layout_marginHorizontal="90dp"
         android:background="@drawable/rounded_background_sign_log"
         android:ems="10"
         android:inputType="textEmailAddress"
@@ -75,7 +76,6 @@
         android:paddingEnd="20dp"
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/login_tagline" />
 
@@ -93,9 +93,10 @@
 
     <EditText
         android:id="@+id/login_password_text"
-        android:layout_width="229dp"
+        android:layout_width="0dp"
         android:layout_height="40dp"
         android:layout_marginTop="54dp"
+        android:layout_marginHorizontal="90dp"
         android:background="@drawable/rounded_background_sign_log"
         android:ems="10"
         android:inputType="textPassword"
@@ -109,11 +110,12 @@
 
     <Button
         android:id="@+id/login_button"
-        android:layout_width="229dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="64dp"
         android:backgroundTint="#F8B64C"
         android:text="Login"
+        android:layout_marginHorizontal="85dp"
         android:textColor="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
