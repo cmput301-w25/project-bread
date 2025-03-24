@@ -1,18 +1,23 @@
 package com.example.bread.fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,11 +25,16 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bread.R;
 import com.example.bread.controller.HomeMoodEventArrayAdapter;
+import com.example.bread.controller.UserAdapter;
 import com.example.bread.model.MoodEvent;
+import com.example.bread.model.Participant;
 import com.example.bread.repository.MoodEventRepository;
+import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.view.LoginPage;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -36,19 +46,44 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Represents the home page of the app, where users can view mood events from users they follow.
+ * Also includes search functionality to find and follow other users.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements UserAdapter.UserInteractionListener {
 
     private static final String TAG = "HomeFragment";
+
+    // Mood events section
     private ArrayList<MoodEvent> moodEventArrayList;
     private HomeMoodEventArrayAdapter moodEventArrayAdapter;
-    private MoodEventRepository moodEventRepository;
-    private FirebaseAuth mAuth;
-
     private ListView moodEventListView;
+    private ProgressBar moodsLoadingIndicator;
+    private TextView emptyMoodsView;
+
+    // Search section
+    private EditText searchEditText;
+    private RecyclerView userRecyclerView;
+    private ProgressBar searchProgressBar;
+    private TextView searchEmptyView;
+    private FloatingActionButton searchButton;
+    private View searchContainer;
+
+    private MoodEventRepository moodEventRepository;
+    private ParticipantRepository participantRepository;
+    private FirebaseAuth mAuth;
+    private String currentUsername;
+
+    // User search
+    private UserAdapter userAdapter;
+    private List<Participant> userList = new ArrayList<>();
+    private AtomicBoolean isSearching = new AtomicBoolean(false);
+
+    // Handler for delayed searches
+    private Runnable searchRunnable;
+    private final long SEARCH_DELAY_MS = 500;
 
     // Filter-related variables
     private FloatingActionButton filterButton;
@@ -62,13 +97,55 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        // Initialize mood list views
         moodEventListView = view.findViewById(R.id.homeListView);
+        moodsLoadingIndicator = view.findViewById(R.id.moods_loading_indicator);
+        emptyMoodsView = view.findViewById(R.id.empty_moods_view);
+
         moodEventArrayList = new ArrayList<>();
         moodEventArrayAdapter = new HomeMoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodEventArrayAdapter);
 
+        // Initialize search section views
+        searchEditText = view.findViewById(R.id.search_edit_text);
+        userRecyclerView = view.findViewById(R.id.user_recycler_view);
+        searchProgressBar = view.findViewById(R.id.search_progress_bar);
+        searchEmptyView = view.findViewById(R.id.search_empty_view);
+        searchContainer = view.findViewById(R.id.search_container);
+        searchButton = view.findViewById(R.id.search_button);
+
+        // Ensure search container is initially hidden
+        if (searchContainer != null) {
+            searchContainer.setVisibility(View.GONE);
+        } else {
+            Log.e(TAG, "Search container not found in layout");
+        }
+
         mAuth = FirebaseAuth.getInstance();
         moodEventRepository = new MoodEventRepository();
+        participantRepository = new ParticipantRepository();
+
+        // Get current user
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            currentUsername = user.getDisplayName();
+        }
+
+        // Setup search functionality
+        setupSearch();
+
+        // Setup click listeners
+        if (searchButton != null) {
+            searchButton.setOnClickListener(v -> {
+                Log.d(TAG, "Search button clicked");
+                if (searchContainer.getVisibility() == View.VISIBLE) {
+                    hideSearchContainer();
+                } else {
+                    showSearchContainer();
+                }
+            });
+        }
 
         // Add filter button click listener
         filterButton = view.findViewById(R.id.filter_button_home);
@@ -76,11 +153,114 @@ public class HomeFragment extends Fragment {
             filterButton.setOnClickListener(v -> showFilterDialog());
         }
 
+        // Set click listener for mood events
         moodEventArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
+
+        // Fetch mood events
         fetchMoodEvents();
+
         return view;
     }
 
+    /**
+     * Sets up the search functionality UI and event listeners
+     */
+    private void setupSearch() {
+        // Set up RecyclerView for user search
+        userAdapter = new UserAdapter(userList, this);
+        userRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        userRecyclerView.setAdapter(userAdapter);
+
+        // Set up search text watcher with debounce
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString().trim();
+
+                // Cancel any pending search
+                if (searchRunnable != null) {
+                    searchEditText.removeCallbacks(searchRunnable);
+                }
+
+                if (query.length() >= 2) {
+                    // Show loading indicator
+                    searchProgressBar.setVisibility(View.VISIBLE);
+                    searchEmptyView.setVisibility(View.GONE);
+
+                    // Create a new search with delay to debounce input
+                    searchRunnable = () -> searchUsers(query);
+                    searchEditText.postDelayed(searchRunnable, SEARCH_DELAY_MS);
+                } else {
+                    // Clear results when search is cleared
+                    clearSearchResults();
+                }
+            }
+        });
+    }
+
+    /**
+     * Clears search results and resets UI state
+     */
+    private void clearSearchResults() {
+        userList.clear();
+        if (userAdapter != null) {
+            userAdapter.notifyDataSetChanged();
+        }
+        searchEmptyView.setVisibility(View.GONE);
+        userRecyclerView.setVisibility(View.GONE);
+        searchProgressBar.setVisibility(View.GONE);
+    }
+
+    /**
+     * Shows the search container and displays keyboard
+     */
+    private void showSearchContainer() {
+        if (searchContainer != null) {
+            searchContainer.setVisibility(View.VISIBLE);
+            searchEditText.requestFocus();
+
+            // Show keyboard
+            try {
+                InputMethodManager imm = (InputMethodManager)
+                        requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(searchEditText, InputMethodManager.SHOW_IMPLICIT);
+            } catch (Exception e) {
+                Log.e(TAG, "Error showing keyboard", e);
+            }
+        }
+    }
+
+    /**
+     * Hides the search container and keyboard
+     */
+    private void hideSearchContainer() {
+        if (searchContainer != null) {
+            searchContainer.setVisibility(View.GONE);
+            searchEditText.setText("");
+
+            // Hide keyboard
+            try {
+                InputMethodManager imm = (InputMethodManager)
+                        requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                View currentFocus = requireActivity().getCurrentFocus();
+                if (currentFocus != null) {
+                    imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error hiding keyboard", e);
+            }
+        }
+    }
+
+    /**
+     * Fetches mood events from users the current user is following
+     */
     private void fetchMoodEvents() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -116,6 +296,61 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    /**
+     * Performs search for users by username
+     *
+     * @param query The search query (username prefix)
+     */
+    private void searchUsers(String query) {
+        if (isSearching.get()) {
+            return; // Prevent multiple concurrent searches
+        }
+
+        isSearching.set(true);
+        searchProgressBar.setVisibility(View.VISIBLE);
+        searchEmptyView.setVisibility(View.GONE);
+
+        participantRepository.searchUsersByUsername(query, participants -> {
+            userList.clear();
+
+            // Filter out the current user from results
+            for (Participant participant : participants) {
+                if (!participant.getUsername().toLowerCase().equals(currentUsername.toLowerCase())) {
+                    userList.add(participant);
+                }
+            }
+
+            userAdapter.notifyDataSetChanged();
+            updateSearchEmptyView();
+            searchProgressBar.setVisibility(View.GONE);
+            isSearching.set(false);
+        }, e -> {
+            Log.e(TAG, "Error searching users", e);
+            Toast.makeText(getContext(), "Error searching users", Toast.LENGTH_SHORT).show();
+            searchProgressBar.setVisibility(View.GONE);
+            isSearching.set(false);
+            updateSearchEmptyView();
+        });
+    }
+
+    /**
+     * Updates the visibility of the empty view based on search results
+     */
+    private void updateSearchEmptyView() {
+        if (userList.isEmpty()) {
+            searchEmptyView.setVisibility(View.VISIBLE);
+            userRecyclerView.setVisibility(View.GONE);
+        } else {
+            searchEmptyView.setVisibility(View.GONE);
+            userRecyclerView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * Shows detailed view for a selected mood event
+     *
+     * @param moodEvent The selected mood event
+     */
     private void showMoodDetailsDialog(MoodEvent moodEvent) {
         EventDetail fragment = EventDetail.newInstance(moodEvent);
         FragmentManager fragmentManager = getParentFragmentManager();
@@ -125,6 +360,62 @@ public class HomeFragment extends Fragment {
         transaction.add(R.id.frame_layout, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    @Override
+    public void onFollowClick(Participant participant) {
+        searchProgressBar.setVisibility(View.VISIBLE);
+
+        // First check if already following
+        participantRepository.isFollowing(currentUsername, participant.getUsername(), isFollowing -> {
+            if (isFollowing) {
+                Toast.makeText(getContext(), "You are already following this user", Toast.LENGTH_SHORT).show();
+                searchProgressBar.setVisibility(View.GONE);
+                return;
+            }
+
+            // Then check if a follow request already exists
+            participantRepository.checkFollowRequestExists(currentUsername, participant.getUsername(), requestExists -> {
+                if (requestExists) {
+                    Toast.makeText(getContext(), "Follow request already sent", Toast.LENGTH_SHORT).show();
+                    searchProgressBar.setVisibility(View.GONE);
+                    return;
+                }
+
+                // Send follow request
+                participantRepository.sendFollowRequest(currentUsername, participant.getUsername(), unused -> {
+                    Toast.makeText(getContext(), "Follow request sent", Toast.LENGTH_SHORT).show();
+                    updateFollowButtonState(participant.getUsername());
+                    searchProgressBar.setVisibility(View.GONE);
+                }, e -> {
+                    Log.e(TAG, "Error sending follow request", e);
+                    Toast.makeText(getContext(), "Error sending follow request", Toast.LENGTH_SHORT).show();
+                    searchProgressBar.setVisibility(View.GONE);
+                });
+            }, e -> {
+                Log.e(TAG, "Error checking follow request", e);
+                Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
+                searchProgressBar.setVisibility(View.GONE);
+            });
+        }, e -> {
+            Log.e(TAG, "Error checking follow status", e);
+            Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
+            searchProgressBar.setVisibility(View.GONE);
+        });
+    }
+
+    /**
+     * Updates the follow button state for a user in the list
+     *
+     * @param username The username to update the button for
+     */
+    private void updateFollowButtonState(String username) {
+        for (int i = 0; i < userList.size(); i++) {
+            if (userList.get(i).getUsername().equals(username)) {
+                userAdapter.notifyItemChanged(i);
+                break;
+            }
+        }
     }
 
     // Filter-related methods
@@ -219,6 +510,9 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    /**
+     * Applies filters to the mood events list
+     */
     private void applyFilters() {
         if (allMoodEvents.isEmpty() && !moodEventArrayList.isEmpty()) {
             allMoodEvents.addAll(moodEventArrayList);
@@ -238,15 +532,28 @@ public class HomeFragment extends Fragment {
             filteredList = filterByKeyword(filteredList, searchKeyword);
         }
 
+        Log.d(TAG, "Filtered list size: " + filteredList.size());
+
         moodEventArrayList.clear();
         moodEventArrayList.addAll(filteredList);
-        moodEventArrayAdapter.notifyDataSetChanged();
+
+        if (moodEventArrayAdapter != null) {
+            moodEventArrayAdapter.notifyDataSetChanged();
+        } else {
+            Log.e(TAG, "MoodEventArrayAdapter is null!");
+        }
 
         if (filteredList.isEmpty() && (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty())) {
             Toast.makeText(getContext(), "No mood events match the applied filters", Toast.LENGTH_SHORT).show();
         }
     }
 
+    /**
+     * Filters mood events from the past week
+     *
+     * @param events List of events to filter
+     * @return Filtered list containing only events from the past week
+     */
     private ArrayList<MoodEvent> filterByRecentWeek(ArrayList<MoodEvent> events) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
@@ -262,6 +569,13 @@ public class HomeFragment extends Fragment {
         return filteredList;
     }
 
+    /**
+     * Filters mood events by emotional state
+     *
+     * @param events List of events to filter
+     * @param state Emotional state to filter by
+     * @return Filtered list containing only events with the specified emotional state
+     */
     private ArrayList<MoodEvent> filterByEmotionalState(ArrayList<MoodEvent> events, MoodEvent.EmotionalState state) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
 
@@ -274,6 +588,13 @@ public class HomeFragment extends Fragment {
         return filteredList;
     }
 
+    /**
+     * Filters mood events by keyword in reason
+     *
+     * @param events List of events to filter
+     * @param keyword Keyword to search for in reason field
+     * @return Filtered list containing only events with reasons containing the keyword
+     */
     private ArrayList<MoodEvent> filterByKeyword(ArrayList<MoodEvent> events, String keyword) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
 
@@ -286,18 +607,43 @@ public class HomeFragment extends Fragment {
         return filteredList;
     }
 
+    /**
+     * Resets all filters and restores the original event list
+     */
     private void resetFilters() {
+        Log.d(TAG, "Resetting filters...");
+        Log.d(TAG, "All mood events size: " + allMoodEvents.size());
+
         if (!allMoodEvents.isEmpty()) {
             moodEventArrayList.clear();
             moodEventArrayList.addAll(allMoodEvents);
-            moodEventArrayList.sort(Comparator.reverseOrder());
-            moodEventArrayAdapter.notifyDataSetChanged();
+            moodEventArrayList.sort((e1, e2) -> e2.compareTo(e1));
+
+            Log.d(TAG, "Mood events size after reset: " + moodEventArrayList.size());
+
+            if (moodEventArrayAdapter != null) {
+                moodEventArrayAdapter.notifyDataSetChanged();
+            } else {
+                Log.e(TAG, "MoodEventArrayAdapter is null!");
+            }
+        } else {
+            Log.e(TAG, "No events available to reset!");
         }
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        fetchMoodEvents();
+    public void onPause() {
+        super.onPause();
+        // Clear search when leaving fragment
+        if (searchEditText != null) {
+            searchEditText.setText("");
+        }
+        userList.clear();
+        if (userAdapter != null) {
+            userAdapter.notifyDataSetChanged();
+        }
+        if (searchContainer != null) {
+            searchContainer.setVisibility(View.GONE);
+        }
     }
 }

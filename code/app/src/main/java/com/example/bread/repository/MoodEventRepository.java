@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Repository class for handling mood events in the database
@@ -59,10 +60,7 @@ public class MoodEventRepository {
      * @param onFailureListener The listener to be called when the mood events cannot be fetched
      */
     public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
-        // Removed ordering by timestamp to avoid requiring a Firestore index
-        getMoodEventCollRef()
-                .whereEqualTo("participantRef", participantRef)
-                .get()
+        getMoodEventCollRef().whereEqualTo("participantRef", participantRef).get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
                         Log.e("MoodEventRepository", "No mood events found with participantRef: " + participantRef);
@@ -80,8 +78,7 @@ public class MoodEventRepository {
 
                     onSuccessListener.onSuccess(moodEvents);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                        Log.e(TAG, "Failed to fetch mood events with participantRef: " + participantRef, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch mood events with participantRef: " + participantRef, e));
     }
 
     /**
@@ -102,12 +99,12 @@ public class MoodEventRepository {
             }
 
             // Counter to track when all queries are complete
-            final int[] queriesRemaining = {following.size()};
+            AtomicInteger queriesRemaining = new AtomicInteger(following.size());
 
             for (String followingUsername : following) {
-                // Don't use orderBy to avoid Firestore index requirements
                 getMoodEventCollRef()
                         .whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                        .orderBy("timestamp", Query.Direction.DESCENDING)
                         .limit(MAX_EVENTS_PER_USER)
                         .get()
                         .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -128,7 +125,7 @@ public class MoodEventRepository {
                             }
 
                             // If all queries are complete, return the results
-                            if (queriesRemaining[0]-- <= 1) {
+                            if (queriesRemaining.decrementAndGet() <= 0) {
                                 onSuccessListener.onSuccess(allMoodEvents);
                             }
                         })
@@ -136,7 +133,7 @@ public class MoodEventRepository {
                             Log.e(TAG, "Error fetching events for " + followingUsername, e);
 
                             // Even on failure, decrement counter and check if done
-                            if (queriesRemaining[0]-- <= 1) {
+                            if (queriesRemaining.decrementAndGet() <= 0) {
                                 onSuccessListener.onSuccess(allMoodEvents);
                             }
                         });
@@ -222,8 +219,7 @@ public class MoodEventRepository {
     public void addMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                        Log.e(TAG, "Failed to add mood event: " + moodEvent, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to add mood event: " + moodEvent, e));
     }
 
     /**
@@ -236,8 +232,7 @@ public class MoodEventRepository {
     public void deleteMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
         getMoodEventCollRef().document(moodEvent.getId()).delete()
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                        Log.e(TAG, "Failed to delete mood event: " + moodEvent, e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to delete mood event: " + moodEvent, e));
     }
 
     /**
@@ -255,8 +250,7 @@ public class MoodEventRepository {
         }
         getMoodEventCollRef().document(moodEvent.getId()).set(moodEvent)
                 .addOnSuccessListener(onSuccessListener)
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
-                        Log.e(TAG, "Failed to update mood event: " + moodEvent.getId(), e));
+                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to update mood event: " + moodEvent.getId(), e));
     }
 
     /**

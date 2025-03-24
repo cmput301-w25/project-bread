@@ -109,7 +109,7 @@ public class FollowRequest implements Serializable {
      *
      * @param status The RequestStatus enum value to set
      */
-    public void setStatus(RequestStatus status) {
+    public void setStatusEnum(RequestStatus status) {
         this.status = status.getValue();
     }
 

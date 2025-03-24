@@ -103,6 +103,14 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
         return convertView;
     }
 
+    /**
+     * Loads participant information from cache or network
+     * This method improves performance by caching participant data and avoiding
+     * unnecessary network calls when the same participant data is needed multiple times
+     *
+     * @param moodEvent The mood event containing the participant reference
+     * @param holder    The ViewHolder to update with participant data
+     */
     private void loadParticipantInfo(MoodEvent moodEvent, ViewHolder holder) {
         if (moodEvent.getParticipantRef() == null) {
             holder.username.setText("Unknown");
