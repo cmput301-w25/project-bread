@@ -1,7 +1,12 @@
 package com.example.bread.fragment;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.ext.SdkExtensions;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,23 +15,29 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresExtension;
 import androidx.fragment.app.Fragment;
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
+import com.example.bread.utils.ImageHandler;
 import com.example.bread.utils.LocationHandler;
 import com.example.bread.view.HomePage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 
+import java.io.File;
 import java.util.Map;
 
 /**
@@ -41,7 +52,9 @@ public class AddMoodEventFragment extends Fragment {
     private MoodEventRepository moodEventRepository;
     private ParticipantRepository participantRepository;
     private LocationHandler locationHandler;
-
+    private ImageButton uploadImage;
+    private ActivityResultLauncher<Intent> resultLauncher;
+    private String imageBase64;
 
     private ActivityResultLauncher<String> requestPermissionLauncher;
 
@@ -76,8 +89,8 @@ public class AddMoodEventFragment extends Fragment {
         eventTitleEditText = view.findViewById(R.id.eventTitleEditText);
         triggerEditText = view.findViewById(R.id.triggerEditText);
         locationCheckbox = view.findViewById(R.id.locationCheckbox);
+        uploadImage = view.findViewById(R.id.imageAdd);
         Log.d(TAG, "UI elements initialized");
-
 
         moodEventRepository = new MoodEventRepository();
         participantRepository = new ParticipantRepository();
@@ -107,6 +120,12 @@ public class AddMoodEventFragment extends Fragment {
                 locationHandler.requestLocationPermission(requestPermissionLauncher);
             }
         });
+
+        // Initialize resultLauncher for image upload and set up image upload listener
+        registerResult();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2) {
+            uploadImage.setOnClickListener(v -> pickImage());
+        }
 
         // Save button logic
         saveButton.setOnClickListener(v -> {
@@ -196,7 +215,7 @@ public class AddMoodEventFragment extends Fragment {
         MoodEvent moodEvent = new MoodEvent(eventTitle, reason, emotionalState, participantRef);
         moodEvent.setSocialSituation(socialSituation);
         moodEvent.setTrigger(trigger);
-        moodEvent.setAttachedImage(null); // TODO: Implement image upload functionality
+        moodEvent.setAttachedImage(imageBase64);
         Log.d(TAG, "MoodEvent created: " + moodEvent.toString());
         Log.d(TAG, "Timestamp (before save): " + (moodEvent.getTimestamp() != null ? moodEvent.getTimestamp().toString() : "null (to be set by server)"));
 
@@ -262,5 +281,50 @@ public class AddMoodEventFragment extends Fragment {
     public void onDetach() {
         super.onDetach();
         requestPermissionLauncher = null; // Clean up
+    }
+
+    /**
+     * Registers a result launcher to handle the result of an image picking activity.
+     * If no image is selected or the operation is cancelled, appropriate error messages are logged,
+     * and a cancellation Toast is optionally shown.
+     */
+    private void registerResult(){
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getData() == null) {
+                            Log.e(TAG, "No image selected.");
+                            return; // Exit early to prevent crashes
+                        }
+                        try {
+                            Uri imageUri = result.getData().getData();
+                            if (imageUri != null){
+                                uploadImage.setImageURI(imageUri);
+                                imageBase64 = ImageHandler.compressImageToBase64(requireContext(), result.getData().getData());
+                                Log.d(TAG, "Image selected and converted: " + imageBase64);
+                                Toast.makeText(requireContext(), "Image successfully uploaded.", Toast.LENGTH_SHORT).show();
+                            }
+                            else{
+                                Log.e(TAG, "No image selected.");
+                            }
+                        } catch (Exception e) {
+                            Log.e(TAG, "User canceled image selection.");
+                            Toast.makeText(requireContext(), "No Image Selected", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
+        );
+    }
+
+    /**
+     * Allows user to pick an image from camera roll
+     * Uses resultLauncher to launch image picking activity
+     */
+    @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
+    private void pickImage(){
+        Intent intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
+        resultLauncher.launch(intent);
     }
 }
