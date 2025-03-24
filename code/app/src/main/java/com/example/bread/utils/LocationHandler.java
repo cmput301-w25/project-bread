@@ -81,7 +81,7 @@ public class LocationHandler {
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         lastLocation = location;
-                        Log.d(TAG, "fetchUserLocation Success: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
+                        Log.d(TAG, "fetchUserLocation Success 1: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
                     } else {
                         Log.d(TAG, "Last location is null. Requesting updates...");
                         requestLocationUpdates();
@@ -108,7 +108,7 @@ public class LocationHandler {
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         lastLocation = location;
-                        Log.d(TAG, "fetchUserLocation Success: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
+                        Log.d(TAG, "fetchUserLocation Success 2: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
                         callback.onLocationAvailable(lastLocation);
                     } else {
                         Log.d(TAG, "Last location is null. Requesting updates...");

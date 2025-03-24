@@ -62,6 +62,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     private ParticipantRepository participantRepository;
     private String username;
     private GoogleMap mMap;
+    private Location userLocation;
+    private LatLng currentLocation;
 
     // Filter-related variables
     private FloatingActionButton filterButton;
@@ -104,10 +106,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         locationHandler = LocationHandler.getInstance(requireContext());
         locationPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
+                Log.d(TAG, "permission is granted");
                 locationHandler.fetchUserLocation();
             } else {
                 Log.e(TAG, "Location permission denied - cannot fetch location");
-                Log.w(TAG, "Permission denied, unchecking location checkbox");
                 Toast.makeText(getContext(), "Please enable location permissions.", Toast.LENGTH_SHORT).show();
             }
         });
@@ -204,10 +206,28 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
-
         googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style));
-        LatLng uofa = new LatLng(53.5232, -113.5263);
-        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(uofa, 15));
+
+        // Getting user current location to set the map to this
+        Location userCurrentLocation = locationHandler.getLastLocation();
+        if (userCurrentLocation == null) {
+            Log.i(TAG, "Location not available yet, waiting for location callback");
+            locationHandler.fetchUserLocation(location -> {
+                Log.i(TAG, "Location callback received");
+                userLocation = location;
+
+                Log.d(TAG, "Current location: " + userLocation);
+
+                currentLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+            });
+        } else {
+            Log.i(TAG, "Location already available");
+            userLocation = userCurrentLocation;
+            currentLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+        }
+
         // adding map UI controls https://www.youtube.com/watch?v=y84o2kyi_eo
         // Get UI settings
         UiSettings uiSettings = googleMap.getUiSettings();
