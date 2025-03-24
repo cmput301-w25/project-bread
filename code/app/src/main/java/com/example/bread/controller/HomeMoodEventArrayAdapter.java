@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.bread.R;
@@ -17,6 +18,7 @@ import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
+import com.example.bread.utils.TimestampUtils;
 
 import java.util.ArrayList;
 
@@ -30,10 +32,13 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
     static class ViewHolder {
         TextView username;
-        TextView reason;
+        TextView title;
         TextView date;
         TextView mood;
+        TextView socialSituation;
         ImageView profilePic;
+        ImageView moodImage;
+        CardView miniImageHolder;
         ConstraintLayout eventLayout;
     }
 
@@ -46,11 +51,14 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             convertView = LayoutInflater.from(context).inflate(R.layout.layout_event_home, parent, false);
             holder = new ViewHolder();
             holder.username = convertView.findViewById(R.id.textUsername);
-            holder.reason = convertView.findViewById(R.id.textReason);
+            holder.title = convertView.findViewById(R.id.textTitle);
             holder.date = convertView.findViewById(R.id.textDate);
             holder.mood = convertView.findViewById(R.id.textMood);
-            holder.profilePic = convertView.findViewById(R.id.imageProfile);
+            holder.profilePic = convertView.findViewById(R.id.profile_image_home);
             holder.eventLayout = convertView.findViewById(R.id.homeConstraintLayout);
+            holder.socialSituation = convertView.findViewById(R.id.textSocialSituation);
+            holder.moodImage = convertView.findViewById(R.id.event_home_image);
+            holder.miniImageHolder = convertView.findViewById(R.id.event_home_image_holder);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -73,9 +81,20 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
                 holder.username.setText("Unknown");
                 holder.profilePic.setImageResource(R.drawable.ic_baseline_profile_24);
             });
-            holder.reason.setText(moodEvent.getReason());
-            holder.date.setText(moodEvent.getTimestamp().toString());
-            holder.mood.setText(EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+            if (moodEvent.getAttachedImage() != null) {
+                holder.moodImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
+            } else {
+                holder.moodImage.setVisibility(View.GONE);
+                holder.miniImageHolder.setVisibility(View.GONE);
+            }
+            holder.title.setText(moodEvent.getTitle());
+            holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
+            holder.mood.setText(moodEvent.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+            if (moodEvent.getSocialSituation() != null && moodEvent.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
+                holder.socialSituation.setText(moodEvent.getSocialSituation().toString());
+            } else {
+                holder.socialSituation.setVisibility(View.INVISIBLE);
+            }
 
             convertView.setOnClickListener(v -> {
                 if (clickListener != null) {

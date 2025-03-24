@@ -69,6 +69,7 @@ dependencies {
 
     // Google Services
     implementation(libs.play.services.location)
+    implementation(libs.legacy.support.v4)
 
     // Testing
     testImplementation(libs.junit)

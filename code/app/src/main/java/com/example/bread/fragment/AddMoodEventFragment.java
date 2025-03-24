@@ -245,7 +245,9 @@ public class AddMoodEventFragment extends Fragment {
                     Toast.makeText(requireContext(), "Mood saved!", Toast.LENGTH_SHORT).show();
                     // Navigate back to HomeFragment
                     requireActivity().getSupportFragmentManager()
-                            .beginTransaction()
+                            .beginTransaction().setCustomAnimations(
+                                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+                            )
                             .replace(R.id.frame_layout, new HomeFragment())
                             .commit();
 
@@ -282,7 +284,9 @@ public class AddMoodEventFragment extends Fragment {
     }
 
     /**
-     *
+     * Registers a result launcher to handle the result of an image picking activity.
+     * If no image is selected or the operation is cancelled, appropriate error messages are logged,
+     * and a cancellation Toast is optionally shown.
      */
     private void registerResult(){
         resultLauncher = registerForActivityResult(
@@ -300,6 +304,7 @@ public class AddMoodEventFragment extends Fragment {
                                 uploadImage.setImageURI(imageUri);
                                 imageBase64 = ImageHandler.compressImageToBase64(requireContext(), result.getData().getData());
                                 Log.d(TAG, "Image selected and converted: " + imageBase64);
+                                Toast.makeText(requireContext(), "Image successfully uploaded.", Toast.LENGTH_SHORT).show();
                             }
                             else{
                                 Log.e(TAG, "No image selected.");
