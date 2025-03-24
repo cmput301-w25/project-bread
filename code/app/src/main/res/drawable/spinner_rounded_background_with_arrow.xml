@@ -2,8 +2,8 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">
-            <corners android:radius="27dp" /> <!-- Match the radius from rounded_background -->
-            <solid android:color="#5a5a5a" /> <!-- Match your background color or use a transparent color -->
+            <corners android:radius="27dp" />
+            <solid android:color="#5a5a5a" />
         </shape>
     </item>
     <item
