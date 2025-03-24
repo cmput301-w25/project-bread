@@ -154,6 +154,21 @@
             android:text="Location"
             android:textColor="#FFFFFF" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:text="Upload an Image (optional)"
+            android:textColor="#FFFFFF" />
+
+        <ImageButton
+            android:layout_width="55dp"
+            android:layout_height="55dp"
+            android:background="@drawable/rounded_background"
+            android:src="@drawable/camera_icon"
+            android:id="@+id/imageAdd"/>
+
         <Button
             android:id="@+id/saveButton"
             android:layout_width="wrap_content"
