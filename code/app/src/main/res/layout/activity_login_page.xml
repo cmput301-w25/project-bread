@@ -159,17 +159,13 @@
         android:autoLink="none"
         android:clickable="true"
         android:focusable="true"
-        android:paddingTop="0dp"
         android:text="Sign Up"
+        android:layout_marginTop="20dp"
         android:textAlignment="center"
         android:textColor="#F8B64C"
         android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/or_divider"
-        app:layout_constraintVertical_bias="0.085" />
-
+        app:layout_constraintTop_toBottomOf="@+id/or_divider" />
 </androidx.constraintlayout.widget.ConstraintLayout>
