@@ -165,6 +165,7 @@
         <ImageButton
             android:layout_width="55dp"
             android:layout_height="55dp"
+            android:background="@drawable/rounded_background"
             android:src="@drawable/camera_icon"
             android:id="@+id/imageAdd"/>
 

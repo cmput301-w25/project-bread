@@ -302,6 +302,7 @@ public class AddMoodEventFragment extends Fragment {
                                 uploadImage.setImageURI(imageUri);
                                 imageBase64 = ImageHandler.compressImageToBase64(requireContext(), result.getData().getData());
                                 Log.d(TAG, "Image selected and converted: " + imageBase64);
+                                Toast.makeText(requireContext(), "Image successfully uploaded.", Toast.LENGTH_SHORT).show();
                             }
                             else{
                                 Log.e(TAG, "No image selected.");

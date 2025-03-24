@@ -107,28 +107,28 @@ public class MoodHistoryFragmentTest {
         Thread.sleep(1000);
         onView(withId(R.id.history)).perform(click());
         Thread.sleep(1000);
-        onView(withText("test reason 1")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(matches(isDisplayed()));
-        onView(withText("test reason 3")).check(matches(isDisplayed()));
-        onView(withText("test reason 4")).check(matches(isDisplayed()));
+        onView(withText("Test Event 1")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(matches(isDisplayed()));
+        onView(withText("Test Event 3")).check(matches(isDisplayed()));
+        onView(withText("Test Event 4")).check(matches(isDisplayed()));
     }
 
     @Test
     public void sortReverseChronologicalOrderTest() throws InterruptedException {
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         onView(withId(R.id.history)).perform(click());
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         onData(anything())
                 .inAdapterView(withId(R.id.historyListView))
                 .atPosition(0)
-                .onChildView(withId(R.id.reason))
-                .check(matches(withText("test reason 4")));
+                .onChildView(withId(R.id.history_title_text))
+                .check(matches(withText("Test Event 4")));
         Thread.sleep(1000);
         onData(anything())
                 .inAdapterView(withId(R.id.historyListView))
                 .atPosition(3)
-                .onChildView(withId(R.id.reason))
-                .check(matches(withText("test reason 1")));
+                .onChildView(withId(R.id.history_title_text))
+                .check(matches(withText("Test Event 1")));
     }
 
     @Test
@@ -145,7 +145,7 @@ public class MoodHistoryFragmentTest {
         onView(withId(R.id.deleteButton)).perform(click());
 
         onView(withId(android.R.id.button1)).perform(click());
-        onView(withText("test reason 4")).check(doesNotExist());
+        onView(withText("Test Event 4")).check(doesNotExist());
     }
 
     @After
