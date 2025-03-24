@@ -153,7 +153,7 @@ public class MoodHistoryFragmentTest {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         URL url = null;
         try {
-            url = new URL("http://10.0.2.2:9099/emulator/v1/projects/+"+projectId+"/databases/%28default%29/documents");
+            url = new URL("http://10.0.2.2:9099/emulator/v1/projects/"+projectId+"/databases/%28default%29/documents");
         } catch (MalformedURLException exception) {
             Log.e("URL Error", Objects.requireNonNull(exception.getMessage()));
         }
@@ -178,7 +178,7 @@ public class MoodHistoryFragmentTest {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         URL url = null;
         try {
-            url = new URL("http://10.0.2.2:8080/emulator/v1/projects/+"+projectId+"/databases/%28default%29/documents");
+            url = new URL("http://10.0.2.2:8080/emulator/v1/projects/"+projectId+"/databases/%28default%29/documents");
         } catch (MalformedURLException exception) {
             Log.e("URL Error", Objects.requireNonNull(exception.getMessage()));
         }
