@@ -2,10 +2,12 @@ package com.example.bread.view;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -47,7 +49,11 @@ public class LoginPage extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         Button loginButton = findViewById(R.id.login_button);
-        Button signupButton = findViewById(R.id.login_signup_button);
+
+        TextView signupButton = findViewById(R.id.login_signup_button);
+        //https://stackoverflow.com/questions/10019001/how-do-you-underline-a-text-in-android-xml
+        signupButton.setPaintFlags(signupButton.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
         emailEditText = findViewById(R.id.login_email_text);
         passwordEditText = findViewById(R.id.login_password_text);
 
