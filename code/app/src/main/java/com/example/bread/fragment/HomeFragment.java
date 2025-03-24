@@ -18,6 +18,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.bread.R;
 import com.example.bread.controller.HomeMoodEventArrayAdapter;
@@ -87,8 +89,7 @@ public class HomeFragment extends Fragment {
         if (user != null) {
             String username = user.getDisplayName();
             if (username != null) {
-                moodEventRepository.listenForEventsFromFollowing(username, moodEvents -> {
-
+                moodEventRepository.fetchForEventsFromFollowing(username, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
@@ -118,8 +119,14 @@ public class HomeFragment extends Fragment {
     }
 
     private void showMoodDetailsDialog(MoodEvent moodEvent) {
-        // TODO: launch a new fragment to show more details about the mood event
-        Log.d(TAG, "Clicked on mood event: " + moodEvent);
+        EventDetail fragment = EventDetail.newInstance(moodEvent);
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+        );
+        transaction.add(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     // Filter-related methods

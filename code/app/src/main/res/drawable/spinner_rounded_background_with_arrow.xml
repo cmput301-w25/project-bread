@@ -3,7 +3,7 @@
     <item>
         <shape android:shape="rectangle">
             <corners android:radius="27dp" /> <!-- Match the radius from rounded_background -->
-            <solid android:color="#78766a" /> <!-- Match your background color or use a transparent color -->
+            <solid android:color="#242323" /> <!-- Match your background color or use a transparent color -->
         </shape>
     </item>
     <item

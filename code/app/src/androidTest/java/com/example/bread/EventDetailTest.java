@@ -3,16 +3,20 @@ package com.example.bread;
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
+import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.CoreMatchers.anything;
+import static org.hamcrest.Matchers.anything;
 
 import android.util.Log;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
+
+import com.example.bread.model.Comment;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -28,24 +32,25 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
-public class MoodHistoryFragmentTest {
+@RunWith(AndroidJUnit4.class)
+@LargeTest
+public class EventDetailTest {
 
     @Rule
     public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
 
     @BeforeClass
     public static void testSetup() {
-        // Connecting to emulators and creating test participant
         String androidLocalHost = "10.0.2.2";
         FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
         FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
@@ -74,7 +79,7 @@ public class MoodHistoryFragmentTest {
 
     @Before
     public void seedDatabase() {
-        // Seed the database with user mood events
+        // Seed the database with some mood events
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference participants = db.collection("participants");
         Participant p1 = new Participant();
@@ -82,68 +87,93 @@ public class MoodHistoryFragmentTest {
 
         DocumentReference p1Ref = participants.document("testUser");
         p1Ref.set(p1);
+        p1Ref.collection("following").document("testUser2").set(new HashMap<>() {
+            {
+                put("username", "testUser2");
+            }
+        });
 
-        MoodEvent m1 = new MoodEvent("Test Event 1", "test reason 1", MoodEvent.EmotionalState.HAPPY, p1Ref);
-        MoodEvent m2 = new MoodEvent("Test Event 2", "test reason 2", MoodEvent.EmotionalState.SAD, p1Ref);
-        MoodEvent m3 = new MoodEvent("Test Event 3", "test reason 3", MoodEvent.EmotionalState.CONFUSED, p1Ref);
-        MoodEvent m4 = new MoodEvent("Test Event 4", "test reason 4", MoodEvent.EmotionalState.NEUTRAL, p1Ref);
+        Participant p2 = new Participant();
+        p2.setUsername("testUser2");
 
-        // Manually setting time rather than having it done automatically so we can test for sorting
-        m1.setTimestamp(new GregorianCalendar(2025, Calendar.MARCH, 1).getTime());
-        m2.setTimestamp(new GregorianCalendar(2025, Calendar.MARCH, 2).getTime());
-        m3.setTimestamp(new GregorianCalendar(2025, Calendar.MARCH, 3).getTime());
-        m4.setTimestamp(new GregorianCalendar(2025, Calendar.MARCH, 4).getTime());
+        DocumentReference p2Ref = participants.document("testUser2");
+        p2Ref.set(p2);
+        p2Ref.collection("followers").document("testUser").set(new HashMap<>() {
+            {
+                put("username", "testUser");
+            }
+        });
 
-        db.collection("moodEvents").document("mood1").set(m1);
-        db.collection("moodEvents").document("mood2").set(m2);
-        db.collection("moodEvents").document("mood3").set(m3);
-        db.collection("moodEvents").document("mood4").set(m4);
+        MoodEvent moodEvent1 = new MoodEvent("Test Event 1", "test reason", MoodEvent.EmotionalState.HAPPY, p2Ref);
+        moodEvent1.setSocialSituation(MoodEvent.SocialSituation.ALONE);
+        MoodEvent moodEvent2 = new MoodEvent("Test Event 2", "test reason", MoodEvent.EmotionalState.ANGRY, p2Ref);
+        moodEvent2.setSocialSituation(MoodEvent.SocialSituation.WITH_FRIENDS);
+
+        CollectionReference moodEvents = db.collection("moodEvents");
+        MoodEvent[] events = {
+                moodEvent1, moodEvent2
+        };
+
+        for (MoodEvent event : events) {
+            moodEvents.document(event.getId()).set(event);
+        }
+
+        Comment comment1 = new Comment(p1Ref, "test comment 1");
+        Comment comment2 = new Comment(p1Ref, "test comment 2");
+
+        for (Comment comment : List.of(comment1, comment2)) {
+            moodEvents.document(moodEvent1.getId()).collection("comments")
+                    .document(comment.getId()).set(comment);
+        }
+
+        for (Comment comment : List.of(comment1, comment2)) {
+            moodEvents.document(moodEvent2.getId()).collection("comments")
+                    .document(comment.getId()).set(comment);
+        }
     }
 
     @Test
-    public void displaysAllMoodEventsTest() throws InterruptedException {
-        Thread.sleep(1000);
-        onView(withId(R.id.history)).perform(click());
-        Thread.sleep(1000);
-        onView(withText("Test Event 1")).check(matches(isDisplayed()));
-        onView(withText("Test Event 2")).check(matches(isDisplayed()));
-        onView(withText("Test Event 3")).check(matches(isDisplayed()));
-        onView(withText("Test Event 4")).check(matches(isDisplayed()));
+    public void testEventDetailOpens() {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        onData(anything()).inAdapterView(withId(R.id.homeListView)).atPosition(0).perform(click());
+
+        // Check that the event detail dialog is displayed
+        onView(withId(R.id.event_title)).check(matches(isDisplayed()));
+        onView(withId(R.id.emotional_state_text)).check(matches(isDisplayed()));
+        onView(withId(R.id.social_situation_text)).check(matches(isDisplayed()));
+        onView(withId(R.id.reason_text)).check(matches(isDisplayed()));
+        onView(withText("test comment 1")).check(matches(isDisplayed()));
+        onView(withText("test comment 2")).check(matches(isDisplayed()));
     }
 
     @Test
-    public void sortReverseChronologicalOrderTest() throws InterruptedException {
-        Thread.sleep(2000);
-        onView(withId(R.id.history)).perform(click());
-        Thread.sleep(3000);
-        onData(anything())
-                .inAdapterView(withId(R.id.historyListView))
-                .atPosition(0)
-                .onChildView(withId(R.id.history_title_text))
-                .check(matches(withText("Test Event 4")));
-        Thread.sleep(1000);
-        onData(anything())
-                .inAdapterView(withId(R.id.historyListView))
-                .atPosition(3)
-                .onChildView(withId(R.id.history_title_text))
-                .check(matches(withText("Test Event 1")));
-    }
+    public void testEventDetailsCommentDialog() {
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
-    @Test
-    public void deleteMoodEventTest() throws InterruptedException {
-        Thread.sleep(2000);
-        onView(withId(R.id.history)).perform(click());
-        Thread.sleep(2000);
-        onData(anything())
-                .inAdapterView(withId(R.id.historyListView))
-                .atPosition(0)
-                .onChildView(withId(R.id.checkbox))
-                .perform(click());
+        onData(anything()).inAdapterView(withId(R.id.homeListView)).atPosition(0).perform(click());
+        onView(withId(R.id.add_comment_fab)).perform(click());
+        onView(withId(R.id.comment_edit_text)).check(matches(isDisplayed()));
+        onView(withId(R.id.add_comment_button)).check(matches(isDisplayed()));
 
-        onView(withId(R.id.deleteButton)).perform(click());
+        onView(withId(R.id.comment_edit_text)).perform(typeText("test comment 3"));
+        onView(withId(R.id.add_comment_button)).perform(click());
 
-        onView(withId(android.R.id.button1)).perform(click());
-        onView(withText("Test Event 4")).check(doesNotExist());
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        onView(withText("test comment 3")).check(matches(isDisplayed()));
     }
 
     @After

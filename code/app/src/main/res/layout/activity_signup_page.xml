@@ -25,6 +25,7 @@
         android:gravity="center_horizontal|top"
         android:letterSpacing="0.02"
         android:lineSpacingExtra="-35sp"
+        android:fontFamily="@font/righteous"
         android:text="@string/sentio"
         android:textColor="@color/white"
         android:textSize="48sp"
