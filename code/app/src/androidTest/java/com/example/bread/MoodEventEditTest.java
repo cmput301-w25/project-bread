@@ -2,7 +2,6 @@ package com.example.bread;
 
 import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
-import static androidx.test.espresso.Espresso.onIdle;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
@@ -43,7 +42,6 @@ import org.junit.runner.RunWith;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -117,17 +115,14 @@ public class MoodEventEditTest {
         }
     }
 
-    @Before
-    public void navigateToHistoryTab() {
+    @Test
+    public void testEditDialogAppears() throws InterruptedException {
+        Thread.sleep(2000);
+
         // Navigate to the History tab
         onView(withId(R.id.history)).perform(click());
 
         // Ensure UI updates before proceeding
-        onIdle();
-    }
-
-    @Test
-    public void testEditDialogAppears() throws InterruptedException {
         Thread.sleep(2000);
         // Select and click the first mood event automatically
         onData(anything())
@@ -136,7 +131,7 @@ public class MoodEventEditTest {
                 .perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Ensure image is set
         onView(withId(R.id.mood_event_image)).check(matches(isDisplayed()));
@@ -150,7 +145,7 @@ public class MoodEventEditTest {
         onView(withText("Edit")).perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Verify that the edit dialog appears
         onView(withText("Edit Mood")).check(matches(isDisplayed()));
@@ -167,12 +162,19 @@ public class MoodEventEditTest {
         onView(withText("Cancel")).perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
     }
 
     @Test
     public void testEditDialogCanBeSaved() throws InterruptedException {
         Thread.sleep(2000);
+
+        // Navigate to the History tab
+        onView(withId(R.id.history)).perform(click());
+
+        // Ensure UI updates before proceeding
+        Thread.sleep(2000);
+
         // Select and click the first mood event automatically
         onData(anything())
                 .inAdapterView(withId(R.id.historyListView))
@@ -180,25 +182,24 @@ public class MoodEventEditTest {
                 .perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Click the Edit button
         onView(withText("Edit")).perform(click());
 
-        // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Make a simple change
         onView(withId(R.id.edit_reason)).perform(replaceText("Test reason"));
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Click Save button
         onView(withText("Save")).perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Verify dialog is dismissed
         try {
@@ -212,6 +213,13 @@ public class MoodEventEditTest {
     @Test
     public void testEditDialogCanBeCanceled() throws InterruptedException {
         Thread.sleep(2000);
+
+        // Navigate to the History tab
+        onView(withId(R.id.history)).perform(click());
+
+        // Ensure UI updates before proceeding
+        Thread.sleep(2000);
+
         // Select and click the first mood event automatically
         onData(anything())
                 .inAdapterView(withId(R.id.historyListView))
@@ -219,25 +227,25 @@ public class MoodEventEditTest {
                 .perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Click the Edit button
         onView(withText("Edit")).perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Make a change
         onView(withId(R.id.edit_reason)).perform(replaceText("This should not be saved"));
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Click Cancel button
         onView(withText("Cancel")).perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Verify dialog is dismissed
         try {
@@ -251,6 +259,13 @@ public class MoodEventEditTest {
     @Test
     public void removeMoodImageTest() throws InterruptedException {
         Thread.sleep(2000);
+
+        // Navigate to the History tab
+        onView(withId(R.id.history)).perform(click());
+
+        // Ensure UI updates before proceeding
+        Thread.sleep(2000);
+
         onData(anything())
                 .inAdapterView(withId(R.id.historyListView))
                 .atPosition(0)
@@ -260,13 +275,13 @@ public class MoodEventEditTest {
         onView(withText("Edit")).perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Remove image associated with mood
         onView(withId(R.id.delete_image_button)).perform(click());
 
         // Ensure UI updates
-        onIdle();
+        Thread.sleep(2000);
 
         // Save changes
         onView(withText("Save")).perform(click());
