@@ -284,7 +284,9 @@ public class AddMoodEventFragment extends Fragment {
     }
 
     /**
-     *
+     * Registers a result launcher to handle the result of an image picking activity.
+     * If no image is selected or the operation is cancelled, appropriate error messages are logged,
+     * and a cancellation Toast is optionally shown.
      */
     private void registerResult(){
         resultLauncher = registerForActivityResult(
