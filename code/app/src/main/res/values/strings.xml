@@ -12,4 +12,6 @@
     <string name="no_users_found">No users found</string>
     <string name="no_follow_requests">No follow requests</string>
     <string name="search_hint">Search for users...</string>
+    <string name="reset">Reset</string>
+    <string name="apply">Apply</string>
 </resources>

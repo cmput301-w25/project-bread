@@ -2,6 +2,7 @@ package com.example.bread.fragment;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -27,6 +29,7 @@ import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
+import com.example.bread.utils.TimestampUtils;
 import com.example.bread.view.LoginPage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -278,23 +281,62 @@ public class ProfileFragment extends Fragment {
             TextView titleView = recentMoodEventView.findViewById(R.id.textTitle);
             TextView dateView = recentMoodEventView.findViewById(R.id.textDate);
             TextView moodView = recentMoodEventView.findViewById(R.id.textMood);
-            View cardBackground = recentMoodEventView.findViewById(R.id.moodCard);
-            View constraintLayout = recentMoodEventView.findViewById(R.id.homeConstraintLayout);
+            TextView socialSituationView = recentMoodEventView.findViewById(R.id.textSocialSituation);
+            ImageView profileImageView = recentMoodEventView.findViewById(R.id.profile_image_home);
+            View cardBackground = recentMoodEventView.findViewById(R.id.homeConstraintLayout);
+
+            // Get the image container to properly hide it when no image
+            CardView imageContainer = recentMoodEventView.findViewById(R.id.event_home_image_holder);
+            ImageView eventImage = recentMoodEventView.findViewById(R.id.event_home_image);
 
             usernameView.setText(currentUsername);
             titleView.setText(recentMood.getTitle());
-            dateView.setText(recentMood.getTimestamp().toString());
-            moodView.setText(EmotionUtils.getEmoticon(recentMood.getEmotionalState()));
+            dateView.setText(TimestampUtils.transformTimestamp(recentMood.getTimestamp()));
+            moodView.setText(recentMood.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(recentMood.getEmotionalState()));
+
+            // Set social situation text or hide it
+            if (recentMood.getSocialSituation() != null && recentMood.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
+                socialSituationView.setText(recentMood.getSocialSituation().toString());
+                socialSituationView.setVisibility(View.VISIBLE);
+            } else {
+                socialSituationView.setVisibility(View.INVISIBLE);
+            }
+
+            // Handle event image visibility
+            if (recentMood.getAttachedImage() != null && !recentMood.getAttachedImage().isEmpty()) {
+                Bitmap imageBitmap = ImageHandler.base64ToBitmap(recentMood.getAttachedImage());
+                if (imageBitmap != null) {
+                    eventImage.setImageBitmap(imageBitmap);
+                    eventImage.setVisibility(View.VISIBLE);
+                    imageContainer.setVisibility(View.VISIBLE);
+                } else {
+                    eventImage.setVisibility(View.GONE);
+                    imageContainer.setVisibility(View.GONE);
+                }
+            } else {
+                eventImage.setVisibility(View.GONE);
+                imageContainer.setVisibility(View.GONE);
+            }
+
+            // Set profile picture for the recent mood event
+            if (profileImageView != null) {
+                participantRepository.fetchBaseParticipant(currentUsername, participant -> {
+                    if (participant != null && participant.getProfilePicture() != null) {
+                        Bitmap bitmap = ImageHandler.base64ToBitmap(participant.getProfilePicture());
+                        if (bitmap != null) {
+                            profileImageView.setImageBitmap(bitmap);
+                        } else {
+                            profileImageView.setImageResource(R.drawable.ic_baseline_profile_24);
+                        }
+                    } else {
+                        profileImageView.setImageResource(R.drawable.ic_baseline_profile_24);
+                    }
+                }, e -> Log.e(TAG, "Error loading profile image", e));
+            }
 
             // Set background color based on emotional state
             int colorResId = EmotionUtils.getColorResource(recentMood.getEmotionalState());
-
-            // Apply color to the card or constraint layout
-            if (cardBackground != null) {
-                cardBackground.setBackgroundResource(colorResId);
-            } else if (constraintLayout != null) {
-                constraintLayout.setBackgroundResource(colorResId);
-            }
+            cardBackground.setBackgroundResource(colorResId);
 
             recentMoodEventView.setVisibility(View.VISIBLE);
             emptyMoodText.setVisibility(View.GONE);
@@ -327,8 +369,17 @@ public class ProfileFragment extends Fragment {
         }
 
         // Set profile picture if available
-        if (participant.getProfilePicture() != null && profileImageView != null) {
-            profileImageView.setImageBitmap(ImageHandler.base64ToBitmap(participant.getProfilePicture()));
+        if (profileImageView != null) {
+            if (participant.getProfilePicture() != null && !participant.getProfilePicture().isEmpty()) {
+                Bitmap bitmap = ImageHandler.base64ToBitmap(participant.getProfilePicture());
+                if (bitmap != null) {
+                    profileImageView.setImageBitmap(bitmap);
+                } else {
+                    profileImageView.setImageResource(R.drawable.ic_baseline_profile_24);
+                }
+            } else {
+                profileImageView.setImageResource(R.drawable.ic_baseline_profile_24);
+            }
         }
     }
 

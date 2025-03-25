@@ -47,15 +47,24 @@
             app:layout_constraintBottom_toBottomOf="@id/sentio_logo" />
 
         <!-- Profile Header Section -->
-        <ImageView
-            android:id="@+id/profile_image"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/profile_image_container"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_marginTop="16dp"
-            android:background="@drawable/default_avatar"
+            app:cardCornerRadius="40dp"
+            app:cardElevation="0dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/sentio_logo" />
+            app:layout_constraintTop_toBottomOf="@+id/sentio_logo">
+
+            <ImageView
+                android:id="@+id/profile_image"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tools:src="@drawable/ic_baseline_profile_24" />
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/profile_username"
@@ -68,7 +77,7 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/profile_image" />
+            app:layout_constraintTop_toBottomOf="@+id/profile_image_container" />
 
         <!-- Followers/Following Counts -->
         <LinearLayout

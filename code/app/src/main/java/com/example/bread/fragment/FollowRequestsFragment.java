@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bread.R;
 import com.example.bread.controller.FollowRequestAdapter;
-import com.example.bread.controller.FollowRequestAdapter;
 import com.example.bread.model.FollowRequest;
 import com.example.bread.repository.ParticipantRepository;
 import com.google.firebase.auth.FirebaseAuth;
@@ -116,13 +115,37 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             updateEmptyView();
             progressBar.setVisibility(View.GONE);
 
-            // Check if already following this user before showing follow back dialog
-            participantRepository.isFollowing(currentUsername, requestorUsername, isAlreadyFollowing -> {
-                if (isAlreadyFollowing) {
-                    // Already following this user, no need for follow back dialog
+            // First check if the current user is already following the requestor
+            // or has a pending follow request to the requestor
+            checkFollowRelationship(requestorUsername);
+
+        }, e -> {
+            Log.e(TAG, "Error accepting follow request", e);
+            Toast.makeText(getContext(), "Error accepting follow request", Toast.LENGTH_SHORT).show();
+            progressBar.setVisibility(View.GONE);
+        });
+    }
+
+    /**
+     * Check if the current user is already following or has a pending request to the requestor
+     * before showing the follow back dialog
+     */
+    private void checkFollowRelationship(String requestorUsername) {
+        // First check if already following
+        participantRepository.isFollowing(currentUsername, requestorUsername, isAlreadyFollowing -> {
+            if (isAlreadyFollowing) {
+                // Already following this user, no need for follow back dialog
+                Toast.makeText(getContext(), "Follow request accepted", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Then check if a follow request already exists from current user to requestor
+            participantRepository.checkFollowRequestExists(currentUsername, requestorUsername, requestExists -> {
+                if (requestExists) {
+                    // A follow request already exists, no need for follow back dialog
                     Toast.makeText(getContext(), "Follow request accepted", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Show follow back dialog only if not already following
+                    // No existing relationship, show follow back dialog
                     if (getContext() != null) {
                         new AlertDialog.Builder(getContext())
                                 .setTitle("Follow Back")
@@ -140,12 +163,13 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             }, e -> {
                 // In case of error, still show toast for acceptance
                 Toast.makeText(getContext(), "Follow request accepted", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Error checking following status", e);
+                Log.e(TAG, "Error checking follow request status", e);
             });
+
         }, e -> {
-            Log.e(TAG, "Error accepting follow request", e);
-            Toast.makeText(getContext(), "Error accepting follow request", Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.GONE);
+            // In case of error, still show toast for acceptance
+            Toast.makeText(getContext(), "Follow request accepted", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error checking following status", e);
         });
     }
 

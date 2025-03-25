@@ -21,7 +21,7 @@ public class ImageHandler {
     public static final float SCALE_FACTOR = 0.7f;
 
     /**
-     * Compress an image file to a base64 encoded string with size less that {@link #MAX_IMAGE_SIZE}.
+     * Compress an image file to a base64 encoded string with size less than {@link #MAX_IMAGE_SIZE}.
      *
      * <p>
      * Firebase Firestore has a document size limit of 1MB, but this implementation ensures that
@@ -40,16 +40,15 @@ public class ImageHandler {
      */
     public static String compressImageToBase64(Context context, Uri uri) throws IOException {
         InputStream inputStream = context.getContentResolver().openInputStream(uri);
-        Bitmap orginalBitmap = BitmapFactory.decodeStream(inputStream);
+        Bitmap originalBitmap = BitmapFactory.decodeStream(inputStream);
         if (inputStream != null) {
             inputStream.close();
         }
-
-        return compressBitmapToBase64(orginalBitmap);
+        return compressBitmapToBase64(originalBitmap);
     }
 
     /**
-     * Compress a bitmap to a base64 encoded string with size less that {@link #MAX_IMAGE_SIZE}.
+     * Compress a bitmap to a base64 encoded string with size less than {@link #MAX_IMAGE_SIZE}.
      *
      * @param bitmap the bitmap to compress
      * @return Base64 encoded string of the compressed image
@@ -93,11 +92,19 @@ public class ImageHandler {
 
     /**
      * Convert a base64 encoded string to a bitmap.
+     * If the string contains a data URI prefix (e.g., "data:image/webp;base64,"), the prefix is removed before decoding.
      *
      * @param base64 the base64 encoded string
-     * @return the bitmap
+     * @return the bitmap, or null if conversion fails
      */
     public static Bitmap base64ToBitmap(String base64) {
+        if (base64 == null || base64.isEmpty()) {
+            return null;
+        }
+        // Remove the data URI scheme prefix if it exists
+        if (base64.startsWith("data:image")) {
+            base64 = base64.substring(base64.indexOf(",") + 1);
+        }
         byte[] decodedString = Base64.decode(base64, Base64.DEFAULT);
         return BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
     }
