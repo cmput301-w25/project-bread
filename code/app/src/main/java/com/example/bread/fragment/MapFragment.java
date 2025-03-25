@@ -124,7 +124,8 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private void doFetchInRadiusMoodEvents(@NonNull Location currentLocation, @NonNull OnSuccessListener<Map<String, MoodEvent>> onSuccessListener) {
+//    private void doFetchInRadiusMoodEvents(@NonNull Location currentLocation, @NonNull OnSuccessListener<Map<String, MoodEvent>> onSuccessListener) {
+    private void doFetchInRadiusMoodEvents(@NonNull Location currentLocation) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
             Log.e(TAG, "Cannot fetch mood events without a signed-in user");
@@ -135,11 +136,16 @@ public class MapFragment extends Fragment {
             Log.e(TAG, "Cannot fetch mood events without a username");
             return;
         }
-        moodEventRepo.fetchForInRadiusEventsFromFollowing(username, currentLocation, 5.0, moodEventMaps -> {
-            if (moodEventMaps.isEmpty()) {
-                Toast.makeText(getContext(), "No mood events found within the radius", Toast.LENGTH_LONG).show();
+//            if (moodEventMaps.isEmpty()) {
+//        moodEventRepo.fetchForInRadiusEventsFromFollowing(username, currentLocation, 5.0, moodEventMaps -> {
+//                Toast.makeText(getContext(), "No mood events found within the radius", Toast.LENGTH_LONG).show();
+//            }
+//            onSuccessListener.onSuccess(moodEventMaps);
+        moodEventRepo.fetchForInRadiusEventsFromFollowing(username, currentLocation, 5.0, moodEvents -> {
+            // TODO: collect these events here in a combined list to display on the map
+            for (MoodEvent moodEvent : moodEvents) {
+                Log.d(TAG, "Fetched mood event: " + moodEvent.toString());
             }
-            onSuccessListener.onSuccess(moodEventMaps);
         }, e -> {
             Log.e(TAG, "Failed to fetch mood events", e);
         });
