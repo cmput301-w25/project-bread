@@ -13,7 +13,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -29,7 +28,6 @@ import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
-import com.example.bread.utils.TimestampUtils;
 import com.example.bread.view.LoginPage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -205,11 +203,45 @@ public class ProfileFragment extends Fragment {
             }
             updateRequestsVisibility();
 
-            // Show follow back dialog
-            showFollowBackDialog(requestorUsername);
+            // Check if the current user is already following the requestor
+            // or has a pending follow request to the requestor before showing follow-back dialog
+            checkFollowRelationship(requestorUsername);
 
         }, e -> {
             Log.e(TAG, "Error accepting follow request", e);
+        });
+    }
+
+    /**
+     * Check if the current user is already following or has a pending request to the requestor
+     * before showing the follow back dialog
+     */
+    private void checkFollowRelationship(String requestorUsername) {
+        // First check if already following
+        participantRepository.isFollowing(currentUsername, requestorUsername, isAlreadyFollowing -> {
+            if (isAlreadyFollowing) {
+                // Already following this user, no need for follow back dialog
+                return;
+            }
+
+            // Then check if a follow request already exists from current user to requestor
+            participantRepository.checkFollowRequestExists(currentUsername, requestorUsername, requestExists -> {
+                if (requestExists) {
+                    // A follow request already exists, no need for follow back dialog
+                } else {
+                    // No existing relationship, show follow back dialog
+                    showFollowBackDialog(requestorUsername);
+                }
+            }, e -> {
+                Log.e(TAG, "Error checking follow request status", e);
+                // In case of error, default to showing dialog
+                showFollowBackDialog(requestorUsername);
+            });
+
+        }, e -> {
+            Log.e(TAG, "Error checking following status", e);
+            // In case of error, default to showing dialog
+            showFollowBackDialog(requestorUsername);
         });
     }
 
@@ -281,53 +313,40 @@ public class ProfileFragment extends Fragment {
             TextView titleView = recentMoodEventView.findViewById(R.id.textTitle);
             TextView dateView = recentMoodEventView.findViewById(R.id.textDate);
             TextView moodView = recentMoodEventView.findViewById(R.id.textMood);
-            TextView socialSituationView = recentMoodEventView.findViewById(R.id.textSocialSituation);
             ImageView profileImageView = recentMoodEventView.findViewById(R.id.profile_image_home);
-            View cardBackground = recentMoodEventView.findViewById(R.id.homeConstraintLayout);
-
-            // Get the image container to properly hide it when no image
-            CardView imageContainer = recentMoodEventView.findViewById(R.id.event_home_image_holder);
-            ImageView eventImage = recentMoodEventView.findViewById(R.id.event_home_image);
+            ImageView moodImageView = recentMoodEventView.findViewById(R.id.event_home_image);
+            View cardBackground = recentMoodEventView.findViewById(R.id.moodCard);
+            View imageContainer = recentMoodEventView.findViewById(R.id.event_home_image_holder);
+            View constraintLayout = recentMoodEventView.findViewById(R.id.homeConstraintLayout);
 
             usernameView.setText(currentUsername);
             titleView.setText(recentMood.getTitle());
-            dateView.setText(TimestampUtils.transformTimestamp(recentMood.getTimestamp()));
-            moodView.setText(recentMood.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(recentMood.getEmotionalState()));
+            dateView.setText(recentMood.getTimestamp().toString());
+            moodView.setText(EmotionUtils.getEmoticon(recentMood.getEmotionalState()));
 
-            // Set social situation text or hide it
-            if (recentMood.getSocialSituation() != null && recentMood.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
-                socialSituationView.setText(recentMood.getSocialSituation().toString());
-                socialSituationView.setVisibility(View.VISIBLE);
-            } else {
-                socialSituationView.setVisibility(View.INVISIBLE);
-            }
-
-            // Handle event image visibility
+            // Handle image visibility
             if (recentMood.getAttachedImage() != null && !recentMood.getAttachedImage().isEmpty()) {
-                Bitmap imageBitmap = ImageHandler.base64ToBitmap(recentMood.getAttachedImage());
-                if (imageBitmap != null) {
-                    eventImage.setImageBitmap(imageBitmap);
-                    eventImage.setVisibility(View.VISIBLE);
+                if (moodImageView != null) {
+                    moodImageView.setImageBitmap(ImageHandler.base64ToBitmap(recentMood.getAttachedImage()));
+                    moodImageView.setVisibility(View.VISIBLE);
+                }
+                if (imageContainer != null) {
                     imageContainer.setVisibility(View.VISIBLE);
-                } else {
-                    eventImage.setVisibility(View.GONE);
-                    imageContainer.setVisibility(View.GONE);
                 }
             } else {
-                eventImage.setVisibility(View.GONE);
-                imageContainer.setVisibility(View.GONE);
+                if (moodImageView != null) {
+                    moodImageView.setVisibility(View.GONE);
+                }
+                if (imageContainer != null) {
+                    imageContainer.setVisibility(View.GONE);
+                }
             }
 
             // Set profile picture for the recent mood event
             if (profileImageView != null) {
                 participantRepository.fetchBaseParticipant(currentUsername, participant -> {
                     if (participant != null && participant.getProfilePicture() != null) {
-                        Bitmap bitmap = ImageHandler.base64ToBitmap(participant.getProfilePicture());
-                        if (bitmap != null) {
-                            profileImageView.setImageBitmap(bitmap);
-                        } else {
-                            profileImageView.setImageResource(R.drawable.ic_baseline_profile_24);
-                        }
+                        profileImageView.setImageBitmap(ImageHandler.base64ToBitmap(participant.getProfilePicture()));
                     } else {
                         profileImageView.setImageResource(R.drawable.ic_baseline_profile_24);
                     }
@@ -336,7 +355,13 @@ public class ProfileFragment extends Fragment {
 
             // Set background color based on emotional state
             int colorResId = EmotionUtils.getColorResource(recentMood.getEmotionalState());
-            cardBackground.setBackgroundResource(colorResId);
+
+            // Apply color to the card or constraint layout
+            if (cardBackground != null) {
+                cardBackground.setBackgroundResource(colorResId);
+            } else if (constraintLayout != null) {
+                constraintLayout.setBackgroundResource(colorResId);
+            }
 
             recentMoodEventView.setVisibility(View.VISIBLE);
             emptyMoodText.setVisibility(View.GONE);
@@ -369,14 +394,10 @@ public class ProfileFragment extends Fragment {
         }
 
         // Set profile picture if available
-        if (profileImageView != null) {
-            if (participant.getProfilePicture() != null && !participant.getProfilePicture().isEmpty()) {
-                Bitmap bitmap = ImageHandler.base64ToBitmap(participant.getProfilePicture());
-                if (bitmap != null) {
-                    profileImageView.setImageBitmap(bitmap);
-                } else {
-                    profileImageView.setImageResource(R.drawable.ic_baseline_profile_24);
-                }
+        if (participant.getProfilePicture() != null && profileImageView != null) {
+            Bitmap bitmap = ImageHandler.base64ToBitmap(participant.getProfilePicture());
+            if (bitmap != null) {
+                profileImageView.setImageBitmap(bitmap);
             } else {
                 profileImageView.setImageResource(R.drawable.ic_baseline_profile_24);
             }
