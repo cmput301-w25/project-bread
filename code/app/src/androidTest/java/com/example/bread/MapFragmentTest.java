@@ -5,6 +5,7 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static org.junit.Assert.assertTrue;
 
+import android.Manifest;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
@@ -162,8 +163,9 @@ public class MapFragmentTest {
     //https://developer.android.com/training/testing/other-components/ui-automator
     public void testMarkerAppears() throws Exception {
         Thread.sleep(2000);
+        grantPermission();
         onView(withId(R.id.map)).perform(click());
-        Thread.sleep(3000);
+        Thread.sleep(2000);
 
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
@@ -173,7 +175,7 @@ public class MapFragmentTest {
             allowButton.click();
         }
 
-        Thread.sleep(3000);
+        Thread.sleep(2000);
 
         Context context = ApplicationProvider.getApplicationContext();
         FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
@@ -202,6 +204,10 @@ public class MapFragmentTest {
         assertTrue("Marker should be visible", marker.exists());
     }
 
+    private void grantPermission() {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
+                "pm grant " + InstrumentationRegistry.getInstrumentation().getTargetContext().getPackageName() + " " + Manifest.permission.ACCESS_FINE_LOCATION);
+    }
 
     @After
     public void tearDown() {
