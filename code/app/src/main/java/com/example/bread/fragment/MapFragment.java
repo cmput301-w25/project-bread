@@ -401,10 +401,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                     // Convert Map values to List for filtering
                     ArrayList<MoodEvent> moodArray = new ArrayList<>(filteredMap.values());
 
-                    // Apply additional filters (if necessary)
+                    // Apply additional filters
                     ArrayList<MoodEvent> filteredArray = applyFilters(moodArray);
 
-                    // Use filteredMap to ensure markers have correct User ID → MoodEvent mapping
+                    // Use filteredMap to ensure markers have correct User ID to MoodEvent mapping
                     Map<String, MoodEvent> filteredMapFinal = new HashMap<>();
                     for (MoodEvent event : filteredArray) {
                         filteredMapFinal.put(event.getParticipantRef().getId(), event);
