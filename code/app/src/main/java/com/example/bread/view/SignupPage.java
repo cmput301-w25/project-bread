@@ -2,6 +2,7 @@ package com.example.bread.view;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -44,6 +46,7 @@ public class SignupPage extends AppCompatActivity {
     private EditText usernameEditText, emailEditText, passwordEditText, firstNameEditText, lastNameEditText;
     private ProgressBar progressBar;
     private Button signupButton;
+    private TextView alreadyAccountTextView;
 
     private FirebaseAuth mAuth;
     private ParticipantRepository participantRepository;
@@ -62,6 +65,10 @@ public class SignupPage extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         participantRepository = new ParticipantRepository();
 
+        TextView alreadyaccountButton = findViewById(R.id.already_account);
+        //https://stackoverflow.com/questions/10019001/how-do-you-underline-a-text-in-android-xml
+        alreadyaccountButton.setPaintFlags(alreadyaccountButton.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
         initializeUI();
         setupListeners();
     }
@@ -73,6 +80,7 @@ public class SignupPage extends AppCompatActivity {
         firstNameEditText = findViewById(R.id.signup_firstname_text);
         lastNameEditText = findViewById(R.id.signup_lastname_text);
         signupButton = findViewById(R.id.signup_button);
+        alreadyAccountTextView = findViewById(R.id.already_account);
 
         progressBar = findViewById(R.id.signup_progress_bar);
         if (progressBar == null) {
@@ -81,7 +89,12 @@ public class SignupPage extends AppCompatActivity {
     }
 
     private void setupListeners() {
+
         signupButton.setOnClickListener(v -> attemptSignup());
+        alreadyAccountTextView.setOnClickListener(v -> {
+            Intent intent = new Intent(SignupPage.this, LoginPage.class);
+            startActivity(intent);
+        });
     }
 
     private void attemptSignup() {
