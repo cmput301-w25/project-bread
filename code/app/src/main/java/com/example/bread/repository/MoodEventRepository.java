@@ -171,10 +171,11 @@ public class MoodEventRepository {
 
                         GeoLocation docLocation = new GeoLocation(lat, lng);
                         double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
-                        if (distanceInM <= radius && !Objects.requireNonNull(doc.get("participantRef")).equals(participantRepository.getParticipantRef(username))) {
+
+                        if (distanceInM <= radius*1000 && !Objects.requireNonNull(doc.get("participantRef")).equals(participantRepository.getParticipantRef(username))) {
+                            Log.d(TAG, "Went inside loop");
                             matchingDocs.add(doc.toObject(MoodEvent.class));
                         }
-
                     }
                 }
 

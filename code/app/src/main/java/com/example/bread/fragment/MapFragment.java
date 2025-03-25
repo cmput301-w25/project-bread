@@ -196,6 +196,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
 
         moodEventRepo.fetchForInRadiusEventsFromFollowing(username, currentLocation, 5.0, moodEventMaps -> {
+            Log.d(TAG, "Mood event map follower: "+moodEventMaps);
             onSuccessListener.onSuccess(moodEventMaps);
         }, e -> {
             Log.e(TAG, "Failed to fetch mood events", e);
@@ -365,7 +366,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
             int moodPosition = moodSpinner.getSelectedItemPosition();
             if (moodPosition > 0) {
-                String selectedMood = moodOptions.get(moodPosition);
+                String selectedMood = moodOptions.get(moodPosition).toUpperCase();
                 selectedEmotionalState = MoodEvent.EmotionalState.valueOf(selectedMood);
             } else {
                 selectedEmotionalState = null;
@@ -378,13 +379,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             if (isFilteringByHistory) {
                 fetchSelfMoodEvents(filteredMoods -> {
                     ArrayList<MoodEvent> finalFilteredList = applyFilters(filteredMoods);
-                    Map<String, MoodEvent> filteredMap = new HashMap<>();
 
-                    for (MoodEvent moodEvent : finalFilteredList){
-                        filteredMap.put(username, moodEvent);
-                    }
+                    Log.d(TAG, "Filtered user history list: "+finalFilteredList);
 
-                    putMarkersOnMap(filteredMap);
+                    putPersonalOnMap(finalFilteredList);
                 });
             }
 
@@ -397,8 +395,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                         String userId = entry.getKey();
                         MoodEvent event = entry.getValue();
 
-                        Log.d("MoodEvent", "User ID: " + userId + ", Mood: " + event.getTitle());
-
                         filteredMap.put(userId, event);  // Preserve User ID in map
                     }
 
@@ -409,7 +405,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                     ArrayList<MoodEvent> filteredArray = applyFilters(moodArray);
 
                     // Use filteredMap to ensure markers have correct User ID → MoodEvent mapping
-                    putMarkersOnMap(filteredMap);
+                    Map<String, MoodEvent> filteredMapFinal = new HashMap<>();
+                    for (MoodEvent event : filteredArray) {
+                        filteredMapFinal.put(event.getParticipantRef().getId(), event);
+                    }
+                    putMarkersOnMap(filteredMapFinal);
                 });
             }
 
@@ -451,6 +451,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
 
         if (filteredList.isEmpty() && (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty())) {
+            mMap.clear();
             Toast.makeText(getContext(), "No mood events match the applied filters", Toast.LENGTH_SHORT).show();
             return new ArrayList<>(); // Return an empty list
         }
@@ -502,6 +503,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             String userId = moodEvent.getKey();
             MoodEvent event = moodEvent.getValue();
 
+            Log.d(TAG, "Event on map: "+event);
+
             Map<String, Object> geo = event.getGeoInfo();
             if (geo != null) {
                 double lat = (double) geo.get("latitude");
@@ -512,6 +515,30 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 String moodText = emotion.toString();
                 String emoji = EmotionUtils.getEmoticon(emotion);
                 String finalString = "@".concat(userId).concat(": ").concat(moodText).concat(emoji);
+
+                MarkerOptions testMark = new MarkerOptions().position(eventPos).title(finalString).icon(BitmapDescriptorFactory
+                        .fromBitmap(textAsBitmap(emoji)));
+
+                mMap.addMarker(testMark);
+            }
+        }
+    }
+
+    private void putPersonalOnMap(ArrayList<MoodEvent> eventsArray) {
+        for (MoodEvent event : eventsArray){
+
+            Log.d(TAG, "Event on map: "+event);
+
+            Map<String, Object> geo = event.getGeoInfo();
+            if (geo != null) {
+                double lat = (double) geo.get("latitude");
+                double lon = (double) geo.get("longitude");
+
+                LatLng eventPos = new LatLng(lat, lon);
+                MoodEvent.EmotionalState emotion = event.getEmotionalState();
+                String moodText = emotion.toString();
+                String emoji = EmotionUtils.getEmoticon(emotion);
+                String finalString = "@".concat(username).concat(": ").concat(moodText).concat(emoji);
 
                 MarkerOptions testMark = new MarkerOptions().position(eventPos).title(finalString).icon(BitmapDescriptorFactory
                         .fromBitmap(textAsBitmap(emoji)));
