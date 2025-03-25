@@ -119,11 +119,14 @@ public class AddMoodEventFragment extends Fragment {
 
     private void saveMoodEvent() {
         Log.i(TAG, "Starting saveMoodEvent");
+        // Show immediate feedback
+        Toast.makeText(requireContext(), "Mood Saved", Toast.LENGTH_SHORT).show();
 
         // Get required information for mood event
         MoodEvent.EmotionalState emotionalState = (MoodEvent.EmotionalState) emotionalStateSpinner.getSelectedItem();
         if (emotionalState == null) {
             Log.w(TAG, "No emotional state selected");
+            saveButton.setEnabled(true);
             return;
         }
         Log.d(TAG, "Emotional state selected: " + emotionalState);
@@ -182,7 +185,8 @@ public class AddMoodEventFragment extends Fragment {
 
         // If any validation fails, stop here
         if (!isValid) {
-            Log.w(TAG, "Validation failed, aborting save");
+            // Re-enable button
+            saveButton.setEnabled(true);
             return;
         }
 
@@ -210,6 +214,7 @@ public class AddMoodEventFragment extends Fragment {
                 Log.i(TAG, "Location attached to mood event: " + geoInfo);
             } catch (Exception e) {
                 Log.e(TAG, "Error generating geo info: " + e.getMessage(), e);
+                saveButton.setEnabled(true);
                 return;
             }
         } else {
@@ -217,24 +222,28 @@ public class AddMoodEventFragment extends Fragment {
             Log.d(TAG, "No location attached (checkbox unchecked or location null)");
         }
 
-        // Save to Firebase
+        // Navigate to home screen before Firebase save operation
+        if (isAdded() && getActivity() != null) {
+            // Navigate back to HomeFragment
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction().setCustomAnimations(
+                            R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+                    )
+                    .replace(R.id.frame_layout, new HomeFragment())
+                    .commit();
+
+            if (getActivity() instanceof HomePage) {
+                ((HomePage) getActivity()).selectHomeNavigation();
+            }
+        }
+
+        // Save to Firebase after navigation for smooth transition
         Log.i(TAG, "Saving mood event to Firebase");
         moodEventRepository.addMoodEvent(
                 moodEvent,
                 aVoid -> {
-                    Log.i(TAG, "Mood event saved successfully");
-                    Toast.makeText(requireContext(), "Mood saved!", Toast.LENGTH_SHORT).show();
-                    // Navigate back to HomeFragment
-                    requireActivity().getSupportFragmentManager()
-                            .beginTransaction().setCustomAnimations(
-                                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
-                            )
-                            .replace(R.id.frame_layout, new HomeFragment())
-                            .commit();
+                    Log.i(TAG, "Mood event saved successfully in background");
 
-                    if (getActivity() instanceof HomePage) {
-                        ((HomePage) getActivity()).selectHomeNavigation();
-                    }
                 },
                 e -> {
                     Log.e(TAG, "Failed to save mood event: " + e.getMessage(), e);
