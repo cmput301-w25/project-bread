@@ -140,6 +140,25 @@
         app:layout_constraintTop_toBottomOf="@+id/signup_password_text"
         app:layout_constraintVertical_bias="0.0" />
 
+    <TextView
+        android:id="@+id/already_account"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:autoLink="none"
+        android:clickable="true"
+        android:focusable="true"
+        android:text="Already have an account?"
+        android:textAlignment="center"
+        android:textColor="#F8B64C"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signup_button" />
+
     <ImageView
         android:id="@+id/sentio_logo"
         android:layout_width="wrap_content"
