@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -18,8 +19,11 @@ import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.LocationHandler;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.Map;
 
 /**
  * Represents the map page of the app, where users can view a map of their location and nearby
@@ -120,7 +124,7 @@ public class MapFragment extends Fragment {
         }
     }
 
-    private void doFetchInRadiusMoodEvents(@NonNull Location currentLocation) {
+    private void doFetchInRadiusMoodEvents(@NonNull Location currentLocation, @NonNull OnSuccessListener<Map<String, MoodEvent>> onSuccessListener) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
             Log.e(TAG, "Cannot fetch mood events without a signed-in user");
@@ -131,11 +135,11 @@ public class MapFragment extends Fragment {
             Log.e(TAG, "Cannot fetch mood events without a username");
             return;
         }
-        moodEventRepo.fetchForInRadiusEventsFromFollowing(username, currentLocation, 5.0, moodEvents -> {
-            // TODO: collect these events here in a combined list to display on the map
-            for (MoodEvent moodEvent : moodEvents) {
-                Log.d(TAG, "Fetched mood event: " + moodEvent.toString());
+        moodEventRepo.fetchForInRadiusEventsFromFollowing(username, currentLocation, 5.0, moodEventMaps -> {
+            if (moodEventMaps.isEmpty()) {
+                Toast.makeText(getContext(), "No mood events found within the radius", Toast.LENGTH_LONG).show();
             }
+            onSuccessListener.onSuccess(moodEventMaps);
         }, e -> {
             Log.e(TAG, "Failed to fetch mood events", e);
         });
