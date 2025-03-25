@@ -10,7 +10,7 @@ android {
     namespace = "com.example.bread"
     compileSdk = 35
 
-    defaultConfig {
+      defaultConfig {
         applicationId = "com.example.bread"
         minSdk = 24
         targetSdk = 35
@@ -88,4 +88,7 @@ dependencies {
     implementation(libs.google.maps)
     implementation("com.google.android.gms:play-services-maps:18.1.0")
     implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // UI automator for testing
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.2.0")
 }
