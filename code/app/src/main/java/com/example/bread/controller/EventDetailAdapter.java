@@ -27,7 +27,6 @@ public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     private static final String TAG = "EventDetailAdapter";
     private static final int VIEW_TYPE_HEADER = 0;
     private static final int VIEW_TYPE_COMMENT = 1;
-
     private final MoodEvent event;
     private final List<Comment> comments;
     private static ParticipantRepository participantRepository;
