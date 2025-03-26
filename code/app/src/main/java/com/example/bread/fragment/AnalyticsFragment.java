@@ -1,5 +1,7 @@
 package com.example.bread.fragment;
 
+import static com.github.mikephil.charting.utils.ColorTemplate.rgb;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,7 +26,6 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,6 +49,11 @@ public class AnalyticsFragment extends Fragment {
     public AnalyticsFragment() {
         // Required empty public constructor
     }
+
+    public static final int[] MOOD_COLORS = {
+            rgb("#FFE066"), rgb("#A9D6E5"), rgb("#FF6B6B"), rgb("#BDB2FF"), rgb("#D3D3D3"), rgb("#FDFFB6"),
+            rgb("#9BF6FF"), rgb("#FFC6FF"), rgb("#70F473"), rgb("#FFFFFF")
+    };
 
     /**
      * Use this factory method to create a new instance of
@@ -175,7 +181,7 @@ public class AnalyticsFragment extends Fragment {
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
-        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setColors(MOOD_COLORS);
         dataSet.setSliceSpace(2f);
         dataSet.setValueTextSize(12f);
         dataSet.setValueTextColor(Color.WHITE);
@@ -218,6 +224,7 @@ public class AnalyticsFragment extends Fragment {
             return new BarData();
         }
 
+        int currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR);
         monthMoodMap.clear();
         sortedMonthKeys.clear();
 
@@ -227,8 +234,13 @@ public class AnalyticsFragment extends Fragment {
             java.util.Calendar cal = java.util.Calendar.getInstance();
             cal.setTime(event.getTimestamp());
             int year = cal.get(java.util.Calendar.YEAR);
-            int month = cal.get(java.util.Calendar.MONTH) + 1;
 
+            // Only process events from the current year
+            if (year != currentYear) {
+                continue;
+            }
+
+            int month = cal.get(java.util.Calendar.MONTH) + 1;
             String yearMonthKey = String.format("%04d-%02d", year, month);
 
             monthMoodMap.putIfAbsent(yearMonthKey, new HashMap<>());
@@ -250,7 +262,6 @@ public class AnalyticsFragment extends Fragment {
         sortedMonthKeys.sort(String::compareTo);
 
         List<BarEntry> barEntries = new ArrayList<>();
-
         for (int i = 0; i < sortedMonthKeys.size(); i++) {
             String monthKey = sortedMonthKeys.get(i);
             Map<String, Integer> moodCountMap = monthMoodMap.get(monthKey);
@@ -267,7 +278,7 @@ public class AnalyticsFragment extends Fragment {
         com.github.mikephil.charting.data.BarDataSet dataSet =
                 new com.github.mikephil.charting.data.BarDataSet(barEntries, "");
         dataSet.setStackLabels(allMoods.toArray(new String[0]));
-        dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
+        dataSet.setColors(MOOD_COLORS);
         dataSet.setValueTextColor(Color.WHITE);
 
         BarData barData = new BarData(dataSet);
@@ -301,6 +312,8 @@ public class AnalyticsFragment extends Fragment {
 
         barChart.getAxisLeft().setTextColor(Color.WHITE);
         barChart.getAxisRight().setTextColor(Color.WHITE);
+
+        barChart.setExtraBottomOffset(16f);
 
         Legend legend = barChart.getLegend();
         legend.setTextColor(Color.WHITE);
@@ -387,7 +400,7 @@ public class AnalyticsFragment extends Fragment {
         }
 
         com.github.mikephil.charting.data.LineDataSet rawDataSet =
-                new com.github.mikephil.charting.data.LineDataSet(rawEntries, "Daily Average Mood");
+                new com.github.mikephil.charting.data.LineDataSet(rawEntries, "Daily Average");
         rawDataSet.setColor(Color.WHITE);
         rawDataSet.setLineWidth(2f);
         rawDataSet.setCircleRadius(3f);
@@ -440,6 +453,7 @@ public class AnalyticsFragment extends Fragment {
 
         lineChart.getAxisLeft().setTextColor(Color.WHITE);
         lineChart.getAxisRight().setTextColor(Color.WHITE);
+        lineChart.setExtraBottomOffset(16f);
 
         Legend legend = lineChart.getLegend();
         legend.setTextColor(Color.WHITE);
