@@ -11,9 +11,11 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.bread.R;
+import com.example.bread.firebase.FirebaseService;
 
 /**
  * Represents the main activity of the app, where the user is redirected to the login page if they
+ * are not logged in, or to the home page if they are.
  */
 public class MainActivity extends AppCompatActivity {
 
@@ -29,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        // Initialize FirebaseService with context for network connectivity checks
+        FirebaseService.initializeContext(getApplicationContext());
 
         SharedPreferences preferences = getSharedPreferences("sharedPrefs", MODE_PRIVATE);
         if (preferences.getString("username", "").isEmpty()) {
