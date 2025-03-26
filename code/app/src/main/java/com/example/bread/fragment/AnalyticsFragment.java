@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -76,6 +77,12 @@ public class AnalyticsFragment extends Fragment {
         longestStreakTextView = view.findViewById(R.id.longest_streak_text);
         pieChart = view.findViewById(R.id.pie_chart);
         barChart = view.findViewById(R.id.bar_monthly_chart);
+        ImageView closeButton = view.findViewById(R.id.analytics_close_button);
+        closeButton.setOnClickListener(v -> {
+            getParentFragmentManager().beginTransaction().setCustomAnimations(
+                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+            ).remove(AnalyticsFragment.this).commit();
+        });
 
         calculateStreak();
         calculateLongestStreak();
