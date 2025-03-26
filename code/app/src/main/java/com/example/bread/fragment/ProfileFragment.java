@@ -33,6 +33,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.example.bread.utils.TimestampUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -321,8 +322,8 @@ public class ProfileFragment extends Fragment {
 
             usernameView.setText(currentUsername);
             titleView.setText(recentMood.getTitle());
-            dateView.setText(recentMood.getTimestamp().toString());
-            moodView.setText(EmotionUtils.getEmoticon(recentMood.getEmotionalState()));
+            dateView.setText(TimestampUtils.transformTimestamp(recentMood.getTimestamp()));
+            moodView.setText(recentMood.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(recentMood.getEmotionalState()));
 
             // Handle image visibility
             if (recentMood.getAttachedImage() != null && !recentMood.getAttachedImage().isEmpty()) {
