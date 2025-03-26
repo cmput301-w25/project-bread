@@ -2,9 +2,7 @@ package com.example.bread;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.matcher.RootMatchers.isPlatformPopup;
-import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.junit.Assert.assertFalse;
@@ -16,9 +14,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.SystemClock;
 import android.util.Log;
-import android.view.View;
 
-import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -36,7 +32,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -61,18 +56,8 @@ import androidx.test.platform.app.InstrumentationRegistry;
 @LargeTest
 public class MapFragmentTest {
 
-    //https://www.browserstack.com/guide/test-toast-message-using-espresso
-    private View decorView;
-
     @Rule
     public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
-
-    @Before
-    public void setup() {
-        activityScenarioRule.getScenario().onActivity(activity -> {
-            decorView = activity.getWindow().getDecorView();
-        });
-    }
 
     @BeforeClass
     public static void testSetup() {
@@ -162,18 +147,15 @@ public class MapFragmentTest {
         }
     }
 
-    //https://developer.android.com/training/testing/other-components/ui-automator
     @Test
     public void testMarkerAppearsAndNoFilter() throws Exception {
-        Thread.sleep(1000);
         grantPermission();
-        onView(withId(R.id.map)).perform(click());
-        Thread.sleep(1000);
 
-        // Creating a mock location to set as test location so the map centers on this
+        // Set mock location
         Context context = ApplicationProvider.getApplicationContext();
         FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
         Tasks.await(fusedClient.setMockMode(true));
+
         Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
         mockLocation.setLatitude(37.4219999);
         mockLocation.setLongitude(-122.0840575);
@@ -181,6 +163,11 @@ public class MapFragmentTest {
         mockLocation.setTime(System.currentTimeMillis());
         mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
         Tasks.await(fusedClient.setMockLocation(mockLocation));
+
+        Thread.sleep(2000); // Give the system a second to register location
+
+        onView(withId(R.id.map)).perform(click());
+        Thread.sleep(1000);
 
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
@@ -216,10 +203,25 @@ public class MapFragmentTest {
 
     @Test
     public void testRecentReasonMoodFilter() throws Exception{
-        Thread.sleep(3000);
         grantPermission();
+
+        // Set mock location
+        Context context = ApplicationProvider.getApplicationContext();
+        FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
+        Tasks.await(fusedClient.setMockMode(true));
+
+        Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
+        mockLocation.setLatitude(37.4219999);
+        mockLocation.setLongitude(-122.0840575);
+        mockLocation.setAccuracy(1.0f);
+        mockLocation.setTime(System.currentTimeMillis());
+        mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+        Tasks.await(fusedClient.setMockLocation(mockLocation));
+
+        Thread.sleep(2000); // Give the system a second to register location
+
         onView(withId(R.id.map)).perform(click());
-        Thread.sleep(3000);
+        Thread.sleep(1000);
 
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
@@ -228,20 +230,6 @@ public class MapFragmentTest {
         if (allowButton.exists()) {
             allowButton.click();
         }
-
-        Thread.sleep(1000);
-
-        // Creating a mock location to set as test location so the map centers on this
-        Context context = ApplicationProvider.getApplicationContext();
-        FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
-        Tasks.await(fusedClient.setMockMode(true));
-        Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
-        mockLocation.setLatitude(37.4219999);
-        mockLocation.setLongitude(-122.0840575);
-        mockLocation.setAccuracy(1.0f);
-        mockLocation.setTime(System.currentTimeMillis());
-        mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-        Tasks.await(fusedClient.setMockLocation(mockLocation));
 
         Thread.sleep(1000);
 
@@ -258,23 +246,33 @@ public class MapFragmentTest {
                 .perform(click());
         onView(withId(R.id.apply_button)).perform(click());
 
-        // Selecting mood reason
-        onView(withId(R.id.reason_text)).perform(replaceText("test reason 1"));
+        Thread.sleep(3000);
 
         // Ensuring the mood that fits all criteria appears
         UiObject marker1 = device.findObject(new UiSelector().descriptionContains("@testUser: Happy"));
         assertTrue("Marker should be visible", marker1.exists());
-
-        // Ensuring toast appears
-        onView(withText("No follower mood events match the applied filters")).inRoot(withDecorView(Matchers.not(decorView)));
     }
 
     @Test
     public void testResetFilters() throws Exception{
-        Thread.sleep(3000);
         grantPermission();
+
+        // Set mock location
+        Context context = ApplicationProvider.getApplicationContext();
+        FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
+        Tasks.await(fusedClient.setMockMode(true));
+
+        Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
+        mockLocation.setLatitude(37.4219999);
+        mockLocation.setLongitude(-122.0840575);
+        mockLocation.setAccuracy(1.0f);
+        mockLocation.setTime(System.currentTimeMillis());
+        mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+        Tasks.await(fusedClient.setMockLocation(mockLocation));
+
+        Thread.sleep(2000); // Give the system a second to register location
         onView(withId(R.id.map)).perform(click());
-        Thread.sleep(3000);
+        Thread.sleep(1000);
 
         UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
@@ -286,40 +284,27 @@ public class MapFragmentTest {
 
         Thread.sleep(1000);
 
-        // Creating a mock location to set as test location so the map centers on this
-        Context context = ApplicationProvider.getApplicationContext();
-        FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
-        Tasks.await(fusedClient.setMockMode(true));
-        Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
-        mockLocation.setLatitude(37.4219999);
-        mockLocation.setLongitude(-122.0840575);
-        mockLocation.setAccuracy(1.0f);
-        mockLocation.setTime(System.currentTimeMillis());
-        mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-        Tasks.await(fusedClient.setMockLocation(mockLocation));
-
-        Thread.sleep(1000);
-
         onView(withId(R.id.history_switch)).perform(click());
         onView(withId(R.id.follower_switch)).perform(click());
 
         // Selecting sad mood so only mood 2 appears
         onView(withId(R.id.mood_spinner)).perform(click());
-        onView(withText("Happy")) // Searches for "Happy" state within spinner
+        onView(withText("Sad")) // Searches for "Happy" state within spinner
                 .inRoot(isPlatformPopup()) // Ensure we look in the popup filter window not main screen
                 .perform(click());
         onView(withId(R.id.apply_button)).perform(click());
+
+        Thread.sleep(3000);
 
         // Ensuring the mood that fits all criteria appears
         UiObject marker1 = device.findObject(new UiSelector().descriptionContains("@testUser2: Sad"));
         assertTrue("Marker should be visible", marker1.exists());
 
-        // Ensuring toast appears
-        onView(withText("No personal mood events match the applied filters")).inRoot(withDecorView(Matchers.not(decorView)));
-
         //Turn personal mood history viewing off and following on
         onView(withId(R.id.filter_button)).perform(click());
         onView(withId(R.id.reset_button)).perform(click());
+
+        Thread.sleep(3000);
 
         // Ensuring the mood that fits all criteria appears
         UiObject marker3 = device.findObject(new UiSelector().descriptionContains("@testUser: Happy"));

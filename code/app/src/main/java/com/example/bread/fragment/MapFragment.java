@@ -203,7 +203,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         });
     }
 
-    //adding mood event icons to the map https://www.youtube.com/watch?v=4fExmOFKgQY
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
@@ -229,7 +228,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
         }
 
-        // adding map UI controls https://www.youtube.com/watch?v=y84o2kyi_eo
         // Get UI settings
         UiSettings uiSettings = googleMap.getUiSettings();
         // Enable map gestures and controls
@@ -243,7 +241,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         uiSettings.setIndoorLevelPickerEnabled(true);
     }
 
-    //https://stackoverflow.com/questions/8799290/convert-string-text-to-bitmap
     /**
      * Converts text into a bitmap that we can display on the map
      * @param text
