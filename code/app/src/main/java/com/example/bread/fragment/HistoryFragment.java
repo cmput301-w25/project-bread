@@ -161,17 +161,25 @@ public class HistoryFragment extends Fragment {
     private void deleteSelectedMoodEvents() {
         MoodEventRepository repository = new MoodEventRepository();
         selectedEvents = ((HistoryMoodEventArrayAdapter) moodEventListView.getAdapter()).getSelectedEvents();
+
+        int deleteCount = selectedEvents.size();
+
         for (MoodEvent event : selectedEvents) {
+            // Remove the event from the list before syncing for the ui to update when user is offline
+            moodEventArrayList.remove(event);
+            allMoodEvents.remove(event);
             repository.deleteMoodEvent(event, new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     getActivity().runOnUiThread(() -> {
-                        moodArrayAdapter.remove(event);
-                        moodArrayAdapter.notifyDataSetChanged();
+                        // This will run when Firebase sync happens, but UI is already updated
+                        Log.d(TAG, "Mood event synced with Firebase: " + event.getId());
                     });
                 }
             }, e -> Toast.makeText(getContext(), "Error deleting event", Toast.LENGTH_SHORT).show());
         }
+        moodArrayAdapter.notifyDataSetChanged();
+        Toast.makeText(getContext(), deleteCount + " event deleted", Toast.LENGTH_SHORT).show();// just for logcat check
         selectedEvents.clear();  // Clear the selection after deletion
     }
 
@@ -198,10 +206,16 @@ public class HistoryFragment extends Fragment {
         // Set the data
         emotionTextView.setText(moodEvent.getEmotionalState().toString());
 
-        // Format date
-        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
-        String dateString = formatter.format(moodEvent.getTimestamp());
-        dateTextView.setText(dateString);
+        Date timestamp = moodEvent.getTimestamp();
+        //set the date if the timestamp is null to avoid nullpointer exception
+        if (timestamp == null){
+            dateTextView.setText("No date provided");
+        }
+        else {
+            SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
+            String dateString = formatter.format(timestamp);
+            dateTextView.setText(dateString);
+        }
 
         // Set reason
         reasonTextView.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "No reason provided");
@@ -343,11 +357,24 @@ public class HistoryFragment extends Fragment {
                 return;
             }
 
+            int indexOfMood = moodEventArrayList.indexOf(moodEvent);
+
+
             // **Only save if all validations passed**
             moodEvent.setTitle(newTitle);
             moodEvent.setEmotionalState(newEmotionalState);
             moodEvent.setReason(newReason);
             moodEvent.setSocialSituation(newSocialSituation);
+
+            if (indexOfMood >= 0) {
+                    moodEventArrayList.set(indexOfMood, moodEvent);
+
+                    int allEventIndex = allMoodEvents.indexOf(moodEvent);
+                    if (allEventIndex >= 0) {
+                        allMoodEvents.set(allEventIndex, moodEvent);
+                    }
+                    moodArrayAdapter.notifyDataSetChanged();
+            }
 
             // Save to Firebase
             moodsRepo.updateMoodEvent(moodEvent,
@@ -372,6 +399,8 @@ public class HistoryFragment extends Fragment {
                         }
                     }
             );
+            Toast.makeText(getContext(),"Mood updated successfully",Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
         });
     }
 
