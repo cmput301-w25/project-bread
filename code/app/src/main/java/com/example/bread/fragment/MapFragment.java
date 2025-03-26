@@ -380,6 +380,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 fetchSelfMoodEvents(filteredMoods -> {
                     ArrayList<MoodEvent> finalFilteredList = applyFilters(filteredMoods);
 
+                    if (finalFilteredList.isEmpty()){
+                        Toast.makeText(getContext(), "No personal mood events match the applied filters", Toast.LENGTH_SHORT).show();
+                    }
+
                     Log.d(TAG, "Filtered user history list: "+finalFilteredList);
 
                     putPersonalOnMap(finalFilteredList);
@@ -403,6 +407,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
                     // Apply additional filters
                     ArrayList<MoodEvent> filteredArray = applyFilters(moodArray);
+
+                    if (filteredArray.isEmpty()){
+                        Toast.makeText(getContext(), "No follower mood events match the applied filters", Toast.LENGTH_SHORT).show();
+                    }
 
                     // Use filteredMap to ensure markers have correct User ID to MoodEvent mapping
                     Map<String, MoodEvent> filteredMapFinal = new HashMap<>();
@@ -451,8 +459,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
 
         if (filteredList.isEmpty() && (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty())) {
-            mMap.clear();
-            Toast.makeText(getContext(), "No mood events match the applied filters", Toast.LENGTH_SHORT).show();
             return new ArrayList<>(); // Return an empty list
         }
 

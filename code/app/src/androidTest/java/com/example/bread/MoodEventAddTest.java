@@ -45,6 +45,7 @@ import java.util.concurrent.ExecutionException;
 @LargeTest
 public class MoodEventAddTest {
 
+
     @Rule
     public ActivityScenarioRule<HomePage> activityRule = new ActivityScenarioRule<>(HomePage.class);
 

@@ -2,7 +2,12 @@ package com.example.bread;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.replaceText;
+import static androidx.test.espresso.matcher.RootMatchers.isPlatformPopup;
+import static androidx.test.espresso.matcher.RootMatchers.withDecorView;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withText;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.Manifest;
@@ -11,13 +16,14 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.SystemClock;
 import android.util.Log;
+import android.view.View;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
-import com.example.bread.model.Comment;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -29,8 +35,8 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.android.gms.maps.model.LatLng;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -42,7 +48,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -56,8 +61,18 @@ import androidx.test.platform.app.InstrumentationRegistry;
 @LargeTest
 public class MapFragmentTest {
 
+    //https://www.browserstack.com/guide/test-toast-message-using-espresso
+    private View decorView;
+
     @Rule
     public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
+
+    @Before
+    public void setup() {
+        activityScenarioRule.getScenario().onActivity(activity -> {
+            decorView = activity.getWindow().getDecorView();
+        });
+    }
 
     @BeforeClass
     public static void testSetup() {
@@ -89,8 +104,6 @@ public class MapFragmentTest {
 
     @Before
     public void seedDatabase() {
-//        LatLng mockUserLocation = new LatLng(37.4219999, -122.0840575);
-//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mockUserLocation, 15));
 
         // Seed the database with some mood events
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -117,91 +130,198 @@ public class MapFragmentTest {
             }
         });
 
-        double latitude = 37.4220936;
-        double longitude = -122.083922;
-        String geohash = "9q9hvumpqr";
-
-        Map<String, Object> geoInfo = new HashMap<>();
-        geoInfo.put("latitude", latitude);
-        geoInfo.put("longitude", longitude);
-        geoInfo.put("geohash", geohash);
-
-        MoodEvent moodEvent1 = new MoodEvent("Test Event 1", "test reason", MoodEvent.EmotionalState.HAPPY, p2Ref);
+        double latitude1 = 37.43;
+        double longitude1 = -122.083922;
+        String geohash1 = "9q9hvumpqr";
+        Map<String, Object> geoInfo1 = new HashMap<>();
+        geoInfo1.put("latitude", latitude1);
+        geoInfo1.put("longitude", longitude1);
+        geoInfo1.put("geohash", geohash1);
+        MoodEvent moodEvent1 = new MoodEvent("Test Event 1", "test reason 1", MoodEvent.EmotionalState.HAPPY, p1Ref);
         moodEvent1.setSocialSituation(MoodEvent.SocialSituation.ALONE);
-        MoodEvent moodEvent2 = new MoodEvent("Test Event 2", "test reason", MoodEvent.EmotionalState.ANGRY, p2Ref);
-        moodEvent2.setSocialSituation(MoodEvent.SocialSituation.WITH_FRIENDS);
-        MoodEvent moodEvent3 = new MoodEvent("Test Event 3", "test reason", MoodEvent.EmotionalState.SAD, p1Ref);
-        moodEvent3.setSocialSituation(MoodEvent.SocialSituation.ALONE);
-        MoodEvent moodEvent4 = new MoodEvent("Test Event 4", "test reason", MoodEvent.EmotionalState.ANXIOUS, p1Ref);
-        moodEvent4.setSocialSituation(MoodEvent.SocialSituation.WITH_FRIENDS);
-        moodEvent4.setGeoInfo(geoInfo);
+        moodEvent1.setGeoInfo(geoInfo1);
+
+        double latitude2 = 37.4219999;
+        double longitude2 = -122.0840575;
+        String geohash2 = "9q9hvumpqr";
+        Map<String, Object> geoInfo2 = new HashMap<>();
+        geoInfo2.put("latitude", latitude2);
+        geoInfo2.put("longitude", longitude2);
+        geoInfo2.put("geohash", geohash2);
+        MoodEvent moodEvent2 = new MoodEvent("Test Event 2", "test reason 2", MoodEvent.EmotionalState.SAD, p2Ref);
+        moodEvent2.setSocialSituation(MoodEvent.SocialSituation.ALONE);
+        moodEvent2.setGeoInfo(geoInfo2);
 
         CollectionReference moodEvents = db.collection("moodEvents");
         MoodEvent[] events = {
-                moodEvent1, moodEvent2, moodEvent3, moodEvent4
+                moodEvent1, moodEvent2
         };
 
         for (MoodEvent event : events) {
             moodEvents.document(event.getId()).set(event);
         }
-
-        Comment comment1 = new Comment(p1Ref, "test comment 1");
-        Comment comment2 = new Comment(p1Ref, "test comment 2");
-
-        for (Comment comment : List.of(comment1, comment2)) {
-            moodEvents.document(moodEvent1.getId()).collection("comments")
-                    .document(comment.getId()).set(comment);
-        }
-
-        for (Comment comment : List.of(comment1, comment2)) {
-            moodEvents.document(moodEvent2.getId()).collection("comments")
-                    .document(comment.getId()).set(comment);
-        }
     }
 
-    @Test
     //https://developer.android.com/training/testing/other-components/ui-automator
-    public void testMarkerAppears() throws Exception {
-        Thread.sleep(2000);
+    @Test
+    public void testMarkerAppearsAndNoFilter() throws Exception {
+        Thread.sleep(1000);
         grantPermission();
         onView(withId(R.id.map)).perform(click());
-        Thread.sleep(2000);
+        Thread.sleep(1000);
 
-        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-
-        UiObject allowButton = device.findObject(new UiSelector().textContains("While using the app"));
-
-        if (allowButton.exists()) {
-            allowButton.click();
-        }
-
-        Thread.sleep(2000);
-
+        // Creating a mock location to set as test location so the map centers on this
         Context context = ApplicationProvider.getApplicationContext();
         FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
-
         Tasks.await(fusedClient.setMockMode(true));
-
         Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
         mockLocation.setLatitude(37.4219999);
         mockLocation.setLongitude(-122.0840575);
         mockLocation.setAccuracy(1.0f);
         mockLocation.setTime(System.currentTimeMillis());
         mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
-
         Tasks.await(fusedClient.setMockLocation(mockLocation));
 
-        Thread.sleep(3000);
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
+        // Having user select "While using app" when location permission request appears
+        UiObject allowButton = device.findObject(new UiSelector().textContains("While using the app"));
+        if (allowButton.exists()) {
+            allowButton.click();
+        }
+
+        Thread.sleep(5000);
+
+        // Turn personal mood history viewing on
         onView(withId(R.id.history_switch)).perform(click());
 
+        Thread.sleep(1000);
+
+        UiObject marker1 = device.findObject(new UiSelector().descriptionContains("@testUser: Happy"));
+        assertTrue("Personal marker should be visible", marker1.exists());
+
+        //Turn personal mood history viewing off and following on
+        onView(withId(R.id.filter_button)).perform(click());
+        onView(withId(R.id.history_switch)).perform(click());
+        onView(withId(R.id.follower_switch)).perform(click());
         onView(withId(R.id.apply_button)).perform(click());
 
+        UiObject marker2 = device.findObject(new UiSelector().descriptionContains("@testUser2: Sad"));
+        assertTrue("Follower marker should be visible", marker2.exists());
+    }
+
+    @Test
+    public void testRecentReasonMoodFilter() throws Exception{
+        Thread.sleep(3000);
+        grantPermission();
+        onView(withId(R.id.map)).perform(click());
         Thread.sleep(3000);
 
-        UiObject marker = device.findObject(new UiSelector().descriptionContains("@testUser: Anxious"));
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
 
-        assertTrue("Marker should be visible", marker.exists());
+        // Having user select "While using app" when location permission request appears
+        UiObject allowButton = device.findObject(new UiSelector().textContains("While using the app"));
+        if (allowButton.exists()) {
+            allowButton.click();
+        }
+
+        Thread.sleep(1000);
+
+        // Creating a mock location to set as test location so the map centers on this
+        Context context = ApplicationProvider.getApplicationContext();
+        FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
+        Tasks.await(fusedClient.setMockMode(true));
+        Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
+        mockLocation.setLatitude(37.4219999);
+        mockLocation.setLongitude(-122.0840575);
+        mockLocation.setAccuracy(1.0f);
+        mockLocation.setTime(System.currentTimeMillis());
+        mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+        Tasks.await(fusedClient.setMockLocation(mockLocation));
+
+        Thread.sleep(1000);
+
+        onView(withId(R.id.history_switch)).perform(click());
+        onView(withId(R.id.follower_switch)).perform(click());
+
+        // Selecting most recent week
+        onView(withId(R.id.recent_week_switch)).perform(click());
+
+        // Selecting happy mood
+        onView(withId(R.id.mood_spinner)).perform(click());
+        onView(withText("Happy")) // Searches for "Happy" state within spinner
+                .inRoot(isPlatformPopup()) // Ensure we look in the popup filter window not main screen
+                .perform(click());
+        onView(withId(R.id.apply_button)).perform(click());
+
+        // Selecting mood reason
+        onView(withId(R.id.reason_text)).perform(replaceText("test reason 1"));
+
+        // Ensuring the mood that fits all criteria appears
+        UiObject marker1 = device.findObject(new UiSelector().descriptionContains("@testUser: Happy"));
+        assertTrue("Marker should be visible", marker1.exists());
+
+        // Ensuring toast appears
+        onView(withText("No follower mood events match the applied filters")).inRoot(withDecorView(Matchers.not(decorView)));
+    }
+
+    @Test
+    public void testResetFilters() throws Exception{
+        Thread.sleep(3000);
+        grantPermission();
+        onView(withId(R.id.map)).perform(click());
+        Thread.sleep(3000);
+
+        UiDevice device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
+
+        // Having user select "While using app" when location permission request appears
+        UiObject allowButton = device.findObject(new UiSelector().textContains("While using the app"));
+        if (allowButton.exists()) {
+            allowButton.click();
+        }
+
+        Thread.sleep(1000);
+
+        // Creating a mock location to set as test location so the map centers on this
+        Context context = ApplicationProvider.getApplicationContext();
+        FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
+        Tasks.await(fusedClient.setMockMode(true));
+        Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
+        mockLocation.setLatitude(37.4219999);
+        mockLocation.setLongitude(-122.0840575);
+        mockLocation.setAccuracy(1.0f);
+        mockLocation.setTime(System.currentTimeMillis());
+        mockLocation.setElapsedRealtimeNanos(SystemClock.elapsedRealtimeNanos());
+        Tasks.await(fusedClient.setMockLocation(mockLocation));
+
+        Thread.sleep(1000);
+
+        onView(withId(R.id.history_switch)).perform(click());
+        onView(withId(R.id.follower_switch)).perform(click());
+
+        // Selecting sad mood so only mood 2 appears
+        onView(withId(R.id.mood_spinner)).perform(click());
+        onView(withText("Happy")) // Searches for "Happy" state within spinner
+                .inRoot(isPlatformPopup()) // Ensure we look in the popup filter window not main screen
+                .perform(click());
+        onView(withId(R.id.apply_button)).perform(click());
+
+        // Ensuring the mood that fits all criteria appears
+        UiObject marker1 = device.findObject(new UiSelector().descriptionContains("@testUser2: Sad"));
+        assertTrue("Marker should be visible", marker1.exists());
+
+        // Ensuring toast appears
+        onView(withText("No personal mood events match the applied filters")).inRoot(withDecorView(Matchers.not(decorView)));
+
+        //Turn personal mood history viewing off and following on
+        onView(withId(R.id.filter_button)).perform(click());
+        onView(withId(R.id.reset_button)).perform(click());
+
+        // Ensuring the mood that fits all criteria appears
+        UiObject marker3 = device.findObject(new UiSelector().descriptionContains("@testUser: Happy"));
+        assertFalse("Marker should not be visible", marker3.exists());
+        UiObject marker4 = device.findObject(new UiSelector().descriptionContains("@testUser2: Sad"));
+        assertFalse("Marker should not be visible", marker4.exists());
     }
 
     private void grantPermission() {
