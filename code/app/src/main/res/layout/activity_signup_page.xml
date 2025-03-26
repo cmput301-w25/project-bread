@@ -110,7 +110,7 @@
         android:textColor="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/signup_email_text"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.165"
+        app:layout_constraintHorizontal_bias="0.155"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
