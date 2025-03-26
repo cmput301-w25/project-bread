@@ -98,7 +98,12 @@ public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             eventTitle.setText(event.getTitle());
             timestampText.setText(TimestampUtils.transformTimestamp(event.getTimestamp()));
             emotionalStateText.setText(event.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(event.getEmotionalState()));
-            socialSituationText.setText(event.getSocialSituation().toString());
+            if (event.getSocialSituation() != null && event.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
+                socialSituationText.setText(event.getSocialSituation().toString());
+                socialSituationText.setVisibility(View.VISIBLE);
+            } else {
+                socialSituationText.setVisibility(View.GONE);
+            }
             reasonText.setText(event.getReason());
             if (event.getAttachedImage() != null) {
                 eventImage.setImageBitmap(ImageHandler.base64ToBitmap(event.getAttachedImage()));
