@@ -186,7 +186,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
-                <!-- Monthly bar graph -->
                 <com.github.mikephil.charting.charts.BarChart
                     android:id="@+id/bar_monthly_chart"
                     android:layout_width="match_parent"
@@ -194,26 +193,40 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/bar_heading_text"
-                    app:layout_constraintVertical_bias="0.542" />
+                    app:layout_constraintTop_toBottomOf="@+id/bar_heading_text" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/analytics_layout4"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="wrap_content"
                 android:layout_marginHorizontal="36dp"
                 android:layout_marginVertical="10dp"
-                android:background="@drawable/rounded" />
+                android:background="@drawable/rounded"
+                android:padding="4dp">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/analytics_layout5"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginHorizontal="36dp"
-                android:layout_marginVertical="10dp"
-                android:background="@drawable/rounded" />
+                <TextView
+                    android:id="@+id/line_heading_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="4dp"
+                    android:text="Monthly Mood Trend"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.github.mikephil.charting.charts.LineChart
+                    android:id="@+id/line_monthly_chart"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/line_heading_text" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
     </ScrollView>
