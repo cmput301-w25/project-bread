@@ -36,6 +36,7 @@ public class SettingsFragment extends Fragment {
     private ImageButton profileChangeButton;
     private ImageView sentioLogo;
     private ParticipantRepository participantRepository;
+    private ImageView closeButton;
     private String currentUsername;
 
     @Override
@@ -60,6 +61,13 @@ public class SettingsFragment extends Fragment {
         sentioLogo = view.findViewById(R.id.sentio_logo_settings);
         Button editAccountButton = view.findViewById(R.id.edit_account_button);
         Button logoutButton = view.findViewById(R.id.log_out_button);
+        closeButton = view.findViewById(R.id.settings_close_button);
+
+        closeButton.setOnClickListener(v -> {
+            getParentFragmentManager().beginTransaction().setCustomAnimations(
+                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+            ).remove(SettingsFragment.this).commit();
+        });
 
         // Find and hide the delete account button
         Button deleteAccountButton = view.findViewById(R.id.delete_account_button);
