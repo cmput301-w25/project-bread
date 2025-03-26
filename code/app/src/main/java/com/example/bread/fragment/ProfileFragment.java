@@ -53,7 +53,7 @@ public class ProfileFragment extends Fragment {
     private View recentMoodEventView;
     private TextView emptyRequestsText;
     private TextView emptyMoodText;
-    private ImageButton settingsButton;
+    private ImageView settingsButton;
 
     private ParticipantRepository participantRepository;
     private MoodEventRepository moodEventRepository;
@@ -107,7 +107,7 @@ public class ProfileFragment extends Fragment {
             FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
                     R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
             );
-            transaction.replace(R.id.frame_layout, new SettingsFragment());
+            transaction.add(R.id.frame_layout, new SettingsFragment());
             transaction.commit();
         });
 

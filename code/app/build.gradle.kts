@@ -71,7 +71,10 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.legacy.support.v4)
 
-    // Testing
+    // Charts
+    implementation(libs.mpandroidchart)
+
+    // testing
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.api)
     testRuntimeOnly(libs.junit.jupiter.engine)

@@ -190,15 +190,19 @@ public class MapFragmentTest {
             allowButton.click();
         }
 
-        Thread.sleep(5000);
-
-        // Turn personal mood history viewing on
-        onView(withId(R.id.history_switch)).perform(click());
-
         Thread.sleep(1000);
 
         UiObject marker1 = device.findObject(new UiSelector().descriptionContains("@testUser: Happy"));
+        UiObject marker2 = device.findObject(new UiSelector().descriptionContains("@testUser2: Sad"));
+
+        // Turn personal mood history viewing on
+        onView(withId(R.id.history_switch)).perform(click());
+        onView(withId(R.id.apply_button)).perform(click());
+
+        Thread.sleep(1000);
+
         assertTrue("Personal marker should be visible", marker1.exists());
+        assertFalse("Follower marker should be visible", marker2.exists());
 
         //Turn personal mood history viewing off and following on
         onView(withId(R.id.filter_button)).perform(click());
@@ -206,7 +210,7 @@ public class MapFragmentTest {
         onView(withId(R.id.follower_switch)).perform(click());
         onView(withId(R.id.apply_button)).perform(click());
 
-        UiObject marker2 = device.findObject(new UiSelector().descriptionContains("@testUser2: Sad"));
+        assertFalse("Personal marker should be visible", marker1.exists());
         assertTrue("Follower marker should be visible", marker2.exists());
     }
 

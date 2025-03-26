@@ -4,48 +4,56 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#121318"
     tools:context=".fragment.HomeFragment">
 
-    <ImageView
-        android:id="@+id/sentio_logo"
-        android:layout_width="94dp"
-        android:layout_height="74dp"
-        android:scaleType="centerCrop"
-        android:scaleX="0.75"
-        android:scaleY="0.75"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@mipmap/sound_wave_layer" />
-
-    <TextView
-        android:id="@+id/title_text"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/page_header_holder"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/righteous"
-        android:text="Sentio"
-        android:textSize="20sp"
-        android:layout_marginStart="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/sentio_logo" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/search_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:backgroundTint="#F8B64C"
-        android:contentDescription="Search users"
-        android:src="@drawable/ic_baseline_search_24"
-        app:fabSize="mini"
-        app:layout_constraintBottom_toBottomOf="@id/sentio_logo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:tint="@color/black" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="12dp"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <!-- Search container (hidden by default) -->
+        <ImageView
+            android:id="@+id/sentio_logo"
+            android:layout_width="94dp"
+            android:layout_height="74dp"
+            android:scaleType="centerCrop"
+            android:scaleX="0.75"
+            android:scaleY="0.75"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/sound_wave_layer" />
+
+        <TextView
+            android:id="@+id/title_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:fontFamily="@font/righteous"
+            android:text="Sentio"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@id/sentio_logo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/sentio_logo" />
+
+        <!-- Search container (hidden by default) -->
+        <ImageView
+            android:id="@+id/search_button"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="24dp"
+            android:contentDescription="Search users"
+            android:src="@drawable/ic_baseline_search_24"
+            app:layout_constraintBottom_toBottomOf="@id/sentio_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/sentio_logo" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/search_container"
         android:layout_width="match_parent"
@@ -55,7 +63,7 @@
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp"
         android:layout_margin="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/sentio_logo">
+        app:layout_constraintTop_toBottomOf="@+id/page_header_holder">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"

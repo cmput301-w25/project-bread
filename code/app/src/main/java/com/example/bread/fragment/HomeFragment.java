@@ -16,6 +16,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
@@ -68,7 +69,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
     private RecyclerView userRecyclerView;
     private ProgressBar searchProgressBar;
     private TextView searchEmptyView;
-    private FloatingActionButton searchButton;
+    private ImageView searchButton;
     private View searchContainer;
 
     private MoodEventRepository moodEventRepository;
