@@ -106,7 +106,7 @@ public class HistoryFragment extends Fragment {
         FloatingActionButton deleteButton = view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
 
-        Button chartButton = view.findViewById(R.id.chartButton);
+        ImageView chartButton = view.findViewById(R.id.chartButton);
         chartButton.setOnClickListener(v -> {
             if (moodEventArrayList.isEmpty()) {
                 Toast.makeText(getContext(), "No mood events to display", Toast.LENGTH_SHORT).show();
