@@ -30,6 +30,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresExtension;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.example.bread.R;
 import com.example.bread.controller.HistoryMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
@@ -44,6 +47,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -77,7 +81,7 @@ public class HistoryFragment extends Fragment {
 
     // Filter-related variables
     private FloatingActionButton filterButton;
-    private ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
+    private final ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
     private boolean isFilteringByWeek = false;
     private MoodEvent.EmotionalState selectedEmotionalState = null;
     private String searchKeyword = "";
@@ -99,8 +103,25 @@ public class HistoryFragment extends Fragment {
 
         fetchParticipantAndLoadEvents();
 
-        Button deleteButton = view.findViewById(R.id.deleteButton);
+        FloatingActionButton deleteButton = view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
+
+        Button chartButton = view.findViewById(R.id.chartButton);
+        chartButton.setOnClickListener(v -> {
+            if (moodEventArrayList.isEmpty()) {
+                Toast.makeText(getContext(), "No mood events to display", Toast.LENGTH_SHORT).show();
+            } else {
+                List<MoodEvent> moodEvents = new ArrayList<>(moodEventArrayList);
+                AnalyticsFragment fragment = AnalyticsFragment.newInstance(moodEvents);
+                FragmentManager fragmentManager = getParentFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                        R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+                );
+                transaction.add(R.id.frame_layout, fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
 
         // Add filter button click listener
         filterButton = view.findViewById(R.id.filter_button);
@@ -293,7 +314,7 @@ public class HistoryFragment extends Fragment {
         emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         emotionSpinner.setAdapter(emotionAdapter);
 
-        if (moodEvent.getAttachedImage() != null){
+        if (moodEvent.getAttachedImage() != null) {
             // If image already assigned it is displayed on image button, and blank if not
             editImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
         }
@@ -431,10 +452,11 @@ public class HistoryFragment extends Fragment {
         });
     }
     // Edit / add image related functions
+
     /**
      *
      */
-    private void registerResult(){
+    private void registerResult() {
         resultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
@@ -446,14 +468,13 @@ public class HistoryFragment extends Fragment {
                         }
                         try {
                             Uri imageUri = result.getData().getData();
-                            if (imageUri != null){
+                            if (imageUri != null) {
                                 // Changes image on the button if user changes image
                                 editImage.setImageURI(imageUri);
                                 // Assigns new image to our global variable that is then assigned to moodEvent
                                 imageBase64 = ImageHandler.compressImageToBase64(requireContext(), result.getData().getData());
                                 Log.d(TAG, "Image selected and converted: " + imageBase64);
-                            }
-                            else{
+                            } else {
                                 Log.e(TAG, "No image selected.");
                             }
                         } catch (Exception e) {
@@ -469,7 +490,7 @@ public class HistoryFragment extends Fragment {
      * Uses resultLauncher to launch image picking activity
      */
     @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
-    private void pickImage(){
+    private void pickImage() {
         Intent intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
         resultLauncher.launch(intent);
     }
