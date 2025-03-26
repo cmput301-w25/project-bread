@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,10 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import com.example.bread.R;
+import com.example.bread.model.Participant;
 import com.example.bread.repository.ParticipantRepository;
+import com.example.bread.utils.ImageHandler;
 import com.example.bread.view.LoginPage;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -28,6 +33,21 @@ import java.util.Objects;
 public class SettingsFragment extends Fragment {
 
     private static final String TAG = "SettingsFragment";
+    private ImageButton profileChangeButton;
+    private ImageView sentioLogo;
+    private ParticipantRepository participantRepository;
+    private String currentUsername;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        participantRepository = new ParticipantRepository();
+
+        // Get current username
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            currentUsername = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,12 +55,27 @@ public class SettingsFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
 
+        // Initialize views
+        profileChangeButton = view.findViewById(R.id.profile_change_button);
+        sentioLogo = view.findViewById(R.id.sentio_logo_settings);
         Button editAccountButton = view.findViewById(R.id.edit_account_button);
+        Button logoutButton = view.findViewById(R.id.log_out_button);
+
+        // Find and hide the delete account button
+        Button deleteAccountButton = view.findViewById(R.id.delete_account_button);
+        if (deleteAccountButton != null) {
+            deleteAccountButton.setVisibility(View.GONE);
+        }
+
+        // Load user's profile picture
+        loadProfilePicture();
+
+        // Edit account button
         editAccountButton.setOnClickListener(v -> {
             editName();
         });
 
-        Button logoutButton = view.findViewById(R.id.log_out_button);
+        // Logout button
         logoutButton.setOnClickListener(v -> {
             // Clear SharedPreferences
             SharedPreferences preferences = getActivity().getSharedPreferences("sharedPrefs", Context.MODE_PRIVATE);
@@ -55,16 +90,26 @@ public class SettingsFragment extends Fragment {
             startActivity(intent);
         });
 
-        Button deleteAccountButton = view.findViewById(R.id.delete_account_button );
-        deleteAccountButton.setOnClickListener(v -> {
-            // Delete user account and all associated mood events
-            // TODO: implement delete account functionality (?)
-            //https://firebase.google.com/docs/auth/android/manage-users#delete_a_user
-        });
         return view;
     }
 
-    public void editName(){
+    /**
+     * Loads the user's profile picture from Firestore and sets it on the profile image button
+     */
+    private void loadProfilePicture() {
+        if (currentUsername == null) return;
+
+        participantRepository.fetchBaseParticipant(currentUsername, participant -> {
+            if (participant != null && participant.getProfilePicture() != null) {
+                Bitmap bitmap = ImageHandler.base64ToBitmap(participant.getProfilePicture());
+                if (bitmap != null && profileChangeButton != null) {
+                    profileChangeButton.setImageBitmap(bitmap);
+                }
+            }
+        }, e -> Log.e(TAG, "Error loading profile picture", e));
+    }
+
+    public void editName() {
         if (getContext() == null) return;
 
         // Retrieving user information
@@ -88,8 +133,8 @@ public class SettingsFragment extends Fragment {
                         String firstname = participant.getFirstName();
                         String lastname = participant.getLastName();
 
-                        editFirstname.setText(firstname != null ? firstname : "test");
-                        editLastname.setText(lastname != null ? lastname : "test");
+                        editFirstname.setText(firstname != null ? firstname : "");
+                        editLastname.setText(lastname != null ? lastname : "");
 
                         Log.d(TAG, "Fetched participant: " + participant.getFirstName() + " " + participant.getLastName());
                     } else {
@@ -128,5 +173,11 @@ public class SettingsFragment extends Fragment {
 
         AlertDialog dialog = builder.create();
         dialog.show();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadProfilePicture();
     }
 }
