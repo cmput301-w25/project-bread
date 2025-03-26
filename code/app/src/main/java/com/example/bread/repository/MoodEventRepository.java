@@ -21,6 +21,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.Source;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,6 +40,9 @@ public class MoodEventRepository {
     private static final String TAG = "MoodEventRepository";
     private static final int MAX_EVENTS_PER_USER = 3;
     private final ParticipantRepository participantRepository = new ParticipantRepository();
+    private Map<String, List<MoodEvent>> followingMoodsCache = new HashMap<>();
+    private long lastCacheUpdateTime = 0;
+    private static final long CACHE_EXPIRY_MS = 5 * 60 * 2000; // 5 minutes
 
     public MoodEventRepository() {
         firebaseService = new FirebaseService();
@@ -60,7 +64,21 @@ public class MoodEventRepository {
      * @param onFailureListener The listener to be called when the mood events cannot be fetched
      */
     public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
-        getMoodEventCollRef().whereEqualTo("participantRef", participantRef).get()
+        boolean offline = !FirebaseService.isNetworkConnected();
+        Source source;
+        if (offline){
+            source = Source.CACHE;
+        }
+        else {
+            source = Source.DEFAULT;
+        }
+        if (offline){
+            Log.d(TAG, "Fetching mood events with source: CACHE (offline mode)");
+        }
+        else {
+            Log.d(TAG, " Fetching mood events with source : Default (online mode)");
+        }
+        getMoodEventCollRef().whereEqualTo("participantRef", participantRef).get(source)  // Added source parameter here
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
                         Log.e("MoodEventRepository", "No mood events found with participantRef: " + participantRef);
@@ -70,7 +88,28 @@ public class MoodEventRepository {
                     List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
                     onSuccessListener.onSuccess(moodEvents);
                 })
-                .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch mood events with participantRef: " + participantRef, e));
+                .addOnFailureListener(e -> {  // Creating the 'e' variable here
+                    Log.e(TAG, "Failed to fetch mood events with participantRef: " + participantRef, e);
+
+                    // If we're online and the server query failed, try cache
+                    if (!offline) {
+                        Log.d(TAG, "Server fetch failed, falling back to cache");
+                        getMoodEventCollRef().whereEqualTo("participantRef", participantRef)
+                                .get(Source.CACHE)
+                                .addOnSuccessListener(cacheResult -> {
+                                    List<MoodEvent> moodEvents = cacheResult.toObjects(MoodEvent.class);
+                                    Log.d(TAG, "Retrieved " + moodEvents.size() + " mood events from cache fallback");
+                                    onSuccessListener.onSuccess(moodEvents);
+                                })
+                                .addOnFailureListener(cacheError -> {
+                                    if (onFailureListener != null) {
+                                        onFailureListener.onFailure(cacheError);
+                                    }
+                                });
+                    } else if (onFailureListener != null) {
+                        onFailureListener.onFailure(e);
+                    }
+                });
     }
 
     /**
@@ -111,26 +150,126 @@ public class MoodEventRepository {
      * @param onFailureListener The listener to be called when the mood events cannot be fetched
      */
     public void fetchForEventsFromFollowing(@NonNull String username, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
-        participantRepository.fetchFollowing(username, following -> {
-            List<MoodEvent> allMoodEvents = new ArrayList<>();
-            AtomicInteger queriesRemaining = new AtomicInteger(following.size());
-            for (String followingUsername : following) {
-                getMoodEventCollRef().whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
-                        .orderBy("timestamp", Query.Direction.DESCENDING)
-                        .limit(MAX_EVENTS_PER_USER)
-                        .get()
-                        .addOnSuccessListener(queryDocumentSnapshots -> {
-                            List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
-                            synchronized (allMoodEvents) {
-                                allMoodEvents.addAll(moodEvents);
-                            }
-                            if (queriesRemaining.decrementAndGet() == 0) {
-                                onSuccessListener.onSuccess(allMoodEvents);
-                            }
-                        })
-                        .addOnFailureListener(onFailureListener);
-            }
-        }, onFailureListener);
+        // Check memory cache first
+        long currentTime = System.currentTimeMillis();
+        if (followingMoodsCache.containsKey(username) &&
+                (currentTime - lastCacheUpdateTime < CACHE_EXPIRY_MS)) {
+            Log.d(TAG, "Using memory cache for following moods");
+            onSuccessListener.onSuccess(followingMoodsCache.get(username));
+            return;
+        }
+
+        // Explicitly check network connectivity
+        boolean offline = !FirebaseService.isNetworkConnected();
+
+        if (offline) {
+            Log.d(TAG, "Device is OFFLINE - forcing CACHE source only");
+
+            // When offline, fetch following users from cache first
+            participantRepository.fetchFollowing(username, following -> {
+                if (following.isEmpty()) {
+                    onSuccessListener.onSuccess(new ArrayList<>());
+                    return;
+                }
+
+                List<MoodEvent> allMoodEvents = new ArrayList<>();
+                AtomicInteger queriesRemaining = new AtomicInteger(following.size());
+
+                for (String followingUsername : following) {
+                    // Force CACHE source when offline
+                    getMoodEventCollRef().whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                            .orderBy("timestamp", Query.Direction.DESCENDING)
+                            .limit(MAX_EVENTS_PER_USER)
+                            .get(Source.CACHE)
+                            .addOnSuccessListener(queryDocumentSnapshots -> {
+                                List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
+                                Log.d(TAG, "Successfully fetched " + moodEvents.size() +
+                                        " events for " + followingUsername + " from CACHE");
+
+                                synchronized (allMoodEvents) {
+                                    allMoodEvents.addAll(moodEvents);
+                                }
+
+                                if (queriesRemaining.decrementAndGet() == 0) {
+                                    // Update the cache
+                                    followingMoodsCache.put(username, new ArrayList<>(allMoodEvents));
+                                    lastCacheUpdateTime = System.currentTimeMillis();
+
+                                    onSuccessListener.onSuccess(allMoodEvents);
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Failed to fetch events for " + followingUsername +
+                                        " from CACHE: " + e.getMessage());
+
+                                if (queriesRemaining.decrementAndGet() == 0) {
+                                    onSuccessListener.onSuccess(allMoodEvents);
+                                }
+                            });
+                }
+            }, onFailureListener);
+        } else {
+            // if online, fetch following users from default source
+            Log.d(TAG, "Device is ONLINE - using DEFAULT source");
+
+            participantRepository.fetchFollowing(username, following -> {
+                if (following.isEmpty()) {
+                    onSuccessListener.onSuccess(new ArrayList<>());
+                    return;
+                }
+
+                List<MoodEvent> allMoodEvents = new ArrayList<>();
+                AtomicInteger queriesRemaining = new AtomicInteger(following.size());
+
+                for (String followingUsername : following) {
+                    getMoodEventCollRef().whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                            .orderBy("timestamp", Query.Direction.DESCENDING)
+                            .limit(MAX_EVENTS_PER_USER)
+                            .get(Source.DEFAULT)
+                            .addOnSuccessListener(queryDocumentSnapshots -> {
+                                List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
+                                synchronized (allMoodEvents) {
+                                    allMoodEvents.addAll(moodEvents);
+                                }
+
+                                if (queriesRemaining.decrementAndGet() == 0) {
+                                    followingMoodsCache.put(username, new ArrayList<>(allMoodEvents));
+                                    lastCacheUpdateTime = System.currentTimeMillis();
+
+                                    onSuccessListener.onSuccess(allMoodEvents);
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                // If we're online and server fetch failed, try cache
+                                // this is just a test scenario i thought and can be removed if not needed since above already covers this. still including in the pr.
+                                Log.d(TAG, "Server fetch failed for " + followingUsername + ", falling back to cache");
+                                getMoodEventCollRef().whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                                        .orderBy("timestamp", Query.Direction.DESCENDING)
+                                        .limit(MAX_EVENTS_PER_USER)
+                                        .get(Source.CACHE)
+                                        .addOnSuccessListener(cacheResult -> {
+                                            List<MoodEvent> moodEvents = cacheResult.toObjects(MoodEvent.class);
+                                            synchronized (allMoodEvents) {
+                                                allMoodEvents.addAll(moodEvents);
+                                            }
+
+                                            if (queriesRemaining.decrementAndGet() == 0) {
+                                                followingMoodsCache.put(username, new ArrayList<>(allMoodEvents));
+                                                lastCacheUpdateTime = System.currentTimeMillis();
+
+                                                onSuccessListener.onSuccess(allMoodEvents);
+                                            }
+                                        })
+                                        .addOnFailureListener(cacheError -> {
+                                            Log.e(TAG, "Cache fallback also failed for " + followingUsername, cacheError);
+                                            if (queriesRemaining.decrementAndGet() == 0) {
+                                                onSuccessListener.onSuccess(allMoodEvents);
+                                            }
+                                        });
+                            });
+                }
+            }, onFailureListener);
+        }
     }
 
     /**
