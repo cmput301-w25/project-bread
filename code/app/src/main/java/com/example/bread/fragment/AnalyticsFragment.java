@@ -14,10 +14,13 @@ import androidx.fragment.app.Fragment;
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
@@ -38,6 +41,7 @@ public class AnalyticsFragment extends Fragment {
     private TextView streakTextView, longestStreakTextView;
     PieChart pieChart;
     BarChart barChart;
+    LineChart lineChart;
     private final Map<String, Map<String, Integer>> monthMoodMap = new HashMap<>();
     private final List<String> sortedMonthKeys = new ArrayList<>();
 
@@ -77,6 +81,7 @@ public class AnalyticsFragment extends Fragment {
         longestStreakTextView = view.findViewById(R.id.longest_streak_text);
         pieChart = view.findViewById(R.id.pie_chart);
         barChart = view.findViewById(R.id.bar_monthly_chart);
+        lineChart = view.findViewById(R.id.line_monthly_chart);
         ImageView closeButton = view.findViewById(R.id.analytics_close_button);
         closeButton.setOnClickListener(v -> {
             getParentFragmentManager().beginTransaction().setCustomAnimations(
@@ -89,6 +94,7 @@ public class AnalyticsFragment extends Fragment {
 
         drawPieChart();
         drawBarChart();
+        drawLineChart();
 
         return view;
     }
@@ -311,5 +317,133 @@ public class AnalyticsFragment extends Fragment {
         String[] parts = yearMonthKey.split("-");
         int monthIndex = Integer.parseInt(parts[1]) - 1;
         return monthNames[monthIndex] + " " + parts[0];
+    }
+
+    private LineData generateLineData() {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        // Set to midnight today for consistency
+        cal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        cal.set(java.util.Calendar.MINUTE, 0);
+        cal.set(java.util.Calendar.SECOND, 0);
+        cal.set(java.util.Calendar.MILLISECOND, 0);
+        java.util.Date today = cal.getTime();
+        java.util.Calendar startCal = (java.util.Calendar) cal.clone();
+        startCal.add(java.util.Calendar.DAY_OF_MONTH, -29);
+        java.util.Date startDate = startCal.getTime();
+
+        // Prepare maps to aggregate scores per day (using day midnight timestamp as key)
+        Map<Long, Float> dailySum = new HashMap<>();
+        Map<Long, Integer> dailyCount = new HashMap<>();
+
+        // Aggregate mood events that fall within the last 30 days
+        for (MoodEvent event : moodEvents) {
+            java.util.Date eventDate = event.getTimestamp();
+            // Only include events within our time window
+            if (eventDate.before(startDate) || eventDate.after(today)) {
+                continue;
+            }
+            // Normalize event date to midnight
+            java.util.Calendar eventCal = java.util.Calendar.getInstance();
+            eventCal.setTime(eventDate);
+            eventCal.set(java.util.Calendar.HOUR_OF_DAY, 0);
+            eventCal.set(java.util.Calendar.MINUTE, 0);
+            eventCal.set(java.util.Calendar.SECOND, 0);
+            eventCal.set(java.util.Calendar.MILLISECOND, 0);
+            long dayKey = eventCal.getTimeInMillis();
+            dailySum.put(dayKey, dailySum.getOrDefault(dayKey, 0f) + event.getScore());
+            dailyCount.put(dayKey, dailyCount.getOrDefault(dayKey, 0) + 1);
+        }
+
+        List<Float> dailyAverages = new ArrayList<>();
+        List<com.github.mikephil.charting.data.Entry> rawEntries = new ArrayList<>();
+        int totalDays = 30;
+        java.util.Calendar iterCal = (java.util.Calendar) startCal.clone();
+
+        for (int i = 0; i < totalDays; i++) {
+            long dayKey = iterCal.getTimeInMillis();
+            float average = 0f;
+            if (dailyCount.containsKey(dayKey)) {
+                average = dailySum.get(dayKey) / dailyCount.get(dayKey);
+            }
+            dailyAverages.add(average);
+            // x value is the day index (0-based)
+            rawEntries.add(new com.github.mikephil.charting.data.Entry(i, average));
+            iterCal.add(java.util.Calendar.DAY_OF_MONTH, 1);
+        }
+
+        // Calculate 7-day moving average (smoothing out daily fluctuations)
+        List<com.github.mikephil.charting.data.Entry> movingAvgEntries = new ArrayList<>();
+        int window = 7;
+        for (int i = 0; i < dailyAverages.size(); i++) {
+            int startWindow = Math.max(0, i - window + 1);
+            float sum = 0f;
+            int count = 0;
+            for (int j = startWindow; j <= i; j++) {
+                sum += dailyAverages.get(j);
+                count++;
+            }
+            float movingAvg = sum / count;
+            movingAvgEntries.add(new com.github.mikephil.charting.data.Entry(i, movingAvg));
+        }
+
+        com.github.mikephil.charting.data.LineDataSet rawDataSet =
+                new com.github.mikephil.charting.data.LineDataSet(rawEntries, "Daily Average Mood");
+        rawDataSet.setColor(Color.WHITE);
+        rawDataSet.setLineWidth(2f);
+        rawDataSet.setCircleRadius(3f);
+        rawDataSet.setDrawCircleHole(false);
+        rawDataSet.setDrawCircles(false);
+        rawDataSet.setValueTextSize(10f);
+        rawDataSet.setDrawValues(false);
+        rawDataSet.setValueTextColor(Color.WHITE);
+        rawDataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+
+        com.github.mikephil.charting.data.LineDataSet movingAvgDataSet =
+                new com.github.mikephil.charting.data.LineDataSet(movingAvgEntries, "7-Day Moving Average");
+        movingAvgDataSet.setColor(Color.CYAN);
+        movingAvgDataSet.setLineWidth(3f);
+        movingAvgDataSet.setDrawCircles(false);
+        movingAvgDataSet.setDrawValues(false);
+        movingAvgDataSet.setMode(com.github.mikephil.charting.data.LineDataSet.Mode.CUBIC_BEZIER);
+
+        return new com.github.mikephil.charting.data.LineData(rawDataSet, movingAvgDataSet);
+    }
+
+    private void drawLineChart() {
+        com.github.mikephil.charting.data.LineData lineData = generateLineData();
+        lineChart.setData(lineData);
+        lineChart.getDescription().setEnabled(false);
+        lineChart.setDrawGridBackground(false);
+
+        com.github.mikephil.charting.components.XAxis xAxis = lineChart.getXAxis();
+        xAxis.setPosition(com.github.mikephil.charting.components.XAxis.XAxisPosition.BOTTOM);
+        xAxis.setTextColor(Color.WHITE);
+
+        java.util.Calendar calendar = java.util.Calendar.getInstance();
+        calendar.set(java.util.Calendar.HOUR_OF_DAY, 0);
+        calendar.set(java.util.Calendar.MINUTE, 0);
+        calendar.set(java.util.Calendar.SECOND, 0);
+        calendar.set(java.util.Calendar.MILLISECOND, 0);
+        calendar.add(java.util.Calendar.DAY_OF_MONTH, -29);
+        final java.util.Date startDate = calendar.getTime();
+        final java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("MMM d");
+
+        xAxis.setValueFormatter(new com.github.mikephil.charting.formatter.ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                java.util.Calendar cal = java.util.Calendar.getInstance();
+                cal.setTime(startDate);
+                cal.add(java.util.Calendar.DAY_OF_MONTH, (int) value);
+                return sdf.format(cal.getTime());
+            }
+        });
+
+        lineChart.getAxisLeft().setTextColor(Color.WHITE);
+        lineChart.getAxisRight().setTextColor(Color.WHITE);
+
+        Legend legend = lineChart.getLegend();
+        legend.setTextColor(Color.WHITE);
+
+        lineChart.invalidate();
     }
 }
