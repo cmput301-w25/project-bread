@@ -68,39 +68,17 @@ public class MoodEventRepository {
                         return;
                     }
                     List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
+
+                    // Ensure all IDs are set
+                    for (int i = 0; i < moodEvents.size(); i++) {
+                        DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(i);
+                        MoodEvent event = moodEvents.get(i);
+                        event.setId(doc.getId());
+                    }
+
                     onSuccessListener.onSuccess(moodEvents);
                 })
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to fetch mood events with participantRef: " + participantRef, e));
-    }
-
-    /**
-     * Listens for all mood events from the database with the given participant reference
-     *
-     * @param participantRef    The reference to the participant whose mood events are to be fetched
-     * @param onSuccessListener The listener to be called when the mood events are successfully fetched
-     * @param onFailureListener The listener to be called when the mood events cannot be fetched
-     */
-    public void listenForEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
-        getMoodEventCollRef().whereEqualTo("participantRef", participantRef)
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        onFailureListener.onFailure(error);
-                        return;
-                    }
-                    if (value != null) {
-                        List<MoodEvent> moodEvents = new ArrayList<>();
-                        for (DocumentSnapshot doc : value.getDocuments()) {
-                            MoodEvent moodEvent = doc.toObject(MoodEvent.class);
-                            if (moodEvent != null) {
-                                // Explicitly set the ID from the document
-                                moodEvent.setId(doc.getId());
-                                Log.d("MoodEventRepository", "Loaded mood with ID: " + doc.getId());
-                                moodEvents.add(moodEvent);
-                            }
-                        }
-                        onSuccessListener.onSuccess(moodEvents);
-                    }
-                });
     }
 
     /**
@@ -113,22 +91,52 @@ public class MoodEventRepository {
     public void fetchForEventsFromFollowing(@NonNull String username, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
         participantRepository.fetchFollowing(username, following -> {
             List<MoodEvent> allMoodEvents = new ArrayList<>();
+
+            // Handle the case of no followed users
+            if (following == null || following.isEmpty()) {
+                onSuccessListener.onSuccess(allMoodEvents);
+                return;
+            }
+
+            // Counter to track when all queries are complete
             AtomicInteger queriesRemaining = new AtomicInteger(following.size());
+
             for (String followingUsername : following) {
-                getMoodEventCollRef().whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                getMoodEventCollRef()
+                        .whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
                         .orderBy("timestamp", Query.Direction.DESCENDING)
                         .limit(MAX_EVENTS_PER_USER)
                         .get()
                         .addOnSuccessListener(queryDocumentSnapshots -> {
-                            List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
+                            List<MoodEvent> moodEvents = new ArrayList<>();
+
+                            // Process each document, setting the ID explicitly
+                            for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                                MoodEvent event = doc.toObject(MoodEvent.class);
+                                if (event != null) {
+                                    event.setId(doc.getId());
+                                    moodEvents.add(event);
+                                }
+                            }
+
+                            // Add to our combined results
                             synchronized (allMoodEvents) {
                                 allMoodEvents.addAll(moodEvents);
                             }
-                            if (queriesRemaining.decrementAndGet() == 0) {
+
+                            // If all queries are complete, return the results
+                            if (queriesRemaining.decrementAndGet() <= 0) {
                                 onSuccessListener.onSuccess(allMoodEvents);
                             }
                         })
-                        .addOnFailureListener(onFailureListener);
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "Error fetching events for " + followingUsername, e);
+
+                            // Even on failure, decrement counter and check if done
+                            if (queriesRemaining.decrementAndGet() <= 0) {
+                                onSuccessListener.onSuccess(allMoodEvents);
+                            }
+                        });
             }
         }, onFailureListener);
     }
@@ -140,6 +148,7 @@ public class MoodEventRepository {
      * Referenced <a href="https://firebase.google.com/docs/firestore/solutions/geoqueries#query_geohashes">Firebase Geo-hashes</a>
      * </p>
      *
+     * @param username          username of the participant
      * @param location          current location of the user
      * @param radius            radius of the area to search for mood events, in kilometers
      * @param onSuccessListener listener to be called when the mood events are successfully fetched
@@ -234,7 +243,6 @@ public class MoodEventRepository {
      * @param onFailureListener The listener to be called when the mood event cannot be updated
      */
     public void updateMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
-
         // need to add check if the mood event id is null
         if (moodEvent.getId() == null) {
             onFailureListener.onFailure(new IllegalArgumentException("Mood event ID cannot be null"));
