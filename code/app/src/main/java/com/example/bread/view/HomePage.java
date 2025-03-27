@@ -37,6 +37,8 @@ public class HomePage extends AppCompatActivity {
     ActivityHomePageBinding binding;
     private ListenerRegistration notificationListener;
 
+
+
     protected void onResume() {
         super.onResume();
 
