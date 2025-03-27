@@ -267,12 +267,8 @@ public class ParticipantRepository {
     public void sendFollowRequest(@NonNull String fromUsername, @NonNull String toUsername,
                                   @NonNull OnSuccessListener<Void> onSuccessListener,
                                   OnFailureListener onFailureListener) {
-        Map<String, Object> request = new HashMap<>();
-        request.put("fromUsername", fromUsername);
-        request.put("status", "pending");
-        request.put("timestamp", com.google.firebase.Timestamp.now());
-
-                getParticipantCollRef().document(toUsername).collection("followRequests").document(fromUsername).set(request)
+        FollowRequest followRequest = new FollowRequest(fromUsername);
+                getParticipantCollRef().document(toUsername).collection("followRequests").document(fromUsername).set(followRequest.toMap())
                 .addOnSuccessListener(aVoid -> {
                     // Send notification
                     NotificationService.sendFollowRequestNotification(fromUsername, toUsername);
@@ -503,27 +499,5 @@ public class ParticipantRepository {
                         Log.e(TAG, "Failed to remove " + targetUsername + " from " + username + "'s following", e));
     }
 
-    /**
-     * Set up a real-time listener for participant data updates
-     *
-     * @param username                    The username of the participant to listen for
-     * @param onParticipantUpdateListener The listener to be called when the participant data updates
-     * @return A ListenerRegistration that can be used to remove the listener when not needed
-     */
-    public ListenerRegistration listenForParticipantUpdates(@NonNull String username, @NonNull OnSuccessListener<Participant> onParticipantUpdateListener) {
-        return getParticipantCollRef().document(username)
-                .addSnapshotListener((documentSnapshot, e) -> {
-                    if (e != null) {
-                        Log.e(TAG, "Error listening for participant updates", e);
-                        return;
-                    }
 
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        Participant participant = documentSnapshot.toObject(Participant.class);
-                        if (participant != null) {
-                            onParticipantUpdateListener.onSuccess(participant);
-                        }
-                    }
-                });
-    }
 }
