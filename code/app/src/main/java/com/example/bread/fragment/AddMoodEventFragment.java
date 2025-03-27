@@ -138,14 +138,11 @@ public class AddMoodEventFragment extends Fragment {
 
     private void saveMoodEvent() {
         Log.i(TAG, "Starting saveMoodEvent");
-        // Show immediate feedback
-        Toast.makeText(requireContext(), "Mood Saved", Toast.LENGTH_SHORT).show();
-
         // Get required information for mood event
         MoodEvent.EmotionalState emotionalState = (MoodEvent.EmotionalState) emotionalStateSpinner.getSelectedItem();
         if (emotionalState == null) {
             Log.w(TAG, "No emotional state selected");
-            saveButton.setEnabled(true);
+            saveButton.setEnabled(false);
             return;
         }
         Log.d(TAG, "Emotional state selected: " + emotionalState);
@@ -204,8 +201,7 @@ public class AddMoodEventFragment extends Fragment {
 
         // If any validation fails, stop here
         if (!isValid) {
-            // Re-enable button
-            saveButton.setEnabled(true);
+            Log.w(TAG, "Validation failed, aborting save");
             return;
         }
 
@@ -257,6 +253,8 @@ public class AddMoodEventFragment extends Fragment {
         }
 
         // Save to Firebase after navigation for smooth transition
+        // add toast to show that the mood is saved in personal history along with saving it in firebase for smooth transition.
+        Toast.makeText(requireContext(), "Mood Saved", Toast.LENGTH_SHORT).show();
         Log.i(TAG, "Saving mood event to Firebase");
         moodEventRepository.addMoodEvent(
                 moodEvent,
