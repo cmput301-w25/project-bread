@@ -13,7 +13,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
 import com.example.bread.databinding.ActivityHomePageBinding;
-
+import com.example.bread.fragment.AddMoodEventFragment;
+import com.example.bread.fragment.FollowRequestsFragment;
 import com.example.bread.fragment.HistoryFragment;
 import com.example.bread.fragment.HomeFragment;
 import com.example.bread.fragment.MapFragment;
@@ -25,7 +26,11 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.example.bread.fragment.UserSearchFragment;
 
+/**
+ * Represents the home page of the app, where users can navigate to different fragments.
+ */
 public class HomePage extends AppCompatActivity {
 
     private static final String TAG = "HomePage";
@@ -70,11 +75,18 @@ public class HomePage extends AppCompatActivity {
             } else if (itemId == R.id.map) {
                 replaceFragment(new MapFragment());
             } else if (itemId == R.id.add) {
-                // Start AddMoodEventActivity instead of replacing with a fragment
+                // Different approaches in the two versions:
+                // 1. Your branch: Starts AddMoodEventActivity
+                // 2. Main branch: Uses AddMoodEventFragment
+                // We'll use the fragment approach from main:
+                replaceFragment(new AddMoodEventFragment());
+
+                // If you need the activity approach, uncomment these lines:
+                /*
                 Intent intent = new Intent(HomePage.this, AddMoodEventActivity.class);
                 startActivity(intent);
-                // Return false to prevent the navigation item from staying selected (optional)
-                return false;
+                return false; // Don't select the tab
+                */
             } else if (itemId == R.id.history) {
                 replaceFragment(new HistoryFragment());
             } else if (itemId == R.id.profile) {
@@ -87,9 +99,40 @@ public class HomePage extends AppCompatActivity {
 
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+        );
         transaction.replace(R.id.frame_layout, fragment);
         transaction.commit();
+    }
+
+    public void selectHomeNavigation() {
+        binding.bottomNavigationView.setSelectedItemId(R.id.home);
+    }
+
+    // Method to navigate to specific fragments from your branch
+    public void navigateToFragment(String fragmentName) {
+        Fragment fragment = null;
+
+        switch (fragmentName) {
+            case "followRequests":
+                fragment = new FollowRequestsFragment();
+                break;
+            case "userSearch":
+                fragment = new UserSearchFragment();
+                break;
+            case "profile":
+                fragment = new ProfileFragment();
+                break;
+        }
+
+        if (fragment != null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.frame_layout, fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
     }
 
 
@@ -108,7 +151,7 @@ public class HomePage extends AppCompatActivity {
                 binding.bottomNavigationView.setSelectedItemId(R.id.profile);
 
                 // once the fragment is setup, we can navgiate to the follow requests fragment and uncomment the line below
-                //navigateToFragment("followRequests");
+                navigateToFragment("FollowRequestsFragment");
 
                 // Get sender username if available
                 String senderUsername = intent.getStringExtra(NotificationUtils.EXTRA_SENDER_USERNAME);

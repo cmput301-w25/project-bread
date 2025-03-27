@@ -2,15 +2,15 @@ package com.example.bread.view;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -18,31 +18,18 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.bread.R;
-import com.example.bread.utils.LocationHandler;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Represents the login page of the app, where users can sign in with their email and password.
+ */
 public class LoginPage extends AppCompatActivity {
 
     private static final String TAG = "LoginPage";
-
-    /**
-     * These two fields are used to handle location permissions and fetching the user's location.
-     * They are required in all the activities that need to fetch the user's location.
-     * Always call stopLocationUpdates() in the onDestroy() / onStop() method of the activity.
-     */
-    private LocationHandler locationHandler;
-    private final ActivityResultLauncher<String> locationPermissionLauncher =
-            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                if (isGranted) {
-                    locationHandler.fetchUserLocation();
-                } else {
-                    Log.e(TAG, "Location permission denied - cannot fetch location");
-                }
-            });
 
     private EditText emailEditText, passwordEditText;
 
@@ -59,13 +46,14 @@ public class LoginPage extends AppCompatActivity {
             return insets;
         });
 
-        locationHandler = LocationHandler.getInstance(this);
-        locationHandler.requestLocationPermission(locationPermissionLauncher);
-
         mAuth = FirebaseAuth.getInstance();
 
         Button loginButton = findViewById(R.id.login_button);
-        Button signupButton = findViewById(R.id.login_signup_button);
+
+        TextView signupButton = findViewById(R.id.login_signup_button);
+        //https://stackoverflow.com/questions/10019001/how-do-you-underline-a-text-in-android-xml
+        signupButton.setPaintFlags(signupButton.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
         emailEditText = findViewById(R.id.login_email_text);
         passwordEditText = findViewById(R.id.login_password_text);
 
@@ -127,12 +115,6 @@ public class LoginPage extends AppCompatActivity {
         } else {
             Log.d(TAG, "User is not signed in");
         }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        locationHandler.stopLocationUpdates();
     }
 
     private void signInUser(@NonNull String email, @NonNull String password, @NonNull OnSuccessListener<AuthResult> onSuccessListener, OnFailureListener onFailureListener) {
