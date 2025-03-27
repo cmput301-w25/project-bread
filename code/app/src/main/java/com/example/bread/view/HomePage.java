@@ -35,6 +35,7 @@ public class HomePage extends AppCompatActivity {
 
     private static final String TAG = "HomePage";
     ActivityHomePageBinding binding;
+    private ListenerRegistration notificationListener;
 
     protected void onResume() {
         super.onResume();
@@ -56,7 +57,7 @@ public class HomePage extends AppCompatActivity {
             notificationListener = null;
         }
     }
-    private ListenerRegistration notificationListener;
+
     @SuppressLint("NonConstantResourceId")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +66,8 @@ public class HomePage extends AppCompatActivity {
         //https://www.youtube.com/watch?v=jOFLmKMOcK0
         binding = ActivityHomePageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
+        // Create notification channels
+        NotificationUtils.createNotificationChannels(this);
         replaceFragment(new HomeFragment());
 
         binding.bottomNavigationView.setOnItemSelectedListener(item -> {
@@ -95,6 +97,11 @@ public class HomePage extends AppCompatActivity {
 
             return true;  // Important to return true to indicate the item was selected
         });
+
+        // Check if the activity was launched from a notification
+        if (getIntent() != null) {
+            handleNotificationIntent(getIntent());
+        }
     }
 
     private void replaceFragment(Fragment fragment) {
@@ -135,30 +142,38 @@ public class HomePage extends AppCompatActivity {
         }
     }
 
-
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        Log.d(TAG, "onNewIntent: Called with intent: " + intent);
         handleNotificationIntent(intent);
     }
 
     private void handleNotificationIntent(Intent intent) {
         if (intent != null) {
             String navigateTo = intent.getStringExtra("navigate_to");
+            Log.d(TAG, "handleNotificationIntent: navigate_to = " + navigateTo);
 
             if ("follow_requests".equals(navigateTo)) {
+                Log.d(TAG, "handleNotificationIntent: Preparing to navigate to follow requests");
+
                 // Select profile in bottom navigation
                 binding.bottomNavigationView.setSelectedItemId(R.id.profile);
 
-                // once the fragment is setup, we can navgiate to the follow requests fragment and uncomment the line below
-                navigateToFragment("FollowRequestsFragment");
+                // Need to wait briefly for the profile fragment to attach
+                binding.bottomNavigationView.postDelayed(() -> {
+                    // Navigate to follow requests fragment using the matching case from the switch statement
+                    navigateToFragment("followRequests");
+                    Log.d(TAG, "handleNotificationIntent: Navigated to followRequests fragment");
 
-                // Get sender username if available
-                String senderUsername = intent.getStringExtra(NotificationUtils.EXTRA_SENDER_USERNAME);
-                if (senderUsername != null && !senderUsername.isEmpty()) {
-                    // You could pass this to the fragment if needed
-                    // For example, to highlight this specific request
-                }
+                    // Get sender username if available
+                    String senderUsername = intent.getStringExtra(NotificationUtils.EXTRA_SENDER_USERNAME);
+                    if (senderUsername != null && !senderUsername.isEmpty()) {
+                        Log.d(TAG, "handleNotificationIntent: Sender username: " + senderUsername);
+                        // You could pass this to the fragment if needed
+                        // For example, to highlight this specific request
+                    }
+                }, 300); // Short delay to ensure fragment transaction completes
             }
         }
     }
