@@ -42,7 +42,7 @@ public class MoodEventRepository {
     private final ParticipantRepository participantRepository = new ParticipantRepository();
     private Map<String, List<MoodEvent>> followingMoodsCache = new HashMap<>();
     private long lastCacheUpdateTime = 0;
-    private static final long CACHE_EXPIRY_MS = 5 * 60 * 2000; // 5 minutes
+    private static final long CACHE_EXPIRY_MS = 120*1000; // 2 minutes just in case there is no delay in fetching during demo or smn
 
     public MoodEventRepository() {
         firebaseService = new FirebaseService();
@@ -68,16 +68,13 @@ public class MoodEventRepository {
         Source source;
         if (offline){
             source = Source.CACHE;
-        }
-        else {
-            source = Source.DEFAULT;
-        }
-        if (offline){
             Log.d(TAG, "Fetching mood events with source: CACHE (offline mode)");
         }
         else {
+            source = Source.DEFAULT;
             Log.d(TAG, " Fetching mood events with source : Default (online mode)");
         }
+
         getMoodEventCollRef().whereEqualTo("participantRef", participantRef).get(source)  // Added source parameter here
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.isEmpty()) {
