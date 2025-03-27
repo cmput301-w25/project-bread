@@ -86,6 +86,14 @@ public class MoodEventRepository {
                         return;
                     }
                     List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
+
+                    // Ensure all IDs are set
+                    for (int i = 0; i < moodEvents.size(); i++) {
+                        DocumentSnapshot doc = queryDocumentSnapshots.getDocuments().get(i);
+                        MoodEvent event = moodEvents.get(i);
+                        event.setId(doc.getId());
+                    }
+
                     onSuccessListener.onSuccess(moodEvents);
                 })
                 .addOnFailureListener(e -> {  // Creating the 'e' variable here
@@ -113,36 +121,6 @@ public class MoodEventRepository {
     }
 
     /**
-     * Listens for all mood events from the database with the given participant reference
-     *
-     * @param participantRef    The reference to the participant whose mood events are to be fetched
-     * @param onSuccessListener The listener to be called when the mood events are successfully fetched
-     * @param onFailureListener The listener to be called when the mood events cannot be fetched
-     */
-    public void listenForEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, @NonNull OnFailureListener onFailureListener) {
-        getMoodEventCollRef().whereEqualTo("participantRef", participantRef)
-                .addSnapshotListener((value, error) -> {
-                    if (error != null) {
-                        onFailureListener.onFailure(error);
-                        return;
-                    }
-                    if (value != null) {
-                        List<MoodEvent> moodEvents = new ArrayList<>();
-                        for (DocumentSnapshot doc : value.getDocuments()) {
-                            MoodEvent moodEvent = doc.toObject(MoodEvent.class);
-                            if (moodEvent != null) {
-                                // Explicitly set the ID from the document
-                                moodEvent.setId(doc.getId());
-                                Log.d("MoodEventRepository", "Loaded mood with ID: " + doc.getId());
-                                moodEvents.add(moodEvent);
-                            }
-                        }
-                        onSuccessListener.onSuccess(moodEvents);
-                    }
-                });
-    }
-
-    /**
      * fetches all mood events that are created by the participants that the given participant is following
      *
      * @param username          The username of the participant whose following's mood events are to be fetched
@@ -165,7 +143,6 @@ public class MoodEventRepository {
         if (offline) {
             Log.d(TAG, "Device is OFFLINE - forcing CACHE source only");
 
-            // When offline, fetch following users from cache first
             participantRepository.fetchFollowing(username, following -> {
                 if (following.isEmpty()) {
                     onSuccessListener.onSuccess(new ArrayList<>());
@@ -176,31 +153,35 @@ public class MoodEventRepository {
                 AtomicInteger queriesRemaining = new AtomicInteger(following.size());
 
                 for (String followingUsername : following) {
-                    // Force CACHE source when offline
-                    getMoodEventCollRef().whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                    getMoodEventCollRef()
+                            .whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
                             .orderBy("timestamp", Query.Direction.DESCENDING)
                             .limit(MAX_EVENTS_PER_USER)
                             .get(Source.CACHE)
                             .addOnSuccessListener(queryDocumentSnapshots -> {
-                                List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
-                                Log.d(TAG, "Successfully fetched " + moodEvents.size() +
-                                        " events for " + followingUsername + " from CACHE");
+                                List<MoodEvent> moodEvents = new ArrayList<>();
+                                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                                    MoodEvent event = doc.toObject(MoodEvent.class);
+                                    if (event != null) {
+                                        event.setId(doc.getId());
+                                        moodEvents.add(event);
+                                    }
+                                }
+
+                                Log.d(TAG, "Successfully fetched " + moodEvents.size() + " events for " + followingUsername + " from CACHE");
 
                                 synchronized (allMoodEvents) {
                                     allMoodEvents.addAll(moodEvents);
                                 }
 
                                 if (queriesRemaining.decrementAndGet() == 0) {
-                                    // Update the cache
                                     followingMoodsCache.put(username, new ArrayList<>(allMoodEvents));
                                     lastCacheUpdateTime = System.currentTimeMillis();
-
                                     onSuccessListener.onSuccess(allMoodEvents);
                                 }
                             })
                             .addOnFailureListener(e -> {
-                                Log.e(TAG, "Failed to fetch events for " + followingUsername +
-                                        " from CACHE: " + e.getMessage());
+                                Log.e(TAG, "Failed to fetch events for " + followingUsername + " from CACHE: " + e.getMessage());
 
                                 if (queriesRemaining.decrementAndGet() == 0) {
                                     onSuccessListener.onSuccess(allMoodEvents);
@@ -209,7 +190,6 @@ public class MoodEventRepository {
                 }
             }, onFailureListener);
         } else {
-            // if online, fetch following users from default source
             Log.d(TAG, "Device is ONLINE - using DEFAULT source");
 
             participantRepository.fetchFollowing(username, following -> {
@@ -222,12 +202,21 @@ public class MoodEventRepository {
                 AtomicInteger queriesRemaining = new AtomicInteger(following.size());
 
                 for (String followingUsername : following) {
-                    getMoodEventCollRef().whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                    getMoodEventCollRef()
+                            .whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
                             .orderBy("timestamp", Query.Direction.DESCENDING)
                             .limit(MAX_EVENTS_PER_USER)
                             .get(Source.DEFAULT)
                             .addOnSuccessListener(queryDocumentSnapshots -> {
-                                List<MoodEvent> moodEvents = queryDocumentSnapshots.toObjects(MoodEvent.class);
+                                List<MoodEvent> moodEvents = new ArrayList<>();
+                                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                                    MoodEvent event = doc.toObject(MoodEvent.class);
+                                    if (event != null) {
+                                        event.setId(doc.getId());
+                                        moodEvents.add(event);
+                                    }
+                                }
+
                                 synchronized (allMoodEvents) {
                                     allMoodEvents.addAll(moodEvents);
                                 }
@@ -235,20 +224,27 @@ public class MoodEventRepository {
                                 if (queriesRemaining.decrementAndGet() == 0) {
                                     followingMoodsCache.put(username, new ArrayList<>(allMoodEvents));
                                     lastCacheUpdateTime = System.currentTimeMillis();
-
                                     onSuccessListener.onSuccess(allMoodEvents);
                                 }
                             })
                             .addOnFailureListener(e -> {
-                                // If we're online and server fetch failed, try cache
-                                // this is just a test scenario i thought and can be removed if not needed since above already covers this. still including in the pr.
                                 Log.d(TAG, "Server fetch failed for " + followingUsername + ", falling back to cache");
-                                getMoodEventCollRef().whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+
+                                getMoodEventCollRef()
+                                        .whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
                                         .orderBy("timestamp", Query.Direction.DESCENDING)
                                         .limit(MAX_EVENTS_PER_USER)
                                         .get(Source.CACHE)
                                         .addOnSuccessListener(cacheResult -> {
-                                            List<MoodEvent> moodEvents = cacheResult.toObjects(MoodEvent.class);
+                                            List<MoodEvent> moodEvents = new ArrayList<>();
+                                            for (DocumentSnapshot doc : cacheResult) {
+                                                MoodEvent event = doc.toObject(MoodEvent.class);
+                                                if (event != null) {
+                                                    event.setId(doc.getId());
+                                                    moodEvents.add(event);
+                                                }
+                                            }
+
                                             synchronized (allMoodEvents) {
                                                 allMoodEvents.addAll(moodEvents);
                                             }
@@ -256,12 +252,12 @@ public class MoodEventRepository {
                                             if (queriesRemaining.decrementAndGet() == 0) {
                                                 followingMoodsCache.put(username, new ArrayList<>(allMoodEvents));
                                                 lastCacheUpdateTime = System.currentTimeMillis();
-
                                                 onSuccessListener.onSuccess(allMoodEvents);
                                             }
                                         })
                                         .addOnFailureListener(cacheError -> {
                                             Log.e(TAG, "Cache fallback also failed for " + followingUsername, cacheError);
+
                                             if (queriesRemaining.decrementAndGet() == 0) {
                                                 onSuccessListener.onSuccess(allMoodEvents);
                                             }
@@ -272,6 +268,7 @@ public class MoodEventRepository {
         }
     }
 
+
     /**
      * Fetches all mood events in the radius of the given location that the participant is following
      *
@@ -279,12 +276,13 @@ public class MoodEventRepository {
      * Referenced <a href="https://firebase.google.com/docs/firestore/solutions/geoqueries#query_geohashes">Firebase Geo-hashes</a>
      * </p>
      *
+     * @param username          username of the participant
      * @param location          current location of the user
      * @param radius            radius of the area to search for mood events, in kilometers
      * @param onSuccessListener listener to be called when the mood events are successfully fetched
      * @param onFailureListener listener to be called when the mood events cannot be fetched
      */
-    public void fetchForInRadiusEventsFromFollowing(@NonNull String username, @NonNull Location location, double radius, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
+    public void fetchForInRadiusEventsFromFollowing(@NonNull String username, @NonNull Location location, double radius, @NonNull OnSuccessListener<Map<String, MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
         GeoLocation center = new GeoLocation(location.getLatitude(), location.getLongitude());
         // Query all the bounds for the given location and radius
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radius * 1000);
@@ -310,10 +308,11 @@ public class MoodEventRepository {
 
                         GeoLocation docLocation = new GeoLocation(lat, lng);
                         double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
-                        if (distanceInM <= radius && !Objects.requireNonNull(doc.get("participantRef")).equals(participantRepository.getParticipantRef(username))) {
+
+                        if (distanceInM <= radius*1000 && !Objects.requireNonNull(doc.get("participantRef")).equals(participantRepository.getParticipantRef(username))) {
+                            Log.d(TAG, "Went inside loop");
                             matchingDocs.add(doc.toObject(MoodEvent.class));
                         }
-
                     }
                 }
 
@@ -333,7 +332,8 @@ public class MoodEventRepository {
                             mostRecentByUser.put(user, event);
                         }
                     }
-                    onSuccessListener.onSuccess(new ArrayList<>(mostRecentByUser.values()));
+//                    onSuccessListener.onSuccess(new ArrayList<>(mostRecentByUser.values()));
+                    onSuccessListener.onSuccess(mostRecentByUser);
                 }, onFailureListener);
             }
         });
@@ -373,7 +373,6 @@ public class MoodEventRepository {
      * @param onFailureListener The listener to be called when the mood event cannot be updated
      */
     public void updateMoodEvent(@NonNull MoodEvent moodEvent, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
-
         // need to add check if the mood event id is null
         if (moodEvent.getId() == null) {
             onFailureListener.onFailure(new IllegalArgumentException("Mood event ID cannot be null"));

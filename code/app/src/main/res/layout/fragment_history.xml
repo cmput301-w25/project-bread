@@ -25,34 +25,29 @@
             app:layout_constraintVertical_bias="0.007"
             app:srcCompat="@mipmap/sound_wave_layer" />
 
-        <Button
-            android:id="@+id/deleteButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:layout_marginEnd="16dp"
-            android:backgroundTint="@color/design_default_color_error"
-            android:text="@string/delete"
+
+        <ImageView
+            android:id="@+id/chartButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="24dp"
+            android:src="@drawable/ic_monitoring"
             android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/sentio_logo"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/sentio_logo"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/sentio_logo" />
 
         <TextView
             android:id="@+id/textView4"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
             android:fontFamily="@font/righteous"
             android:text="Personal"
             android:textSize="20sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.054"
+            app:layout_constraintBottom_toBottomOf="@+id/sentio_logo"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.049" />
+            app:layout_constraintTop_toTopOf="@+id/sentio_logo" />
 
         <ListView
             android:id="@+id/historyListView"
@@ -64,7 +59,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/sentio_logo"
-            app:layout_constraintVertical_bias="0.5" />
+            app:layout_constraintVertical_bias="0.5">
+
+        </ListView>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/filter_button"
@@ -76,6 +73,19 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:tint="@color/black" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/deleteButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:backgroundTint="@color/design_default_color_error"
+            android:text="@string/delete"
+            android:textColor="@color/white"
+            android:src="@drawable/ic_close"
+            app:layout_constraintBottom_toTopOf="@+id/filter_button"
+            app:layout_constraintEnd_toEndOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>

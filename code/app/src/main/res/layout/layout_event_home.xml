@@ -27,8 +27,10 @@
             android:padding="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/imageProfileCardView"
@@ -63,21 +65,25 @@
                 android:id="@+id/textDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="2 hours ago"
                 android:textColor="@android:color/white"
-                android:textSize="12sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/imageProfileCardView"
+                app:layout_constraintStart_toEndOf="@+id/event_home_text_divider_icon"
+                app:layout_constraintTop_toTopOf="@+id/imageProfileCardView" />
 
             <TextView
                 android:id="@+id/textTitle"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="2"
                 android:text="Feeling excited about the upcoming launch!"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/event_home_image_holder"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/imageProfileCardView" />
 
@@ -109,6 +115,37 @@
                 android:textSize="14sp"
                 app:layout_constraintStart_toEndOf="@+id/textMood"
                 app:layout_constraintTop_toBottomOf="@id/textTitle" />
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/event_home_image_holder"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_marginEnd="24dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                app:layout_constraintBottom_toBottomOf="@+id/textTitle"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/textTitle"
+                app:layout_constraintTop_toTopOf="@+id/textTitle">
+
+                <ImageView
+                    android:id="@+id/event_home_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop" />
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:id="@+id/event_home_text_divider_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:text="•"
+                android:textColor="@color/white"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/imageProfileCardView"
+                app:layout_constraintStart_toEndOf="@+id/textUsername"
+                app:layout_constraintTop_toTopOf="@+id/imageProfileCardView" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
