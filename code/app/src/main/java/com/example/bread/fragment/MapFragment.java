@@ -9,20 +9,22 @@ import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
@@ -43,6 +45,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -54,7 +57,7 @@ import java.util.Map;
  * Represents the map page of the app, where users can view a map of their location and nearby
  * mood events.
  */
-public class MapFragment extends Fragment implements OnMapReadyCallback{
+public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = "MapFragment";
     private FirebaseAuth mAuth;
@@ -170,17 +173,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     }
 
     private void fetchInRadiusMoodEventsFromFollowing(@NonNull OnSuccessListener<Map<String, MoodEvent>> onSuccessListener) {
-        Location currentLocation = locationHandler.getLastLocation();
-        if (currentLocation == null) {
-            Log.i(TAG, "Location not available yet, waiting for location callback");
-            locationHandler.fetchUserLocation(location -> {
-                Log.i(TAG, "Location callback received, fetching mood events");
-                doFetchInRadiusMoodEvents(location, onSuccessListener);
-            });
-        } else {
-            Log.i(TAG, "Location already available, fetching mood events");
-            doFetchInRadiusMoodEvents(currentLocation, onSuccessListener);
-        }
+        Log.i(TAG, "Location not available yet, waiting for location callback");
+        locationHandler.fetchUserLocation(location -> {
+            Log.i(TAG, "Location callback received, fetching mood events");
+            doFetchInRadiusMoodEvents(location, onSuccessListener);
+        });
     }
 
     private void doFetchInRadiusMoodEvents(@NonNull Location currentLocation, @NonNull OnSuccessListener<Map<String, MoodEvent>> onSuccessListener) {
@@ -196,7 +193,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
         }
 
         moodEventRepo.fetchForInRadiusEventsFromFollowing(username, currentLocation, 5.0, moodEventMaps -> {
-            Log.d(TAG, "Mood event map follower: "+moodEventMaps);
+            Log.d(TAG, "Mood event map follower: " + moodEventMaps);
             onSuccessListener.onSuccess(moodEventMaps);
         }, e -> {
             Log.e(TAG, "Failed to fetch mood events", e);
@@ -207,26 +204,16 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
         googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(requireContext(), R.raw.map_style));
+        Log.i(TAG, "Location not available yet, waiting for location callback");
+        locationHandler.fetchUserLocation(location -> {
+            Log.i(TAG, "Location callback received");
+            userLocation = location;
 
-        // Getting user current location to set the map to this
-        Location userCurrentLocation = locationHandler.getLastLocation();
-        if (userCurrentLocation == null) {
-            Log.i(TAG, "Location not available yet, waiting for location callback");
-            locationHandler.fetchUserLocation(location -> {
-                Log.i(TAG, "Location callback received");
-                userLocation = location;
+            Log.d(TAG, "Current location: " + userLocation);
 
-                Log.d(TAG, "Current location: " + userLocation);
-
-                currentLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
-            });
-        } else {
-            Log.i(TAG, "Location already available");
-            userLocation = userCurrentLocation;
             currentLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
-        }
+        });
 
         // Get UI settings
         UiSettings uiSettings = googleMap.getUiSettings();
@@ -243,6 +230,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
 
     /**
      * Converts text into a bitmap that we can display on the map
+     *
      * @param text
      * @return
      */
@@ -306,7 +294,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                TextView text = view.findViewById(android.R.id.text1);
                 text.setTextColor(Color.WHITE);
                 return view;
             }
@@ -314,7 +302,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
-                TextView text = (TextView) view.findViewById(android.R.id.text1);
+                TextView text = view.findViewById(android.R.id.text1);
                 text.setTextColor(Color.WHITE);
                 text.setPadding(16, 16, 16, 16);
                 return view;
@@ -377,11 +365,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                 fetchSelfMoodEvents(filteredMoods -> {
                     ArrayList<MoodEvent> finalFilteredList = applyFilters(filteredMoods);
 
-                    if (finalFilteredList.isEmpty()){
+                    if (finalFilteredList.isEmpty()) {
                         Toast.makeText(getContext(), "No personal mood events match the applied filters", Toast.LENGTH_SHORT).show();
                     }
 
-                    Log.d(TAG, "Filtered user history list: "+finalFilteredList);
+                    Log.d(TAG, "Filtered user history list: " + finalFilteredList);
 
                     putPersonalOnMap(finalFilteredList);
                 });
@@ -405,7 +393,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
                     // Apply additional filters
                     ArrayList<MoodEvent> filteredArray = applyFilters(moodArray);
 
-                    if (filteredArray.isEmpty()){
+                    if (filteredArray.isEmpty()) {
                         Toast.makeText(getContext(), "No follower mood events match the applied filters", Toast.LENGTH_SHORT).show();
                     }
 
@@ -502,11 +490,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     }
 
     private void putMarkersOnMap(Map<String, MoodEvent> eventsMap) {
-        for (Map.Entry<String, MoodEvent> moodEvent : eventsMap.entrySet()){
+        for (Map.Entry<String, MoodEvent> moodEvent : eventsMap.entrySet()) {
             String userId = moodEvent.getKey();
             MoodEvent event = moodEvent.getValue();
 
-            Log.d(TAG, "Event on map: "+event);
+            Log.d(TAG, "Event on map: " + event);
 
             Map<String, Object> geo = event.getGeoInfo();
             if (geo != null) {
@@ -528,9 +516,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback{
     }
 
     private void putPersonalOnMap(ArrayList<MoodEvent> eventsArray) {
-        for (MoodEvent event : eventsArray){
+        for (MoodEvent event : eventsArray) {
 
-            Log.d(TAG, "Event on map: "+event);
+            Log.d(TAG, "Event on map: " + event);
 
             Map<String, Object> geo = event.getGeoInfo();
             if (geo != null) {

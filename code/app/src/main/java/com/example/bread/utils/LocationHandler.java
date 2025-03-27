@@ -20,8 +20,8 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
 /**
- * A singleton class that handles location-related tasks, such as fetching the user's location and
- * permission handling. This class uses the {@link FusedLocationProviderClient} to get the user's location.
+ * A singleton class that handles location-related tasks.
+ * It fetches the user's location and sets up continuous updates to handle changes (such as emulator location changes).
  */
 public class LocationHandler {
     private static final String TAG = "LocationHandler";
@@ -30,7 +30,6 @@ public class LocationHandler {
     private final FusedLocationProviderClient fusedLocationProviderClient;
 
     private Location lastLocation;
-
     private LocationCallback locationCallback;
 
     private LocationHandler(Context context) {
@@ -50,51 +49,53 @@ public class LocationHandler {
     }
 
     /**
-     * Check if we already have FINE_LOCATION permission; if not, request it via the given launcher.
-     * If we do have it, immediately fetch the user location.
+     * Check if we already have FINE_LOCATION permission; if not, request it.
+     * If granted, immediately fetch the user location.
      */
     public void requestLocationPermission(ActivityResultLauncher<String> permissionLauncher) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
-            // Launch the permission request dialog
             permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         } else {
-            // Permission is already granted, so we can get location immediately
             fetchUserLocation();
         }
     }
 
     /**
-     * Called after permission is granted (or from requestLocationPermission if already granted).
+     * Fetch the user's location.
+     * Even if a valid last-known location is returned, we subscribe to continuous updates so that any changes are captured.
      */
     @SuppressLint("MissingPermission")
     public void fetchUserLocation() {
-        // We can only call this if permission is already granted
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "fetchUserLocation called without location permission!");
             return;
         }
 
-        // Try to get a quick last-known location
         fusedLocationProviderClient.getLastLocation()
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         lastLocation = location;
-                        Log.d(TAG, "fetchUserLocation Success 1: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
-                    } else {
-                        Log.d(TAG, "Last location is null. Requesting updates...");
+                        Log.d(TAG, "fetchUserLocation Success: "
+                                + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
+                    }
+                    // Always subscribe to updates if not already subscribed
+                    if (locationCallback == null) {
                         requestLocationUpdates();
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error trying to get last location: ", e);
-                    requestLocationUpdates();
+                    if (locationCallback == null) {
+                        requestLocationUpdates();
+                    }
                 });
     }
 
     /**
      * Fetch the user's location and call the given callback with the result.
+     * Also subscribes to continuous updates.
      */
     @SuppressLint("MissingPermission")
     public void fetchUserLocation(@NonNull OnLocationAvailableCallback callback) {
@@ -108,25 +109,28 @@ public class LocationHandler {
                 .addOnSuccessListener(location -> {
                     if (location != null) {
                         lastLocation = location;
-                        Log.d(TAG, "fetchUserLocation Success 2: " + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
+                        Log.d(TAG, "fetchUserLocation Success: "
+                                + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
                         callback.onLocationAvailable(lastLocation);
-                    } else {
-                        Log.d(TAG, "Last location is null. Requesting updates...");
+                    }
+                    if (locationCallback == null) {
                         requestLocationUpdates();
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error trying to get last location: ", e);
-                    requestLocationUpdates();
+                    if (locationCallback == null) {
+                        requestLocationUpdates();
+                    }
                 });
     }
 
     /**
-     * Continuously request location updates if we don’t have a last location or if you need updates.
+     * Continuously request location updates.
+     * This method will only set up updates if they aren’t already active.
      */
     @SuppressLint("MissingPermission")
     private void requestLocationUpdates() {
-        // Again, check for permission
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
             Log.w(TAG, "requestLocationUpdates called without permission!");
@@ -138,7 +142,6 @@ public class LocationHandler {
                 .setMinUpdateIntervalMillis(2000)
                 .build();
 
-        // Keep a single reference so we can stop later
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -147,6 +150,7 @@ public class LocationHandler {
                         lastLocation = location;
                         Log.d(TAG, "requestLocationUpdates onLocationResult: "
                                 + lastLocation.getLatitude() + ", " + lastLocation.getLongitude());
+                        // Exit after processing the first valid location
                         break;
                     }
                 }
