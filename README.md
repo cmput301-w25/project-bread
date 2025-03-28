@@ -27,6 +27,34 @@
 2. [Step 2]
 3. [Step 3]
 
+## Test Instructions
+
+To run the tests make sure that you have `google-services.json` file in your `code/app` directory
+
+Add `GOOGLE_MAPS_API_KEY` in your `local.properties`
+
+Set `FIREBASE_PROJECT_ID` as `bread-2259c` in your `local.properties` file
+
+Before you can run the tests make sure that you have firebase emulators running. To start the emulator:
+```
+firebase emulators:start
+```
+This will launch emulators for firestore and FirebaseAuth that are required to run Android UI tests
+
+After all these steps are complete and the build is successful you can run the tests:
+
+To run Android tests:
+```
+./gradlew connectedAndroidTest
+```
+
+To run Unit tests:
+```
+./gradlew test
+```
+If the above steps doesn't execute the tests, you can open the `code` directory in Android Studio and run the tests manually
+to achieve the same result.
+
 ## Documentation
 
 - https://github.com/cmput301-w25/project-bread/wiki
