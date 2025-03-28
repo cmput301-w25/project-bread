@@ -23,6 +23,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -125,7 +126,6 @@ public class HomeFragmentActivityTest {
     @After
     public void tearDown() {
         clearFirestoreEmulator();
-        clearAuthEmulator();
     }
 
     private void clearFirestoreEmulator() {
@@ -151,7 +151,8 @@ public class HomeFragmentActivityTest {
         }
     }
 
-    private void clearAuthEmulator() {
+    @AfterClass
+    public static void clearAuthEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"

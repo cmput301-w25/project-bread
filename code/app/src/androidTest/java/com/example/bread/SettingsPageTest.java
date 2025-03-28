@@ -12,10 +12,14 @@ import android.Manifest;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,10 +32,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -40,12 +46,13 @@ import java.net.URL;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+@RunWith(AndroidJUnit4.class)
+@LargeTest
 public class SettingsPageTest {
 
     DocumentReference p1Ref;
 
-    @Rule
-    public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
+    public ActivityScenario<HomePage> scenario;
 
     @BeforeClass
     public static void testSetup() {
@@ -78,13 +85,12 @@ public class SettingsPageTest {
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @Before
     public void seedDatabase() {
         // Seed the database with user mood events
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestore db = new FirebaseService().getDb();
         CollectionReference participants = db.collection("participants");
         Participant p1 = new Participant();
         DocumentReference p1Ref = participants.document("testUser");
@@ -95,6 +101,8 @@ public class SettingsPageTest {
 
         p1Ref.set(p1);
 
+        scenario = ActivityScenario.launch(HomePage.class);
+
         onView(withId(R.id.profile)).perform(click());
         onView(withId(R.id.settings_button)).perform(click());
     }
@@ -102,7 +110,7 @@ public class SettingsPageTest {
     @Test
     public void userChangingNameTest() throws InterruptedException {
         // Seed the database with user mood events
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestore db = new FirebaseService().getDb();
         CollectionReference participants = db.collection("participants");
         Participant p1 = new Participant();
         p1Ref = participants.document("testUser");
@@ -157,8 +165,10 @@ public class SettingsPageTest {
     // Same teardown strategy developed in MoodHistoryFragmentTest
     @After
     public void tearDown() {
+        if (scenario != null) {
+            scenario.close();
+        }
         clearFirestoreEmulator();
-        clearAuthEmulator();
     }
 
     private void clearFirestoreEmulator() {
@@ -184,7 +194,8 @@ public class SettingsPageTest {
         }
     }
 
-    private void clearAuthEmulator() {
+    @AfterClass
+    public static void clearAuthEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"
