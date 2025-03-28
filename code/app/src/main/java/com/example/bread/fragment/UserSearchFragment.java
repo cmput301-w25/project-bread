@@ -189,7 +189,6 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
     @Override
     public void onUserClick(Participant participant){
         usernameText = participant.getUsername();
-        Log.d(TAG, "Username text: "+usernameText);
         Bundle bundle = new Bundle();
         bundle.putString("text", usernameText);
         bundle.putSerializable("participant", participant);

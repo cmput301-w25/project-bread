@@ -80,7 +80,6 @@ public class UserProfileFragment extends Fragment {
             // Set up real-time listener for participant data
             setupParticipantListener();
         }
-        Log.d(TAG, "Data: "+data);
     }
 
     @Override
@@ -105,7 +104,6 @@ public class UserProfileFragment extends Fragment {
         followersLayout = view.findViewById(R.id.followers_layout);
         followingLayout = view.findViewById(R.id.following_layout);
         recentMoodEventView = view.findViewById(R.id.recent_mood_container);
-        Log.d(TAG, "Recent mood view: "+recentMoodEventView);
         emptyMoodText = view.findViewById(R.id.empty_mood_text);
 
         followRequest = view.findViewById(R.id.follow_button);
@@ -124,6 +122,8 @@ public class UserProfileFragment extends Fragment {
                 recentMoodEventView.setVisibility(View.GONE);
                 emptyMoodText.setVisibility(View.GONE);
                 recentMoodHeader.setVisibility(View.GONE);
+
+                updateFollowButtonState(followedUsername);
 
                 // Set follow button click listener
                 followRequest.setOnClickListener(v -> {
@@ -306,7 +306,6 @@ public class UserProfileFragment extends Fragment {
                 // Send follow request
                 participantRepository.sendFollowRequest(currentUsername, username, unused -> {
                     Toast.makeText(getContext(), "Follow request sent", Toast.LENGTH_SHORT).show();
-                    updateFollowButtonState(username);
                 }, e -> {
                     Log.e(TAG, "Error sending follow request", e);
                     Toast.makeText(getContext(), "Error sending follow request", Toast.LENGTH_SHORT).show();
