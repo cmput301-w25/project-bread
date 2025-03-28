@@ -215,16 +215,39 @@
                 app:layout_constraintTop_toBottomOf="@id/chips_container"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- Image Upload Button -->
-            <ImageButton
-                android:id="@+id/imageAdd"
-                android:layout_width="55dp"
-                android:layout_height="55dp"
-                android:background="@drawable/rounded_background"
-                android:src="@drawable/camera_icon"
-                android:contentDescription="Select image"
+            <!-- Image Upload Container -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/image_upload_container"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 app:layout_constraintTop_toBottomOf="@id/image_upload_label"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <ImageButton
+                    android:id="@+id/imageAdd"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:background="@drawable/rounded_background"
+                    android:src="@drawable/camera_icon"
+                    android:contentDescription="Select image"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/removeImageButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/rounded_background"
+                    android:src="@android:drawable/ic_menu_delete"
+                    android:contentDescription="Remove image"
+                    android:visibility="gone"
+                    android:layout_marginStart="8dp"
+                    app:layout_constraintStart_toEndOf="@id/imageAdd"
+                    app:layout_constraintTop_toTopOf="@id/imageAdd"
+                    app:layout_constraintBottom_toBottomOf="@id/imageAdd" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- Buttons Container -->
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -232,7 +255,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
-                app:layout_constraintTop_toBottomOf="@id/imageAdd"
+                app:layout_constraintTop_toBottomOf="@id/image_upload_container"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
