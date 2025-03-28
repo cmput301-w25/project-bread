@@ -64,9 +64,8 @@ public class MapFragmentTest {
 
     @BeforeClass
     public static void testSetup() {
-        String androidLocalHost = "10.0.2.2";
-        FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
-        FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
+        FirebaseEmulatorRule.initializeEmulators();
+
 
         try {
             Tasks.await(
