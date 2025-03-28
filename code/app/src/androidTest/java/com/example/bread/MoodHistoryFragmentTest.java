@@ -5,7 +5,6 @@ import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.hasChildCount;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
@@ -36,7 +35,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
@@ -107,28 +105,28 @@ public class MoodHistoryFragmentTest {
         Thread.sleep(1000);
         onView(withId(R.id.history)).perform(click());
         Thread.sleep(1000);
-        onView(withText("test reason 1")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(matches(isDisplayed()));
-        onView(withText("test reason 3")).check(matches(isDisplayed()));
-        onView(withText("test reason 4")).check(matches(isDisplayed()));
+        onView(withText("Test Event 1")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(matches(isDisplayed()));
+        onView(withText("Test Event 3")).check(matches(isDisplayed()));
+        onView(withText("Test Event 4")).check(matches(isDisplayed()));
     }
 
     @Test
     public void sortReverseChronologicalOrderTest() throws InterruptedException {
-        Thread.sleep(1000);
+        Thread.sleep(2000);
         onView(withId(R.id.history)).perform(click());
-        Thread.sleep(1000);
+        Thread.sleep(3000);
         onData(anything())
                 .inAdapterView(withId(R.id.historyListView))
                 .atPosition(0)
-                .onChildView(withId(R.id.reason))
-                .check(matches(withText("test reason 4")));
+                .onChildView(withId(R.id.history_title_text))
+                .check(matches(withText("Test Event 4")));
         Thread.sleep(1000);
         onData(anything())
                 .inAdapterView(withId(R.id.historyListView))
                 .atPosition(3)
-                .onChildView(withId(R.id.reason))
-                .check(matches(withText("test reason 1")));
+                .onChildView(withId(R.id.history_title_text))
+                .check(matches(withText("Test Event 1")));
     }
 
     @Test
@@ -145,55 +143,58 @@ public class MoodHistoryFragmentTest {
         onView(withId(R.id.deleteButton)).perform(click());
 
         onView(withId(android.R.id.button1)).perform(click());
-        onView(withText("test reason 4")).check(doesNotExist());
+        onView(withText("Test Event 4")).check(doesNotExist());
     }
 
     @After
-    public void tearDownAuth() {
+    public void tearDown() {
+        clearFirestoreEmulator();
+        clearAuthEmulator();
+    }
+
+    private void clearFirestoreEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
-        URL url = null;
+        String firestoreUrl = "http://10.0.2.2:8080/emulator/v1/projects/"
+                + projectId
+                + "/databases/(default)/documents";
+
+        HttpURLConnection connection = null;
         try {
-            url = new URL("http://10.0.2.2:9099/emulator/v1/projects/"+projectId+"/databases/%28default%29/documents");
-        } catch (MalformedURLException exception) {
-            Log.e("URL Error", Objects.requireNonNull(exception.getMessage()));
-        }
-        HttpURLConnection urlConnection = null;
-        try {
-            assert url != null;
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("DELETE");
-            int response = urlConnection.getResponseCode();
-            Log.i("Response Code", "Response Code: " + response);
-        } catch (IOException exception) {
-            Log.e("IO Error", Objects.requireNonNull(exception.getMessage()));
+            URL url = new URL(firestoreUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("DELETE");
+
+            int responseCode = connection.getResponseCode();
+            Log.i("tearDown", "Cleared Firestore emulator, response code: " + responseCode);
+        } catch (IOException e) {
+            Log.e("tearDown", "Error clearing Firestore emulator", e);
         } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
+            if (connection != null) {
+                connection.disconnect();
             }
         }
     }
 
-    @After
-    public void tearDownDb() {
+    private void clearAuthEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
-        URL url = null;
+        // This is the Auth emulator endpoint for deleting all test users
+        String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"
+                + projectId
+                + "/accounts";
+
+        HttpURLConnection connection = null;
         try {
-            url = new URL("http://10.0.2.2:8080/emulator/v1/projects/"+projectId+"/databases/%28default%29/documents");
-        } catch (MalformedURLException exception) {
-            Log.e("URL Error", Objects.requireNonNull(exception.getMessage()));
-        }
-        HttpURLConnection urlConnection = null;
-        try {
-            assert url != null;
-            urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("DELETE");
-            int response = urlConnection.getResponseCode();
-            Log.i("Response Code", "Response Code: " + response);
-        } catch (IOException exception) {
-            Log.e("IO Error", Objects.requireNonNull(exception.getMessage()));
+            URL url = new URL(authUrl);
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("DELETE");
+
+            int responseCode = connection.getResponseCode();
+            Log.i("tearDown", "Cleared Auth emulator users, response code: " + responseCode);
+        } catch (IOException e) {
+            Log.e("tearDown", "Error clearing Auth emulator", e);
         } finally {
-            if (urlConnection != null) {
-                urlConnection.disconnect();
+            if (connection != null) {
+                connection.disconnect();
             }
         }
     }

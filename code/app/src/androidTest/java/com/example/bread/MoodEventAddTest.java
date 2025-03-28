@@ -10,7 +10,6 @@ import static androidx.test.espresso.matcher.ViewMatchers.hasErrorText;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.anything;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 
@@ -19,7 +18,6 @@ import android.util.Log;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
-
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -29,7 +27,6 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -47,6 +44,7 @@ import java.util.concurrent.ExecutionException;
 @RunWith(AndroidJUnit4.class)
 @LargeTest
 public class MoodEventAddTest {
+
 
     @Rule
     public ActivityScenarioRule<HomePage> activityRule = new ActivityScenarioRule<>(HomePage.class);
@@ -97,7 +95,7 @@ public class MoodEventAddTest {
     @Test
     public void testAddMoodEventToFirebase() throws InterruptedException {
         // Fill in the mood event details
-        onView(withId(R.id.eventTitleEditText)).perform(replaceText("Test Mood Event"));
+        onView(withId(R.id.eventTitleEditText)).perform(replaceText("Test Mood Event 1"));
         onView(withId(R.id.reasonEditText)).perform(replaceText("ReasonIsRandom"));
 
 
@@ -113,14 +111,15 @@ public class MoodEventAddTest {
         onView(withId(R.id.saveButton)).perform(click());
 
         // Delay to allow Firebase to process
-        //Thread.sleep(3000);
+        Thread.sleep(3000);
 
         // Navigate to history and check if the event is displayed
         onView(withId(R.id.history)).perform(click());
-        //Thread.sleep(2000);
-        onView(withText("ReasonIsRandom")).check(matches(isDisplayed()));
+        Thread.sleep(2000);
+        onView(withText("Test Mood Event 1")).check(matches(isDisplayed()));
 
     }
+
     @Test
     public void testUiElementsAreDisplayed() {
         // Verify that key UI elements are displayed
@@ -132,6 +131,7 @@ public class MoodEventAddTest {
         onView(withId(R.id.publicChip)).check(matches(isDisplayed()));
         onView(withId(R.id.cancelButton)).check(matches(isDisplayed()));
         onView(withId(R.id.saveButton)).check(matches(isDisplayed()));
+        onView(withId(R.id.imageAdd)).check(matches(isDisplayed()));
     }
 
     @Test
@@ -181,7 +181,6 @@ public class MoodEventAddTest {
         onView(withId(R.id.saveButton)).perform(click());
         Thread.sleep(3000);
         onView(withId(R.id.eventTitleEditText)).check(matches(isDisplayed()));
-
     }
 
     @After

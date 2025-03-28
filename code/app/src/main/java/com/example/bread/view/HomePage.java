@@ -38,17 +38,14 @@ public class HomePage extends AppCompatActivity {
             } else if (itemId == R.id.map) {
                 replaceFragment(new MapFragment());
             } else if (itemId == R.id.add) {
-                // Show AddMoodEventFragment as a dialog
-                AddMoodEventFragment dialogFragment = new AddMoodEventFragment();
-                dialogFragment.show(getSupportFragmentManager(), "AddMoodEventFragment");
-                return true; // Keep the current fragment (e.g., HomeFragment) displayed
+                replaceFragment(new AddMoodEventFragment());
             } else if (itemId == R.id.history) {
                 replaceFragment(new HistoryFragment());
             } else if (itemId == R.id.profile) {
                 replaceFragment(new ProfileFragment());
             }
 
-            return true; // Indicate the item was selected
+            return true; // Important to return true to indicate the item was selected
         });
     }
 

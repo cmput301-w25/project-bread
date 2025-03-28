@@ -378,4 +378,30 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         return this.timestamp.compareTo(event.timestamp);
     }
 
+    /**
+     * Returns the score associated with the emotional state of this mood event.
+     *
+     * @return an integer representing the score.
+     */
+    public int getScore() {
+        if (emotionalState == null) {
+            return 0;
+        }
+        switch (emotionalState) {
+            case HAPPY:
+                return 2;
+            case SAD:
+                return -2;
+            case ANGRY:
+            case FEARFUL:
+            case ANXIOUS:
+            case SHAMEFUL:
+                return -1;
+            case SURPRISED:
+                return 1;
+            default:
+                return 0;
+        }
+    }
+
 }

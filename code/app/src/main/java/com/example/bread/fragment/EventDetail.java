@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bread.R;
 import com.example.bread.controller.EventDetailAdapter;
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.Comment;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
@@ -27,8 +28,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -72,6 +76,8 @@ public class EventDetail extends Fragment {
         if (getArguments() != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 moodEvent = getArguments().getSerializable(MOOD_PARAM, MoodEvent.class);
+            } else {
+                moodEvent = (MoodEvent) getArguments().getSerializable(MOOD_PARAM);
             }
         }
         moodEventRepository = new MoodEventRepository();
@@ -86,23 +92,31 @@ public class EventDetail extends Fragment {
         eventRecyclerView = view.findViewById(R.id.main_recycler_view);
         addCommentButton = view.findViewById(R.id.add_comment_fab);
 
-        closeImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getParentFragmentManager().beginTransaction().setCustomAnimations(
-                        R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
-                ).remove(EventDetail.this).commit();
-            }
+        closeImage.setOnClickListener(v -> {
+            getParentFragmentManager().beginTransaction().setCustomAnimations(
+                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+            ).remove(EventDetail.this).commit();
         });
 
-        addCommentButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                launchAddCommentDialog();
-            }
+        addCommentButton.setOnClickListener(v -> {
+            launchAddCommentDialog();
         });
 
-        fetchComments();
+        // Check if device is offline
+        boolean offline = !FirebaseService.isNetworkConnected();
+        if (offline) {
+            Log.d(TAG, "Device is offline - disabling Firestore network");
+            // Disable network for faster cache access
+            FirebaseFirestore.getInstance().disableNetwork()
+                    .addOnSuccessListener(aVoid -> {
+                        Log.d(TAG, "Firestore network disabled for offline mode");
+                        fetchComments();
+                    });
+
+        } else {
+            // JUST FETCH FROM THE FIREBASE IF ONLINE
+            fetchComments();
+        }
 
         return view;
     }
@@ -130,10 +144,23 @@ public class EventDetail extends Fragment {
                     commentText.setError("Comment must be less than 400 characters");
                     return;
                 }
-                moodEventRepository.addComment(moodEvent, new Comment(Objects.requireNonNull(currentUserRef()), comment), (x) -> {
-                    fetchComments();
-                    dialog.dismiss();
-                }, e -> Log.e(TAG, "Error adding comment", e));
+                addButton.setEnabled(false);  // Prevent multiple submissions
+
+                Comment newComment = new Comment(Objects.requireNonNull(currentUserRef()), comment);
+
+                //  For both online and offline, show immediate UI feedback
+                dialog.dismiss();
+
+                // Add the comment immediately in the UI first, then sync with Firebase
+                moodEventRepository.addComment(moodEvent, newComment, (x) -> {
+                    Log.d(TAG, "Comment synced with Firebase: " + newComment.getId());
+                }, e -> {
+                    Log.e(TAG, "Error adding comment", e);
+                    addButton.setEnabled(true);
+                });
+
+                // fetch comments to update the UI
+                fetchComments();
             }
         });
 
@@ -153,10 +180,12 @@ public class EventDetail extends Fragment {
     private void fetchComments() {
         moodEventRepository.fetchComments(moodEvent, comments -> {
             comments.sort(Comparator.reverseOrder());
-            // Set the comments to the recycler view
             eventDetailAdapter = new EventDetailAdapter(moodEvent, comments, participantRepository);
             eventRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             eventRecyclerView.setAdapter(eventDetailAdapter);
         }, e -> Log.e(TAG, "Error fetching comments", e));
     }
+
+
+
 }

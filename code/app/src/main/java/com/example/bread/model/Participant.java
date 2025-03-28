@@ -6,6 +6,7 @@ import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.IgnoreExtraProperties;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -19,18 +20,26 @@ public class Participant implements Serializable {
     private String email;
     private String firstName;
     private String lastName;
-
     private String profilePicture;
+    private int followerCount;
+    private int followingCount;
 
     @Exclude
     private List<String> followers;
     @Exclude
     private List<String> following;
+    @Exclude
+    private List<FollowRequest> followRequests;
 
     /**
      * Default constructor required for Firestore serialization.
      */
     public Participant() {
+        this.followers = new ArrayList<>();
+        this.following = new ArrayList<>();
+        this.followRequests = new ArrayList<>();
+        this.followerCount = 0;
+        this.followingCount = 0;
     }
 
     /**
@@ -44,8 +53,13 @@ public class Participant implements Serializable {
     public Participant(String username, String email, String firstName, String lastName) {
         this.username = username;
         this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.firstName = firstName.substring(0, 1).toUpperCase() + firstName.substring(1).toLowerCase();
+        this.lastName = lastName.substring(0, 1).toUpperCase() + lastName.substring(1).toLowerCase();
+        this.followers = new ArrayList<>();
+        this.following = new ArrayList<>();
+        this.followRequests = new ArrayList<>();
+        this.followerCount = 0;
+        this.followingCount = 0;
     }
 
     /**
@@ -61,6 +75,8 @@ public class Participant implements Serializable {
                 ", email='" + email + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", followerCount=" + followerCount + '\'' +
+                ", followingCount=" + followingCount + '\'' +
                 '}';
     }
 
@@ -147,13 +163,14 @@ public class Participant implements Serializable {
     }
 
     /**
-     * Sets the list of followers for the participant.
+     * Sets the list of followers for the participant and updates the follower count.
      * This field is excluded from Firestore storage.
      *
      * @param followers a list of usernames representing followers.
      */
     public void setFollowers(List<String> followers) {
         this.followers = followers;
+        this.followerCount = followers != null ? followers.size() : 0;
     }
 
     /**
@@ -167,13 +184,14 @@ public class Participant implements Serializable {
     }
 
     /**
-     * Sets the list of users that the participant is following.
+     * Sets the list of users that the participant is following and updates the following count.
      * This field is excluded from Firestore storage.
      *
      * @param following a list of usernames representing following users.
      */
     public void setFollowing(List<String> following) {
         this.following = following;
+        this.followingCount = following != null ? following.size() : 0;
     }
 
     /**
@@ -192,5 +210,83 @@ public class Participant implements Serializable {
      */
     public void setProfilePicture(String profilePicture) {
         this.profilePicture = profilePicture;
+    }
+
+    /**
+     * Gets the list of follow requests for this participant.
+     * This field is excluded from Firestore storage.
+     *
+     * @return List of FollowRequest objects.
+     */
+    public List<FollowRequest> getFollowRequests() {
+        return followRequests;
+    }
+
+    /**
+     * Sets the list of follow requests.
+     * This field is excluded from Firestore storage.
+     *
+     * @param followRequests List of FollowRequest objects.
+     */
+    public void setFollowRequests(List<FollowRequest> followRequests) {
+        this.followRequests = followRequests;
+    }
+
+    /**
+     * Gets a formatted display name combining first and last name.
+     *
+     * @return Formatted display name.
+     */
+    public String getDisplayName() {
+        return capitalize(firstName) + " " + capitalize(lastName);
+    }
+
+    /**
+     * Gets the follower count.
+     *
+     * @return Number of followers.
+     */
+    public int getFollowerCount() {
+        return followerCount;
+    }
+
+    /**
+     * Sets the follower count.
+     *
+     * @param followerCount The count to set.
+     */
+    public void setFollowerCount(int followerCount) {
+        this.followerCount = followerCount;
+    }
+
+    /**
+     * Gets the following count.
+     *
+     * @return Number of users being followed.
+     */
+    public int getFollowingCount() {
+        return followingCount;
+    }
+
+    /**
+     * Sets the following count.
+     *
+     * @param followingCount The count to set.
+     */
+    public void setFollowingCount(int followingCount) {
+        this.followingCount = followingCount;
+    }
+
+    /**
+     * Helper method to capitalize the first letter of a string.
+     *
+     * @param input The input string.
+     * @return String with first letter capitalized.
+     */
+    private String capitalize(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        return input.substring(0, 1).toUpperCase() + input.substring(1).toLowerCase();
     }
 }
