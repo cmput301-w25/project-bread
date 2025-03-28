@@ -54,9 +54,8 @@ public class MoodHistoryFragmentTest {
     @BeforeClass
     public static void testSetup() {
         // Connecting to emulators and creating test participant
-        String androidLocalHost = "10.0.2.2";
-        FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
-        FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
+        FirebaseEmulatorRule.initializeEmulators();
+
 
         try {
             Tasks.await(
