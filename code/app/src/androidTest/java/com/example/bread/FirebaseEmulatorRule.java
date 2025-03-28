@@ -12,12 +12,6 @@ public class FirebaseEmulatorRule {
     public static synchronized void initializeEmulators() {
         if (!isInitialized) {
             try {
-                // Initialize Firebase App if not already initialized
-//                if (FirebaseApp.().isEmpty()) {
-//                    // You might need to pass the application context here
-//                    // FirebaseApp.initializeApp(context);
-//                }
-
                 // Set up Firestore Emulator
                 FirebaseFirestore.getInstance().useEmulator(ANDROID_LOCALHOST, 8080);
 
