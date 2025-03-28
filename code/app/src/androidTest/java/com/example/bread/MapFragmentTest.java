@@ -57,7 +57,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-@Ignore
 public class MapFragmentTest {
 
     public ActivityScenario<HomePage> scenario;
