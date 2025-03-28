@@ -1,25 +1,18 @@
 package com.example.bread.controller;
 
-import android.content.Intent;
 import android.graphics.Paint;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.bread.R;
-import com.example.bread.fragment.UserProfileFragment;
 import com.example.bread.model.Participant;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.ImageHandler;
-import com.example.bread.view.LoginPage;
-import com.example.bread.view.SignupPage;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
@@ -31,8 +24,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     private final ParticipantRepository participantRepository;
     private final String currentUsername;
     private final boolean showFollowButton;
-
-    UserProfileFragment userProfileFragment = new UserProfileFragment();
 
     public UserAdapter(List<Participant> userList, UserInteractionListener listener) {
         this(userList, listener, true);
@@ -67,6 +58,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     public interface UserInteractionListener {
         void onFollowClick(Participant participant);
+        void onUserClick(Participant participant);
     }
 
     class UserViewHolder extends RecyclerView.ViewHolder {
@@ -115,9 +107,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             }
 
             usernameText.setOnClickListener(v -> {
-                Bundle bundle = new Bundle();
-                bundle.putString("text", usernameText.getText().toString());
-                userProfileFragment.setArguments(bundle);
+                listener.onUserClick(participant);
             });
         }
 

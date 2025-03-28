@@ -93,6 +93,9 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
     private MoodEvent.EmotionalState selectedEmotionalState = null;
     private String searchKeyword = "";
 
+    private String usernameText;
+    UserProfileFragment userProfileFragment = new UserProfileFragment();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -403,6 +406,21 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
             Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
             searchProgressBar.setVisibility(View.GONE);
         });
+    }
+
+    @Override
+    public void onUserClick(Participant participant){
+        usernameText = participant.getUsername();
+        Log.d(TAG, "Username text: "+usernameText);
+        Bundle bundle = new Bundle();
+        bundle.putString("text", usernameText);
+        userProfileFragment.setArguments(bundle);
+
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out);
+        transaction.replace(R.id.frame_layout, userProfileFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.example.bread.fragment;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -8,20 +7,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bread.R;
-import com.example.bread.controller.FollowRequestAdapter;
-import com.example.bread.model.FollowRequest;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.repository.MoodEventRepository;
@@ -37,7 +32,6 @@ import com.example.bread.utils.TimestampUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 
 /**
  * Represents the profile page of the app, where users can view their profile information.
@@ -50,12 +44,15 @@ public class UserProfileFragment extends Fragment {
     private ImageView profileImageView;
     private LinearLayout followersLayout, followingLayout;
     private View recentMoodEventView;
-    private TextView emptyMoodText;
-    private ImageView settingsButton;
+    private TextView emptyMoodText, recentMoodHeader;
+    private Button followRequest;
 
     private ParticipantRepository participantRepository;
     private MoodEventRepository moodEventRepository;
     private String currentUsername;
+
+    private String followedUsername;
+
     private ListenerRegistration participantListener;
 
     private ArrayList<MoodEvent> userMoodEvents = new ArrayList<>();
@@ -73,79 +70,83 @@ public class UserProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
         participantRepository = new ParticipantRepository();
         moodEventRepository = new MoodEventRepository();
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUsername = currentUser.getDisplayName();
+        // Get followed user
+        Bundle data = getArguments();
+        if (data != null) {
+            followedUsername = data.getString("text");  // "text" is the key used when setting the bundle
+            // Set up real-time listener for participant data
+            setupParticipantListener();
+        }
+        Log.d(TAG, "Data: "+data);
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        // Bundle to pass username
-        // Use listener to see if they follow or not
-        // Change display according to following or not
-
-        // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_user_profile, container, false);
 
         // Initialize views
         usernameText = view.findViewById(R.id.profile_username);
+        usernameText.setText(followedUsername);
+
+        recentMoodHeader = view.findViewById(R.id.recent_mood_header);
+
         followersCountText = view.findViewById(R.id.followers_count);
         followingCountText = view.findViewById(R.id.following_count);
+
+        // Show loading state
+        followersCountText.setText("...");
+        followingCountText.setText("...");
+
         profileImageView = view.findViewById(R.id.profile_image);
 
         followersLayout = view.findViewById(R.id.followers_layout);
         followingLayout = view.findViewById(R.id.following_layout);
         recentMoodEventView = view.findViewById(R.id.recent_mood_container);
+        Log.d(TAG, "Recent mood view: "+recentMoodEventView);
         emptyMoodText = view.findViewById(R.id.empty_mood_text);
 
-        // Initialize settings button
-        settingsButton = view.findViewById(R.id.settings_button);
-        settingsButton.setOnClickListener(v -> {
-            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
-            FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
-                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
-            );
-            transaction.add(R.id.frame_layout, new SettingsFragment());
-            transaction.commit();
-        });
-
-        // Get current user
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            currentUsername = currentUser.getDisplayName();
-            usernameText.setText(currentUsername);
-
-            // Show loading state
-            followersCountText.setText("...");
-            followingCountText.setText("...");
-
-            // Set up recent mood event
-            loadRecentMoodEvent();
-
-            // Set up real-time listener for participant data
-            setupParticipantListener();
-        } else {
-            navigateToLogin();
-        }
+        followRequest = view.findViewById(R.id.follow_button);
 
         // Set up click listeners
         followersLayout.setOnClickListener(v -> navigateToFollowersList(ParticipantRepository.ListType.FOLLOWERS));
         followingLayout.setOnClickListener(v -> navigateToFollowersList(ParticipantRepository.ListType.FOLLOWING));
 
+        // Check if user is following them or not
+        participantRepository.isFollowing(currentUsername, followedUsername, isFollowing -> {
+            if (isFollowing) {
+                followRequest.setVisibility(View.GONE);
+                loadRecentMoodEvent();
+            }
+            else{
+                recentMoodEventView.setVisibility(View.GONE);
+                emptyMoodText.setVisibility(View.GONE);
+                recentMoodHeader.setVisibility(View.GONE);
+
+                // Set follow button click listener
+                followRequest.setOnClickListener(v -> {
+                    if (followRequest.getText().toString().equals("Follow")) {
+                        onFollowClickProfile(followedUsername);
+                        // Update button immediately for better UX
+                        followRequest.setText("Requested");
+                        followRequest.setEnabled(false);
+                    }
+                });
+            }
+        }, e -> {
+            Log.e(TAG, "Error checking follow status", e);
+            Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
+        });
+
         return view;
     }
 
-    private void sendFollowBackRequest(String username) {
-        participantRepository.sendFollowRequest(currentUsername, username, unused -> {
-            // Success
-        }, e -> {
-            Log.e(TAG, "Error sending follow back request", e);
-        });
-    }
-
     private void loadRecentMoodEvent() {
-        if (currentUsername == null) return;
+        if (followedUsername == null) return;
 
-        DocumentReference participantRef = participantRepository.getParticipantRef(currentUsername);
+        DocumentReference participantRef = participantRepository.getParticipantRef(followedUsername);
 
         // Changed from listenForEventsWithParticipantRef to fetchEventsWithParticipantRef
         moodEventRepository.fetchEventsWithParticipantRef(participantRef, moodEvents -> {
@@ -182,7 +183,7 @@ public class UserProfileFragment extends Fragment {
             View imageContainer = recentMoodEventView.findViewById(R.id.event_home_image_holder);
             View constraintLayout = recentMoodEventView.findViewById(R.id.homeConstraintLayout);
 
-            usernameView.setText(currentUsername);
+            usernameView.setText(followedUsername);
             titleView.setText(recentMood.getTitle());
             dateView.setText(TimestampUtils.transformTimestamp(recentMood.getTimestamp()));
             moodView.setText(recentMood.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(recentMood.getEmotionalState()));
@@ -207,7 +208,7 @@ public class UserProfileFragment extends Fragment {
 
             // Set profile picture for the recent mood event
             if (profileImageView != null) {
-                participantRepository.fetchBaseParticipant(currentUsername, participant -> {
+                participantRepository.fetchBaseParticipant(followedUsername, participant -> {
                     if (participant != null && participant.getProfilePicture() != null) {
                         profileImageView.setImageBitmap(ImageHandler.base64ToBitmap(participant.getProfilePicture()));
                     } else {
@@ -237,7 +238,7 @@ public class UserProfileFragment extends Fragment {
     }
 
     private void fetchParticipantData() {
-        participantRepository.fetchBaseParticipant(currentUsername, participant -> {
+        participantRepository.fetchBaseParticipant(followedUsername, participant -> {
             if (participant != null) {
                 updateUI(participant);
             }
@@ -269,7 +270,7 @@ public class UserProfileFragment extends Fragment {
 
     private void navigateToFollowersList(ParticipantRepository.ListType listType) {
         String type = listType == ParticipantRepository.ListType.FOLLOWERS ? "followers" : "following";
-        FollowersListFragment fragment = FollowersListFragment.newInstance(currentUsername, type);
+        FollowersListFragment fragment = FollowersListFragment.newInstance(followedUsername, type);
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction().setCustomAnimations(
                 R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
         );
@@ -278,13 +279,75 @@ public class UserProfileFragment extends Fragment {
         transaction.commit();
     }
 
-    private void navigateToLogin() {
-        Intent intent = new Intent(getContext(), LoginPage.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        if (getActivity() != null) {
-            getActivity().finish();
-        }
+//    private void navigateToLogin() {
+//        Intent intent = new Intent(getContext(), LoginPage.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        startActivity(intent);
+//        if (getActivity() != null) {
+//            getActivity().finish();
+//        }
+//    }
+
+    private void onFollowClickProfile(String username) {
+        // First check if already following
+        participantRepository.isFollowing(currentUsername, username, isFollowing -> {
+            if (isFollowing) {
+                Toast.makeText(getContext(), "You are already following this user", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Then check if a follow request already exists
+            participantRepository.checkFollowRequestExists(currentUsername, username, requestExists -> {
+                if (requestExists) {
+                    Toast.makeText(getContext(), "Follow request already sent", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Send follow request
+                participantRepository.sendFollowRequest(currentUsername, username, unused -> {
+                    Toast.makeText(getContext(), "Follow request sent", Toast.LENGTH_SHORT).show();
+                    updateFollowButtonState(username);
+                }, e -> {
+                    Log.e(TAG, "Error sending follow request", e);
+                    Toast.makeText(getContext(), "Error sending follow request", Toast.LENGTH_SHORT).show();
+                });
+            }, e -> {
+                Log.e(TAG, "Error checking follow request", e);
+                Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
+            });
+        }, e -> {
+            Log.e(TAG, "Error checking follow status", e);
+            Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void updateFollowButtonState(String followedUser) {
+        // Check if already following
+        participantRepository.isFollowing(currentUsername, followedUser, isFollowing -> {
+            if (isFollowing) {
+                followRequest.setText("Following");
+                followRequest.setEnabled(false);
+            } else {
+                // Check if a follow request exists
+                participantRepository.checkFollowRequestExists(currentUsername, followedUser, requestExists -> {
+                    if (requestExists) {
+                        followRequest.setText("Requested");
+                        followRequest.setEnabled(false);
+                    } else {
+                        followRequest.setText("Follow");
+                        followRequest.setEnabled(true);
+                    }
+                }, e -> {
+                    // Default to Follow if error
+                    followRequest.setText("Follow");
+                    followRequest.setEnabled(true);
+                });
+            }
+        }, e -> {
+            // Default to Follow if error
+            followRequest.setText("Follow");
+            followRequest.setEnabled(true);
+        });
     }
 
     @Override
@@ -292,7 +355,7 @@ public class UserProfileFragment extends Fragment {
         super.onResume();
         // Refresh data when returning to this fragment
         fetchParticipantData();
-        loadRecentMoodEvent();
+//        loadRecentMoodEvent();
     }
 
     @Override

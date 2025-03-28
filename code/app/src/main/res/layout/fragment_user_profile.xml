@@ -30,20 +30,20 @@
             android:id="@+id/profile_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
             android:fontFamily="@font/righteous"
             android:text="User Profile"
             android:textSize="20sp"
-            android:layout_marginStart="16dp"
+            app:layout_constraintBottom_toBottomOf="@id/sentio_logo"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="@id/sentio_logo" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/follow_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Follow"
             android:background="@drawable/rounded_button"
+            android:text="Follow"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -97,11 +97,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:gravity="center"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/followers_count"
@@ -125,11 +125,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:orientation="vertical"
+                android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
-                android:background="?attr/selectableItemBackground">
+                android:gravity="center"
+                android:orientation="vertical">
 
                 <TextView
                     android:id="@+id/following_count"
@@ -148,6 +148,42 @@
                     android:textSize="14sp" />
             </LinearLayout>
         </LinearLayout>
+        <!-- Recent Mood Section -->
+
+        <TextView
+            android:id="@+id/recent_mood_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginBottom="348dp"
+            android:text="Recents"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/follower_stats" />
+
+        <TextView
+            android:id="@+id/empty_mood_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="No mood events"
+            android:textColor="#AAAAAA"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="@+id/recent_mood_header"
+            app:layout_constraintTop_toBottomOf="@+id/recent_mood_header" />
+
+        <include
+            android:id="@+id/recent_mood_container"
+            layout="@layout/layout_event_home"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/recent_mood_header" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>

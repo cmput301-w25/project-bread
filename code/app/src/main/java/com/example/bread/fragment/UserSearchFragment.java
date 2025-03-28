@@ -15,6 +15,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -42,6 +43,10 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
     private String currentUsername;
     private List<Participant> userList = new ArrayList<>();
     private AtomicBoolean isSearching = new AtomicBoolean(false);
+
+    private String usernameText;
+    UserProfileFragment userProfileFragment = new UserProfileFragment();
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -178,6 +183,23 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
             Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
             progressBar.setVisibility(View.GONE);
         });
+    }
+
+    //https://www.youtube.com/watch?v=dh-zw64LKLg passing through bundle
+    @Override
+    public void onUserClick(Participant participant){
+        usernameText = participant.getUsername();
+        Log.d(TAG, "Username text: "+usernameText);
+        Bundle bundle = new Bundle();
+        bundle.putString("text", usernameText);
+        bundle.putSerializable("participant", participant);
+        userProfileFragment.setArguments(bundle);
+
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out);
+        transaction.replace(R.id.frame_layout, userProfileFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     private void updateFollowButtonState(String username) {
