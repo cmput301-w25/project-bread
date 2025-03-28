@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:padding="16dp"
     android:background="@android:color/transparent">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/addMoodCard"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
@@ -17,112 +17,157 @@
         app:cardCornerRadius="16dp"
         app:cardElevation="4dp"
         app:cardUseCompatPadding="true"
-        app:cardPreventCornerOverlap="true">
+        app:cardPreventCornerOverlap="true"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/content_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- Title of the dialog -->
             <TextView
+                android:id="@+id/add_mood_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Add Mood Event"
                 android:textSize="20sp"
                 android:textColor="#FFFFFF"
                 android:fontFamily="@font/righteous"
-                android:layout_gravity="center"
-                android:paddingBottom="16dp" />
+                android:paddingBottom="16dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
+            <!-- Event Title Label -->
             <TextView
+                android:id="@+id/event_title_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="4dp"
                 android:text="Title"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/add_mood_title"
+                app:layout_constraintStart_toStartOf="parent" />
 
+            <!-- Event Title EditText -->
             <EditText
                 android:id="@+id/eventTitleEditText"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:background="@drawable/rounded_background"
                 android:hint="Ex: Party"
                 android:gravity="center_vertical"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/event_title_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
+            <!-- Emotional State Label -->
             <TextView
+                android:id="@+id/emotional_state_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
                 android:paddingBottom="4dp"
                 android:text="Emotional State"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/eventTitleEditText"
+                app:layout_constraintStart_toStartOf="parent" />
 
+            <!-- Emotional State Spinner -->
             <Spinner
                 android:id="@+id/emotionalStateSpinner"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:background="@drawable/spinner_rounded_background_with_arrow"
                 android:gravity="center_vertical"
                 android:paddingStart="14dp"
                 android:paddingEnd="20dp"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/emotional_state_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
+            <!-- Reason Label -->
             <TextView
+                android:id="@+id/reason_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
                 android:paddingBottom="4dp"
                 android:text="Reason (optional)"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/emotionalStateSpinner"
+                app:layout_constraintStart_toStartOf="parent" />
 
+            <!-- Reason EditText -->
             <EditText
                 android:id="@+id/reasonEditText"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:background="@drawable/rounded_background"
                 android:hint="Ex: Birthday"
                 android:gravity="center_vertical"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/reason_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
+            <!-- Social Situation Label -->
             <TextView
+                android:id="@+id/social_situation_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="8dp"
                 android:paddingBottom="4dp"
                 android:text="Social Situation (optional)"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/reasonEditText"
+                app:layout_constraintStart_toStartOf="parent" />
 
+            <!-- Social Situation Spinner -->
             <Spinner
                 android:id="@+id/socialSituationSpinner"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="40dp"
                 android:background="@drawable/spinner_rounded_background_with_arrow"
                 android:gravity="center_vertical"
                 android:paddingStart="14dp"
                 android:paddingEnd="20dp"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/social_situation_label"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
+            <!-- Spacer TextView (for padding) -->
             <TextView
+                android:id="@+id/spacer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="3dp"
                 android:paddingBottom="3dp"
                 android:text=""
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/socialSituationSpinner"
+                app:layout_constraintStart_toStartOf="parent" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- Chips Container -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/chips_container"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingBottom="8dp">
+                android:paddingBottom="8dp"
+                app:layout_constraintTop_toBottomOf="@id/spacer"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/locationChip"
@@ -136,47 +181,60 @@
                     app:chipStrokeWidth="1dp"
                     app:checkedIcon="@drawable/ic_check"
                     app:checkedIconEnabled="true"
-                    app:checkedIconTint="#f8b64c" />
+                    app:checkedIconTint="#f8b64c"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <com.google.android.material.chip.Chip
                     android:id="@+id/publicChip"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="56dp"
+                    android:layout_marginStart="16dp"
                     android:text="Make Public"
                     android:textColor="#FFFFFF"
                     app:chipCornerRadius="27dp"
                     app:chipStrokeWidth="1dp"
                     app:checkedIcon="@drawable/ic_check"
                     app:checkedIconEnabled="true"
-                    app:checkedIconTint="#f8b64c" />
+                    app:checkedIconTint="#f8b64c"
+                    app:layout_constraintStart_toEndOf="@id/locationChip"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- Image Upload Section (Added from the second file) -->
+            <!-- Image Upload Label -->
             <TextView
+                android:id="@+id/image_upload_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingTop="3dp"
                 android:paddingBottom="3dp"
                 android:text="Upload an Image (optional)"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                app:layout_constraintTop_toBottomOf="@id/chips_container"
+                app:layout_constraintStart_toStartOf="parent" />
 
+            <!-- Image Upload Button -->
             <ImageButton
                 android:id="@+id/imageAdd"
                 android:layout_width="55dp"
                 android:layout_height="55dp"
                 android:background="@drawable/rounded_background"
                 android:src="@drawable/camera_icon"
-                android:contentDescription="Select image" />
+                android:contentDescription="Select image"
+                app:layout_constraintTop_toBottomOf="@id/image_upload_label"
+                app:layout_constraintStart_toStartOf="parent" />
 
-            <!-- Cancel and Save Buttons -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- Buttons Container -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/buttons_container"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:paddingTop="8dp">
+                android:paddingTop="8dp"
+                app:layout_constraintTop_toBottomOf="@id/imageAdd"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
                 <Button
                     android:id="@+id/cancelButton"
@@ -186,7 +244,12 @@
                     android:backgroundTint="#808080"
                     android:padding="8dp"
                     android:text="Cancel"
-                    android:textColor="#FFFFFF" />
+                    android:textColor="#FFFFFF"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/saveButton"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintHorizontal_chainStyle="packed" />
 
                 <Button
                     android:id="@+id/saveButton"
@@ -195,12 +258,16 @@
                     android:backgroundTint="#f8b64c"
                     android:padding="8dp"
                     android:text="Save Mood"
-                    android:textColor="#000000" />
+                    android:textColor="#000000"
+                    app:layout_constraintStart_toEndOf="@id/cancelButton"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent" />
 
-            </LinearLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </com.google.android.material.card.MaterialCardView>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
