@@ -17,6 +17,7 @@ import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -80,7 +81,7 @@ public class HomeFilterUITest {
     @Before
     public void seedDatabase() {
         // Seed the database with some mood events
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestore db = new FirebaseService().getDb();
         CollectionReference participants = db.collection("participants");
 
         Participant p1 = new Participant();
@@ -178,7 +179,7 @@ public class HomeFilterUITest {
         onView(withId(R.id.mood_spinner)).perform(click());
         Thread.sleep(1000);
 
-        onView(withText("HAPPY")) //searches for "HAPPY" state within spinner
+        onView(withText("Happy")) //searches for "HAPPY" state within spinner
                 .inRoot(isPlatformPopup()) //ensure we look in the popup filter window not main screen
                 .perform(click());
 
@@ -222,7 +223,7 @@ public class HomeFilterUITest {
         //filtering by dropdown
         onView(withId(R.id.mood_spinner)).perform(click());
         Thread.sleep(1000);
-        onView(withText("SAD")) //searches for "HAPPY" state within spinner
+        onView(withText("Sad")) //searches for "HAPPY" state within spinner
                 .inRoot(isPlatformPopup()) //ensure we look in the popup filter window not main screen
                 .perform(click());
 

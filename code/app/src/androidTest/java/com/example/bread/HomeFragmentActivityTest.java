@@ -8,10 +8,12 @@ import static org.hamcrest.Matchers.anything;
 
 import android.util.Log;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -41,8 +43,7 @@ import java.util.concurrent.ExecutionException;
 @LargeTest
 public class HomeFragmentActivityTest {
 
-    @Rule
-    public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
+    public ActivityScenario<HomePage> scenario;
 
     @BeforeClass
     public static void testSetup() {
@@ -74,7 +75,7 @@ public class HomeFragmentActivityTest {
     @Before
     public void seedDatabase() {
         // Seed the database with some mood events
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestore db = new FirebaseService().getDb();
         CollectionReference participants = db.collection("participants");
         Participant p1 = new Participant();
         p1.setUsername("testUser");
@@ -107,6 +108,8 @@ public class HomeFragmentActivityTest {
         for (MoodEvent event : events) {
             moodEvents.add(event);
         }
+
+        scenario = ActivityScenario.launch(HomePage.class);
     }
 
     @Test
@@ -124,6 +127,9 @@ public class HomeFragmentActivityTest {
 
     @After
     public void tearDown() {
+        if (scenario != null) {
+            scenario.close();
+        }
         clearFirestoreEmulator();
     }
 
