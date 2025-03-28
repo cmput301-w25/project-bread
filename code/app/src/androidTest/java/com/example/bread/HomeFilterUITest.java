@@ -9,9 +9,14 @@ import static androidx.test.espresso.matcher.RootMatchers.isPlatformPopup;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
+
 import android.util.Log;
+
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.espresso.action.ViewActions;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
+
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -21,11 +26,14 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -36,9 +44,10 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+@RunWith(AndroidJUnit4.class)
+@LargeTest
 public class HomeFilterUITest {
-    @Rule
-    public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
+    public ActivityScenario<HomePage> scenario;
 
     @BeforeClass
     public static void testSetup() {
@@ -95,24 +104,26 @@ public class HomeFilterUITest {
             }
         });
 
-        MoodEvent m1 = new MoodEvent("Test Event 1", "test reason 1", MoodEvent.EmotionalState.HAPPY, p2Ref);
-        MoodEvent m2 = new MoodEvent("Test Event 2", "test reason 2", MoodEvent.EmotionalState.ANGRY, p2Ref);
-        MoodEvent m3 = new MoodEvent("Test Event 3", "test reason 3", MoodEvent.EmotionalState.SAD, p2Ref);
+        MoodEvent m1 = new MoodEvent("Test Event 1", "Test Event 1", MoodEvent.EmotionalState.HAPPY, p2Ref);
+        MoodEvent m2 = new MoodEvent("Test Event 2", "Test Event 2", MoodEvent.EmotionalState.ANGRY, p2Ref);
+        MoodEvent m3 = new MoodEvent("Test Event 3", "Test Event 3", MoodEvent.EmotionalState.SAD, p2Ref);
         m1.setTimestamp(new GregorianCalendar(2024, Calendar.MARCH, 1).getTime());
         m2.setTimestamp(new GregorianCalendar(2024, Calendar.MARCH, 2).getTime());
         m3.setTimestamp(new Date());
         db.collection("moodEvents").document("mood1").set(m1);
         db.collection("moodEvents").document("mood2").set(m2);
         db.collection("moodEvents").document("mood3").set(m3);
+
+        scenario = ActivityScenario.launch(HomePage.class);
     }
 
     // testing for everything to appear correctly
     @Test
     public void displaysAllMoodEventsAndDialogTest() throws InterruptedException, ExecutionException {
         Thread.sleep(2000);
-        onView(withText("test reason 1")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(matches(isDisplayed()));
-        onView(withText("test reason 3")).check(matches(isDisplayed()));
+        onView(withText("Test Event 1")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(matches(isDisplayed()));
+        onView(withText("Test Event 3")).check(matches(isDisplayed()));
 
         Thread.sleep(2000);
         // Click the filter button
@@ -135,9 +146,9 @@ public class HomeFilterUITest {
         onView(withId(R.id.apply_button)).perform(click());
 
         Thread.sleep(1000);
-        onView(withText("test reason 1")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(matches(isDisplayed()));
-        onView(withText("test reason 3")).check(matches(isDisplayed()));
+        onView(withText("Test Event 1")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(matches(isDisplayed()));
+        onView(withText("Test Event 3")).check(matches(isDisplayed()));
     }
 
     //  test for filtering by most recent week
@@ -152,9 +163,9 @@ public class HomeFilterUITest {
         onView(withId(R.id.apply_button)).perform(click());
 
         Thread.sleep(1000);
-        onView(withText("test reason 3")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(doesNotExist());
-        onView(withText("test reason 1")).check(doesNotExist());
+        onView(withText("Test Event 3")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(doesNotExist());
+        onView(withText("Test Event 1")).check(doesNotExist());
     }
 
     //  test for filtering by mood state
@@ -175,9 +186,9 @@ public class HomeFilterUITest {
         onView(withId(R.id.apply_button)).perform(click());
 
         Thread.sleep(1000);
-        onView(withText("test reason 3")).check(doesNotExist());
-        onView(withText("test reason 1")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(doesNotExist());
+        onView(withText("Test Event 3")).check(doesNotExist());
+        onView(withText("Test Event 1")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(doesNotExist());
     }
 
     // test for filtering by keyword reason
@@ -193,9 +204,9 @@ public class HomeFilterUITest {
         onView(withId(R.id.apply_button)).perform(click());
 
         Thread.sleep(1000);
-        onView(withText("test reason 3")).check(doesNotExist());
-        onView(withText("test reason 1")).check(doesNotExist());
-        onView(withText("test reason 2")).check(matches(isDisplayed()));
+        onView(withText("Test Event 3")).check(doesNotExist());
+        onView(withText("Test Event 1")).check(doesNotExist());
+        onView(withText("Test Event 2")).check(matches(isDisplayed()));
     }
 
     // test for filtering by all three
@@ -222,9 +233,9 @@ public class HomeFilterUITest {
         onView(withId(R.id.apply_button)).perform(click());
 
         Thread.sleep(1000);
-        onView(withText("test reason 3")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(doesNotExist());
-        onView(withText("test reason 1")).check(doesNotExist());
+        onView(withText("Test Event 3")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(doesNotExist());
+        onView(withText("Test Event 1")).check(doesNotExist());
     }
 
     // test for filtering for one thing then another
@@ -239,9 +250,9 @@ public class HomeFilterUITest {
         Thread.sleep(1000);
         onView(withId(R.id.apply_button)).perform(click());
         Thread.sleep(1000);
-        onView(withText("test reason 3")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(doesNotExist());
-        onView(withText("test reason 1")).check(doesNotExist());
+        onView(withText("Test Event 3")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(doesNotExist());
+        onView(withText("Test Event 1")).check(doesNotExist());
 
         //unselect most recent week
         onView(withId(R.id.filter_button_home)).perform(click());
@@ -250,9 +261,9 @@ public class HomeFilterUITest {
         Thread.sleep(1000);
         onView(withId(R.id.apply_button)).perform(click());
         Thread.sleep(1000);
-        onView(withText("test reason 1")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(matches(isDisplayed()));
-        onView(withText("test reason 3")).check(matches(isDisplayed()));
+        onView(withText("Test Event 1")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(matches(isDisplayed()));
+        onView(withText("Test Event 3")).check(matches(isDisplayed()));
 
         //keyword search test
         onView(withId(R.id.filter_button_home)).perform(click());
@@ -261,14 +272,16 @@ public class HomeFilterUITest {
         Thread.sleep(1000);
         onView(withId(R.id.apply_button)).perform(click());
         Thread.sleep(1000);
-        onView(withText("test reason 1")).check(matches(isDisplayed()));
-        onView(withText("test reason 2")).check(doesNotExist());
-        onView(withText("test reason 3")).check(doesNotExist());
+        onView(withText("Test Event 1")).check(matches(isDisplayed()));
+        onView(withText("Test Event 2")).check(doesNotExist());
+        onView(withText("Test Event 3")).check(doesNotExist());
     }
 
     @After
     public void tearDown() {
-        clearAuthEmulator();
+        if (scenario != null) {
+            scenario.close();
+        }
         clearFirestoreEmulator();
     }
 
@@ -295,7 +308,8 @@ public class HomeFilterUITest {
         }
     }
 
-    private void clearAuthEmulator() {
+    @AfterClass
+    public static void clearAuthEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"
