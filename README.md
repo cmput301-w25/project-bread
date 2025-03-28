@@ -41,7 +41,7 @@ firebase emulators:start
 ```
 This will launch emulators for firestore and FirebaseAuth that are required to run Android UI tests
 
-After all these steps are complete and the build is successful you can run the tests:
+After all these steps are complete and the build is successful you can run the tests by going into `code` directory:
 
 To run Android tests:
 ```
