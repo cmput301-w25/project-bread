@@ -35,6 +35,8 @@ Add `GOOGLE_MAPS_API_KEY` in your `local.properties`
 
 Set `FIREBASE_PROJECT_ID` as `bread-2259c` in your `local.properties` file
 
+(Both the secrets are available in the team discord)
+
 Before you can run the tests make sure that you have firebase emulators running. To start the emulator:
 ```
 firebase emulators:start
