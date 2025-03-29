@@ -81,18 +81,33 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Tap to edit"
+        android:text="Tap to change profile photo"
         android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/profile_image_container" />
 
     <Button
-        android:id="@+id/edit_account_button"
+        android:id="@+id/change_username_button"
         android:layout_width="0dp"
         android:layout_height="71dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="48dp"
+        android:layout_marginEnd="24dp"
+        android:backgroundTint="@color/settingsButton"
+        android:text="Change Username"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/profile_change_text" />
+
+    <Button
+        android:id="@+id/edit_account_button"
+        android:layout_width="0dp"
+        android:layout_height="71dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
         android:backgroundTint="@color/settingsButton"
         android:text="Edit Name"
@@ -100,7 +115,7 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_change_text" />
+        app:layout_constraintTop_toBottomOf="@+id/change_username_button" />
 
     <Button
         android:id="@+id/log_out_button"
