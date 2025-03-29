@@ -81,6 +81,7 @@ public class HistoryFragment extends Fragment {
     // Filter-related variables
     private FloatingActionButton filterButton;
     private final ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
+    private final ArrayList<MoodEvent> analyticsMoodEvents = new ArrayList<>();
     private boolean isFilteringByWeek = false;
     private MoodEvent.EmotionalState selectedEmotionalState = null;
     private String searchKeyword = "";
@@ -110,7 +111,7 @@ public class HistoryFragment extends Fragment {
             if (moodEventArrayList.isEmpty()) {
                 Toast.makeText(getContext(), "No mood events to display", Toast.LENGTH_SHORT).show();
             } else {
-                List<MoodEvent> moodEvents = new ArrayList<>(moodEventArrayList);
+                List<MoodEvent> moodEvents = new ArrayList<>(analyticsMoodEvents);
                 AnalyticsFragment fragment = AnalyticsFragment.newInstance(moodEvents);
                 FragmentManager fragmentManager = getParentFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
@@ -171,6 +172,10 @@ public class HistoryFragment extends Fragment {
                         allMoodEvents.clear();
                         allMoodEvents.addAll(moodEventArrayList);
 
+                        // Save mood events for analytics
+                        analyticsMoodEvents.clear();
+                        analyticsMoodEvents.addAll(moodEventArrayList);
+
                         // Reapply any existing filters
                         if (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty()) {
                             applyFilters();
@@ -226,6 +231,8 @@ public class HistoryFragment extends Fragment {
         Toast.makeText(getContext(), deleteCount + " event deleted", Toast.LENGTH_SHORT).show();// just for logcat check
         selectedEvents.clear();  // Clear the selection after deletion
     }
+
+
 
 
     /**
@@ -354,6 +361,8 @@ public class HistoryFragment extends Fragment {
             int indexOfMood = moodEventArrayList.indexOf(moodEvent);
             if (indexOfMood >= 0) {
                 moodEventArrayList.set(indexOfMood, moodEvent);
+
+
                 int allEventIndex = allMoodEvents.indexOf(moodEvent);
                 if (allEventIndex >= 0) {
                     allMoodEvents.set(allEventIndex, moodEvent);
@@ -384,6 +393,8 @@ public class HistoryFragment extends Fragment {
                         }
                     }
             );
+
+
         });
     }
     // Edit / add image related functions
