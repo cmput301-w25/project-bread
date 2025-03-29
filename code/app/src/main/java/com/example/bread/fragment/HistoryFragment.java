@@ -82,6 +82,7 @@ public class HistoryFragment extends Fragment {
     // Filter-related variables
     private FloatingActionButton filterButton;
     private final ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
+    private final ArrayList<MoodEvent> analyticsMoodEvents = new ArrayList<>();
     private boolean isFilteringByWeek = false;
     private MoodEvent.EmotionalState selectedEmotionalState = null;
     private String searchKeyword = "";
@@ -111,7 +112,7 @@ public class HistoryFragment extends Fragment {
             if (moodEventArrayList.isEmpty()) {
                 Toast.makeText(getContext(), "No mood events to display", Toast.LENGTH_SHORT).show();
             } else {
-                List<MoodEvent> moodEvents = new ArrayList<>(moodEventArrayList);
+                List<MoodEvent> moodEvents = new ArrayList<>(analyticsMoodEvents);
                 AnalyticsFragment fragment = AnalyticsFragment.newInstance(moodEvents);
                 FragmentManager fragmentManager = getParentFragmentManager();
                 FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
@@ -171,6 +172,10 @@ public class HistoryFragment extends Fragment {
                         // Save all mood events for filtering
                         allMoodEvents.clear();
                         allMoodEvents.addAll(moodEventArrayList);
+
+                        // Save mood events for analytics
+                        analyticsMoodEvents.clear();
+                        analyticsMoodEvents.addAll(moodEventArrayList);
 
                         // Reapply any existing filters
                         if (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty()) {
@@ -255,10 +260,9 @@ public class HistoryFragment extends Fragment {
 
         Date timestamp = moodEvent.getTimestamp();
         //set the date if the timestamp is null to avoid nullpointer exception
-        if (timestamp == null){
+        if (timestamp == null) {
             dateTextView.setText("No date provided");
-        }
-        else {
+        } else {
             SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
             String dateString = formatter.format(timestamp);
             dateTextView.setText(dateString);
@@ -444,13 +448,13 @@ public class HistoryFragment extends Fragment {
             moodEvent.setAttachedImage(imageBase64);
 
             if (indexOfMood >= 0) {
-                    moodEventArrayList.set(indexOfMood, moodEvent);
+                moodEventArrayList.set(indexOfMood, moodEvent);
 
-                    int allEventIndex = allMoodEvents.indexOf(moodEvent);
-                    if (allEventIndex >= 0) {
-                        allMoodEvents.set(allEventIndex, moodEvent);
-                    }
-                    moodArrayAdapter.notifyDataSetChanged();
+                int allEventIndex = allMoodEvents.indexOf(moodEvent);
+                if (allEventIndex >= 0) {
+                    allMoodEvents.set(allEventIndex, moodEvent);
+                }
+                moodArrayAdapter.notifyDataSetChanged();
             }
 
             // Save to Firebase
@@ -476,7 +480,7 @@ public class HistoryFragment extends Fragment {
                         }
                     }
             );
-            Toast.makeText(getContext(),"Mood updated successfully",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
             dialog.dismiss();
         });
     }
