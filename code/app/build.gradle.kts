@@ -73,6 +73,7 @@ dependencies {
 
     // Charts
     implementation(libs.mpandroidchart)
+    implementation(libs.firebase.messaging)
 
     // testing
     testImplementation(libs.junit)

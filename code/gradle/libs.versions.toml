@@ -19,6 +19,7 @@ mockitoInline = "5.2.0"
 mpandroidchart = "v3.1.0"
 playServicesLocation = "21.3.0"
 firebaseAuth = "23.2.0"
+firebaseMessaging = "24.1.0"
 legacySupportV4 = "1.0.0"
 espressoContrib = "3.6.1"
 
@@ -42,6 +43,7 @@ mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
 espresso-contrib = { group = "androidx.test.espresso", name = "espresso-contrib", version.ref = "espressoContrib" }
 

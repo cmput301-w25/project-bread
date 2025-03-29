@@ -14,6 +14,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.example.bread.repository.NotificationService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -263,10 +264,16 @@ public class ParticipantRepository {
      * @param onSuccessListener The listener to be called when the request is successfully sent
      * @param onFailureListener The listener to be called when the request cannot be sent
      */
-    public void sendFollowRequest(@NonNull String fromUsername, @NonNull String toUsername, @NonNull OnSuccessListener<Void> onSuccessListener, OnFailureListener onFailureListener) {
-        FollowRequest request = new FollowRequest(fromUsername);
-        getParticipantCollRef().document(toUsername).collection("followRequests").document(fromUsername).set(request)
-                .addOnSuccessListener(onSuccessListener)
+    public void sendFollowRequest(@NonNull String fromUsername, @NonNull String toUsername,
+                                  @NonNull OnSuccessListener<Void> onSuccessListener,
+                                  OnFailureListener onFailureListener) {
+        FollowRequest followRequest = new FollowRequest(fromUsername);
+                getParticipantCollRef().document(toUsername).collection("followRequests").document(fromUsername).set(followRequest.toMap())
+                .addOnSuccessListener(aVoid -> {
+                    // Send notification
+                    NotificationService.sendFollowRequestNotification(fromUsername, toUsername);
+                    onSuccessListener.onSuccess(aVoid);
+                })
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
                         Log.e(TAG, "Failed to send follow request from: " + fromUsername + " to: " + toUsername, e));
     }
@@ -492,27 +499,5 @@ public class ParticipantRepository {
                         Log.e(TAG, "Failed to remove " + targetUsername + " from " + username + "'s following", e));
     }
 
-    /**
-     * Set up a real-time listener for participant data updates
-     *
-     * @param username                    The username of the participant to listen for
-     * @param onParticipantUpdateListener The listener to be called when the participant data updates
-     * @return A ListenerRegistration that can be used to remove the listener when not needed
-     */
-    public ListenerRegistration listenForParticipantUpdates(@NonNull String username, @NonNull OnSuccessListener<Participant> onParticipantUpdateListener) {
-        return getParticipantCollRef().document(username)
-                .addSnapshotListener((documentSnapshot, e) -> {
-                    if (e != null) {
-                        Log.e(TAG, "Error listening for participant updates", e);
-                        return;
-                    }
 
-                    if (documentSnapshot != null && documentSnapshot.exists()) {
-                        Participant participant = documentSnapshot.toObject(Participant.class);
-                        if (participant != null) {
-                            onParticipantUpdateListener.onSuccess(participant);
-                        }
-                    }
-                });
-    }
 }

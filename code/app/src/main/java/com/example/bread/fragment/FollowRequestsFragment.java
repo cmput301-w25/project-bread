@@ -25,6 +25,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Fragment that displays follow requests for the current user.
+ * Allows accepting or declining follow requests and offers to follow back when accepting.
+ */
 public class FollowRequestsFragment extends Fragment implements FollowRequestAdapter.RequestActionListener {
 
     private static final String TAG = "FollowRequestsFragment";
@@ -38,6 +42,9 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
     private String currentUsername;
     private List<FollowRequest> requestsList = new ArrayList<>();
 
+    /**
+     * Initialize the fragment, setting up the repository and retrieving current username.
+     */
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +55,14 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             currentUsername = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
         }
     }
-
+    /**
+     * Create the fragment view, initialize UI components, and load data.
+     *
+     * @param inflater Layout inflater to inflate the fragment layout
+     * @param container Parent view that the fragment UI attaches to
+     * @param savedInstanceState Saved instance state for fragment recreation
+     * @return The inflated fragment view
+     */
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -69,7 +83,10 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
 
         return view;
     }
-
+    /**
+     * Fetches follow requests from the repository and updates the UI.
+     * Shows progress indicator during loading and handles empty state.
+     */
     private void loadFollowRequests() {
         if (currentUsername == null || currentUsername.isEmpty()) {
             updateEmptyView();
@@ -93,7 +110,10 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             updateEmptyView();
         });
     }
-
+    /**
+     * Updates the visibility of UI elements based on whether there are follow requests.
+     * Shows empty view when there are no requests, shows the RecyclerView otherwise.
+     */
     private void updateEmptyView() {
         if (requestsList.isEmpty()) {
             emptyView.setVisibility(View.VISIBLE);
@@ -103,26 +123,34 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             requestsRecyclerView.setVisibility(View.VISIBLE);
         }
     }
-
+    /**
+     * Handles accepting a follow request.
+     * Updates the database, refreshes the UI, and offers to follow back if appropriate.
+     *
+     * @param requestorUsername Username of the person who sent the follow request
+     * @param position Position of the request in the list
+     */
     @Override
     public void onAccept(String requestorUsername, int position) {
         progressBar.setVisibility(View.VISIBLE);
 
         participantRepository.acceptFollowRequest(currentUsername, requestorUsername, unused -> {
-            // Remove from list and update UI
-            requestsList.remove(position);
-            requestAdapter.notifyItemRemoved(position);
-            updateEmptyView();
-            progressBar.setVisibility(View.GONE);
-
             // First check if the current user is already following the requestor
             // or has a pending follow request to the requestor
             checkFollowRelationship(requestorUsername);
-
+            if (getView() != null) {
+                getView().post(() -> {
+                    loadFollowRequests();
+                });
+            }
         }, e -> {
-            Log.e(TAG, "Error accepting follow request", e);
-            Toast.makeText(getContext(), "Error accepting follow request", Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.GONE);
+            if (getView() != null) {
+                getView().post(() -> {
+                    Log.e(TAG, "Error accepting follow request", e);
+                    Toast.makeText(getContext(), "Error accepting follow request", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                });
+            }
         });
     }
 
@@ -172,7 +200,11 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             Log.e(TAG, "Error checking following status", e);
         });
     }
-
+    /**
+     * Sends a follow request back to the user whose request was accepted.
+     *
+     * @param username Username to send the follow request to
+     */
     private void sendFollowBackRequest(String username) {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -186,21 +218,33 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             progressBar.setVisibility(View.GONE);
         });
     }
-
+    /**
+     * Handles declining a follow request.
+     * Updates the database and refreshes the UI.
+     *
+     * @param requestorUsername Username of the person who sent the follow request
+     * @param position Position of the request in the list
+     */
     @Override
     public void onDecline(String requestorUsername, int position) {
         progressBar.setVisibility(View.VISIBLE);
 
         participantRepository.declineFollowRequest(currentUsername, requestorUsername, unused -> {
-            Toast.makeText(getContext(), "Follow request declined", Toast.LENGTH_SHORT).show();
-            requestsList.remove(position);
-            requestAdapter.notifyItemRemoved(position);
-            updateEmptyView();
-            progressBar.setVisibility(View.GONE);
+            if (getView() != null) {
+                getView().post(() -> {
+                    // Simply reload all requests
+                    loadFollowRequests();
+                    Toast.makeText(getContext(), "Follow request declined", Toast.LENGTH_SHORT).show();
+                });
+            }
         }, e -> {
-            Log.e(TAG, "Error declining follow request", e);
-            Toast.makeText(getContext(), "Error declining follow request", Toast.LENGTH_SHORT).show();
-            progressBar.setVisibility(View.GONE);
+            if (getView() != null) {
+                getView().post(() -> {
+                    Log.e(TAG, "Error declining follow request", e);
+                    Toast.makeText(getContext(), "Error declining follow request", Toast.LENGTH_SHORT).show();
+                    progressBar.setVisibility(View.GONE);
+                });
+            }
         });
     }
 }

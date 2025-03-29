@@ -1,0 +1,3 @@
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@mipmap/sound_wave_layer"
+    android:gravity="center" />
