@@ -433,9 +433,6 @@ public class HistoryFragment extends Fragment {
                 return;
             }
 
-            int indexOfMood = moodEventArrayList.indexOf(moodEvent);
-
-
             // **Only save if all validations passed**
             moodEvent.setTitle(newTitle);
             moodEvent.setEmotionalState(newEmotionalState);
@@ -443,6 +440,7 @@ public class HistoryFragment extends Fragment {
             moodEvent.setSocialSituation(newSocialSituation);
             moodEvent.setAttachedImage(imageBase64);
 
+            int indexOfMood = moodEventArrayList.indexOf(moodEvent);
             if (indexOfMood >= 0) {
                     moodEventArrayList.set(indexOfMood, moodEvent);
 
