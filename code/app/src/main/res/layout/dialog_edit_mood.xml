@@ -35,7 +35,7 @@
                 android:fontFamily="@font/righteous"
                 android:paddingBottom="16dp"
                 android:text="Edit Mood Event"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="20sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -48,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:paddingBottom="4dp"
                 android:text="Title"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/edit_mood_title" />
 
@@ -62,7 +62,7 @@
                 android:hint="Ex: Party"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/event_title_label" />
@@ -75,7 +75,7 @@
                 android:paddingTop="16dp"
                 android:paddingBottom="4dp"
                 android:text="Emotional State"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/edit_title" />
 
@@ -88,7 +88,7 @@
                 android:gravity="center_vertical"
                 android:paddingStart="14dp"
                 android:paddingEnd="20dp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/emotion_label" />
@@ -101,7 +101,7 @@
                 android:paddingTop="16dp"
                 android:paddingBottom="4dp"
                 android:text="Reason (optional)"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/edit_emotion_spinner" />
 
@@ -115,7 +115,7 @@
                 android:hint="Ex: Birthday"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/reason_label" />
@@ -128,7 +128,7 @@
                 android:paddingTop="16dp"
                 android:paddingBottom="4dp"
                 android:text="Social Situation (optional)"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/edit_reason" />
 
@@ -141,7 +141,7 @@
                 android:gravity="center_vertical"
                 android:paddingStart="14dp"
                 android:paddingEnd="20dp"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/social_situation_label" />
@@ -154,7 +154,7 @@
                 android:paddingTop="3dp"
                 android:paddingBottom="3dp"
                 android:text=""
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/edit_social_situation_spinner" />
 
@@ -175,7 +175,7 @@
                     android:layout_height="56dp"
                     android:layout_marginTop="4dp"
                     android:text="Add Location"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     app:checkedIcon="@drawable/ic_check"
                     app:checkedIconEnabled="true"
                     app:checkedIconTint="#f8b64c"
@@ -194,7 +194,7 @@
                     android:layout_marginStart="12dp"
                     android:layout_marginTop="4dp"
                     android:text="Make Public"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     app:checkedIcon="@drawable/ic_check"
                     app:checkedIconEnabled="true"
                     app:checkedIconTint="#f8b64c"
@@ -215,7 +215,7 @@
                 android:paddingTop="16dp"
                 android:paddingBottom="8dp"
                 android:text="Upload an Image (optional)"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/chips_container" />
 
@@ -272,7 +272,7 @@
                     android:padding="8dp"
                     android:paddingTop="16dp"
                     android:text="Cancel"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/saveButton"
                     app:layout_constraintHorizontal_chainStyle="packed"
@@ -287,7 +287,7 @@
                     android:padding="8dp"
                     android:paddingTop="16dp"
                     android:text="Update"
-                    android:textColor="#000000"
+                    android:textColor="@color/black"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@id/cancelButton"
