@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -38,6 +39,7 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
         TextView date;
         TextView moodText;
         TextView titleText;
+        ImageView visibilityIcon;
         ConstraintLayout eventLayout;
     }
 
@@ -55,6 +57,7 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
             holder.titleText = convertView.findViewById(R.id.history_title_text);
             holder.moodText = convertView.findViewById(R.id.textMood);
             holder.eventLayout = convertView.findViewById(R.id.historyConstraintLayout);
+            holder.visibilityIcon = convertView.findViewById(R.id.visibility_icon);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -64,9 +67,30 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
         if (moodEvent != null) {
             if (moodEvent.getSocialSituation() != null && moodEvent.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
                 holder.socialSituation.setText(moodEvent.getSocialSituation().toString());
+                holder.socialSituation.setVisibility(View.VISIBLE);
+                // Set the visibility icon's start constraint to be after the social situation
+                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) holder.visibilityIcon.getLayoutParams();
+                params.startToEnd = holder.socialSituation.getId();
+                holder.visibilityIcon.setLayoutParams(params);
             } else {
                 holder.socialSituation.setVisibility(View.INVISIBLE);
+                // Set the visibility icon's start constraint to be after the mood text
+                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) holder.visibilityIcon.getLayoutParams();
+                params.startToEnd = holder.moodText.getId();
+                holder.visibilityIcon.setLayoutParams(params);
             }
+
+            if (moodEvent.getVisibility() != null) {
+                if(moodEvent.getVisibility().toString().equals("PUBLIC")){
+                    holder.visibilityIcon.setImageResource(R.drawable.ic_public); //Create ic_public.xml in drawable
+                }else{
+                    holder.visibilityIcon.setImageResource(R.drawable.ic_private); //create ic_private.xml in drawable
+                }
+                holder.visibilityIcon.setVisibility(View.VISIBLE);
+            } else {
+                holder.visibilityIcon.setVisibility(View.GONE);
+            }
+
             if (holder.checkBox != null) {
                 holder.checkBox.setOnCheckedChangeListener(null);
                 holder.checkBox.setChecked(selectedEvents.contains(moodEvent));
