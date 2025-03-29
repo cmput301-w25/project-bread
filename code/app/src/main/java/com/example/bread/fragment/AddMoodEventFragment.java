@@ -176,7 +176,7 @@ public class AddMoodEventFragment extends DialogFragment {
         // Set up remove image button listener
         removeImageButton.setOnClickListener(v -> {
             imageBase64 = null;
-            imageAddButton.setImageResource(R.drawable.camera_icon); // Reset to default icon
+            imageAddButton.setImageResource(R.drawable.material_camera); // Reset to default icon
             removeImageButton.setVisibility(View.GONE);
             Toast.makeText(requireContext(), "Image removed", Toast.LENGTH_SHORT).show();
         });

@@ -229,7 +229,7 @@
                     android:layout_width="55dp"
                     android:layout_height="55dp"
                     android:background="@drawable/rounded_background"
-                    android:src="@drawable/camera_icon"
+                    android:src="@drawable/material_camera"
                     android:contentDescription="Select image"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -239,7 +239,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:background="@drawable/rounded_background"
-                    android:src="@android:drawable/ic_menu_delete"
+                    android:src="@drawable/material_bin"
                     android:contentDescription="Remove image"
                     android:visibility="gone"
                     android:layout_marginStart="8dp"
