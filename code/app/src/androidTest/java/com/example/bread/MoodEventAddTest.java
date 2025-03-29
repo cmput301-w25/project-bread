@@ -157,9 +157,6 @@ public class MoodEventAddTest {
         onView(withId(R.id.socialSituationSpinner)).perform(click());
         onData(is(MoodEvent.SocialSituation.ALONE)).inRoot(isPlatformPopup()).perform(click());
 
-        // Click the public chip to make the event public
-        onView(withId(R.id.publicChip)).perform(click());
-
         // Save the mood event
         onView(withText("Save Mood")).perform(click());
 
@@ -177,7 +174,9 @@ public class MoodEventAddTest {
         onView(withId(R.id.socialSituationSpinner)).perform(click());
         onData(is(MoodEvent.SocialSituation.ALONE)).inRoot(isPlatformPopup()).perform(click());
 
-        // Do not click the public chip to keep the event private
+        // Click the public chip to make the event private
+        onView(withId(R.id.publicChip)).perform(click());
+
         onView(withText("Save Mood")).perform(click());
 
         // Step 3: Sign out testUser and sign in as testUser2
