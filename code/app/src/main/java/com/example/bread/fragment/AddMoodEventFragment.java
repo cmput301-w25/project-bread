@@ -201,7 +201,7 @@ public class AddMoodEventFragment extends DialogFragment {
 
         // Get required information for mood event
         MoodEvent.EmotionalState emotionalState = (MoodEvent.EmotionalState) emotionalStateSpinner.getSelectedItem();
-        MoodEvent.Visibility visibility = publicChip.isChecked() ? MoodEvent.Visibility.PUBLIC : MoodEvent.Visibility.PRIVATE;
+        MoodEvent.Visibility visibility = publicChip.isChecked() ? MoodEvent.Visibility.PRIVATE : MoodEvent.Visibility.PUBLIC;
         if (emotionalState == null) {
             Log.w(TAG, "No emotional state selected");
             return;

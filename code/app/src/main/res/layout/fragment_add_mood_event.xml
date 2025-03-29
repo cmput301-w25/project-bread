@@ -191,7 +191,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="56dp"
                     android:layout_marginStart="16dp"
-                    android:text="Make Public"
+                    android:text="Make Private"
                     android:textColor="#FFFFFF"
                     app:chipCornerRadius="27dp"
                     app:chipStrokeWidth="1dp"
