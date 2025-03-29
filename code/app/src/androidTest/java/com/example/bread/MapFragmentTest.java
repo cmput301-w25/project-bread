@@ -15,6 +15,7 @@ import android.location.LocationManager;
 import android.os.SystemClock;
 import android.util.Log;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -33,8 +34,10 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,14 +59,12 @@ import androidx.test.platform.app.InstrumentationRegistry;
 @LargeTest
 public class MapFragmentTest {
 
-    @Rule
-    public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
+    public ActivityScenario<HomePage> scenario;
 
     @BeforeClass
     public static void testSetup() {
-        String androidLocalHost = "10.0.2.2";
-        FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
-        FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
+        FirebaseEmulatorRule.initializeEmulators();
+
 
         try {
             Tasks.await(
@@ -145,6 +146,7 @@ public class MapFragmentTest {
         for (MoodEvent event : events) {
             moodEvents.document(event.getId()).set(event);
         }
+        scenario = ActivityScenario.launch(HomePage.class);
     }
 
     @Test
@@ -320,8 +322,10 @@ public class MapFragmentTest {
 
     @After
     public void tearDown() {
+        if (scenario != null) {
+            scenario.close();
+        }
         clearFirestoreEmulator();
-        clearAuthEmulator();
     }
 
     private void clearFirestoreEmulator() {
@@ -347,7 +351,8 @@ public class MapFragmentTest {
         }
     }
 
-    private void clearAuthEmulator() {
+    @AfterClass
+    public static void clearAuthEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"

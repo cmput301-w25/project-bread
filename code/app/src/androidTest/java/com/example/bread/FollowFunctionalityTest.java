@@ -1,46 +1,39 @@
 package com.example.bread;
 
+import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.closeSoftKeyboard;
 import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
-import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static androidx.test.espresso.matcher.RootMatchers.isPlatformPopup;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.containsString;
-import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
-import static androidx.test.espresso.Espresso.onData;
 import static org.hamcrest.Matchers.anything;
-import static androidx.test.espresso.matcher.RootMatchers.isPlatformPopup;
+import static org.hamcrest.Matchers.containsString;
+
+import android.util.Log;
 
 import androidx.test.core.app.ActivityScenario;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
-import android.util.Log;
-import android.view.View;
-
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
-import com.example.bread.view.LoginPage;
-import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
-import org.junit.Rule;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -50,7 +43,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
@@ -72,22 +64,11 @@ public class FollowFunctionalityTest {
     private static final String USER2_FIRST_NAME = "Test2";
     private static final String USER2_LAST_NAME = "User2";
 
-    @Rule
-    public ActivityScenarioRule<LoginPage> loginRule = new ActivityScenarioRule<>(LoginPage.class);
+    public ActivityScenario<HomePage> scenario;
 
     @BeforeClass
     public static void testSetup() {
-        String androidLocalHost = "10.0.2.2";
-        FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
-        FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
-
-        try {
-            clearFirestoreEmulator();
-            clearAuthEmulator();
-        } catch (Exception e) {
-            Log.e(TAG, "Error during cleanup", e);
-        }
-
+        FirebaseEmulatorRule.initializeEmulators();
         try {
             createTestUser(USER1_EMAIL, USER1_PASSWORD, USER1_USERNAME, USER1_FIRST_NAME, USER1_LAST_NAME);
             createTestUser(USER2_EMAIL, USER2_PASSWORD, USER2_USERNAME, USER2_FIRST_NAME, USER2_LAST_NAME);
@@ -129,7 +110,7 @@ public class FollowFunctionalityTest {
             Log.e(TAG, "Exception during user creation", e);
         }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestore db = new FirebaseService().getDb();
         Participant participant = new Participant();
         participant.setUsername(username);
         participant.setFirstName(firstName);
@@ -150,6 +131,8 @@ public class FollowFunctionalityTest {
         } catch (Exception e) {
             Log.e(TAG, "Exception during sign in", e);
         }
+
+        scenario = ActivityScenario.launch(HomePage.class);
     }
 
     @Test
@@ -530,11 +513,13 @@ public class FollowFunctionalityTest {
 
     @After
     public void tearDown() {
+        if (scenario != null) {
+            scenario.close();
+        }
         // Don't clear data after each test since we want state to persist between tests
         // Only clear at the end of all tests
         if (methodName().equals("test4_VerifyFeedAndFollowerStatus")) {
             clearFirestoreEmulator();
-            clearAuthEmulator();
         }
     }
 
@@ -563,7 +548,8 @@ public class FollowFunctionalityTest {
         }
     }
 
-    private static void clearAuthEmulator() {
+    @AfterClass
+    public static void clearAuthEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/" + projectId + "/accounts";
         try {

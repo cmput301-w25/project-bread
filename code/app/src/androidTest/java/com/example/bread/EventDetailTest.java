@@ -12,10 +12,12 @@ import static org.hamcrest.Matchers.anything;
 
 import android.util.Log;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.Comment;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
@@ -28,6 +30,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -46,14 +49,12 @@ import java.util.concurrent.ExecutionException;
 @LargeTest
 public class EventDetailTest {
 
-    @Rule
-    public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
+    public ActivityScenario<HomePage> scenario;
 
     @BeforeClass
     public static void testSetup() {
-        String androidLocalHost = "10.0.2.2";
-        FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
-        FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
+        FirebaseEmulatorRule.initializeEmulators();
+
 
         try {
             Tasks.await(
@@ -80,7 +81,7 @@ public class EventDetailTest {
     @Before
     public void seedDatabase() {
         // Seed the database with some mood events
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestore db = new FirebaseService().getDb();
         CollectionReference participants = db.collection("participants");
         Participant p1 = new Participant();
         p1.setUsername("testUser");
@@ -130,6 +131,7 @@ public class EventDetailTest {
             moodEvents.document(moodEvent2.getId()).collection("comments")
                     .document(comment.getId()).set(comment);
         }
+        scenario = ActivityScenario.launch(HomePage.class);
     }
 
     @Test
@@ -178,8 +180,10 @@ public class EventDetailTest {
 
     @After
     public void tearDown() {
+        if (scenario != null) {
+            scenario.close();
+        }
         clearFirestoreEmulator();
-        clearAuthEmulator();
     }
 
     private void clearFirestoreEmulator() {
@@ -205,7 +209,8 @@ public class EventDetailTest {
         }
     }
 
-    private void clearAuthEmulator() {
+    @AfterClass
+    public static void clearAuthEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"
