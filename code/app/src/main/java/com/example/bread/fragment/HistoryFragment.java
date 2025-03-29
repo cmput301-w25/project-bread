@@ -42,6 +42,7 @@ import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.ImageHandler;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
@@ -96,7 +97,7 @@ public class HistoryFragment extends Fragment {
         moodEventListView.setAdapter(moodArrayAdapter);
 
         // Set click listener for mood events
-        moodArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
+        moodArrayAdapter.setOnMoodEventClickListener(this::showEditMoodDialog);
 
         moodsRepo = new MoodEventRepository();
         userRepo = new ParticipantRepository();
@@ -228,72 +229,6 @@ public class HistoryFragment extends Fragment {
         selectedEvents.clear();  // Clear the selection after deletion
     }
 
-    /**
-     * Shows a dialog with the details of the selected mood event.
-     *
-     * @param moodEvent The mood event to show details for
-     */
-    private void showMoodDetailsDialog(MoodEvent moodEvent) {
-        if (getContext() == null) return;
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("View Mood");
-
-        // Inflate a custom layout for the dialog
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_mood_details, null);
-
-        // Set up the views
-        TextView emotionTextView = dialogView.findViewById(R.id.detail_emotion);
-        TextView dateTextView = dialogView.findViewById(R.id.detail_date);
-        TextView reasonTextView = dialogView.findViewById(R.id.detail_reason);
-        TextView socialSituationTextView = dialogView.findViewById(R.id.detail_social_situation);
-        ImageView moodImageView = dialogView.findViewById(R.id.mood_event_image);
-        TextView imageSelection = dialogView.findViewById(R.id.image_selection);
-
-        // Set the data
-        emotionTextView.setText(moodEvent.getEmotionalState().toString());
-
-        Date timestamp = moodEvent.getTimestamp();
-        //set the date if the timestamp is null to avoid nullpointer exception
-        if (timestamp == null){
-            dateTextView.setText("No date provided");
-        }
-        else {
-            SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
-            String dateString = formatter.format(timestamp);
-            dateTextView.setText(dateString);
-        }
-
-        // Set reason
-        reasonTextView.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "No reason provided");
-
-        // Set social situation
-        SocialSituation situation = moodEvent.getSocialSituation();
-        socialSituationTextView.setText(situation != null ? situation.toString() : "Not specified");
-
-        // Set image
-        String imageBase64 = moodEvent.getAttachedImage();
-        if (imageBase64 == null || imageBase64.isEmpty()) {
-            moodImageView.setVisibility(View.GONE);  // Hide if image not uploaded
-            imageSelection.setText("No image uploaded.");
-        } else {
-            Bitmap bitmap = ImageHandler.base64ToBitmap(imageBase64);
-            moodImageView.setImageBitmap(bitmap);
-            moodImageView.setVisibility(View.VISIBLE);  // Show when image is uploaded
-            imageSelection.setText("");
-        }
-
-        builder.setView(dialogView);
-        builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
-
-        // Add an Edit button
-        builder.setNeutralButton("Edit", (dialog, which) -> {
-            showEditMoodDialog(moodEvent);
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
 
     /**
      * Shows a dialog to edit the selected mood event.
@@ -304,18 +239,24 @@ public class HistoryFragment extends Fragment {
         if (getContext() == null) return;
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Edit Mood");
 
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_mood, null);
-        builder.setView(dialogView);
+        // Inflate the entire layout into a temporary ViewGroup.
+        ViewGroup outer = (ViewGroup) LayoutInflater.from(getContext())
+                .inflate(R.layout.dialog_edit_mood, null, false);
+        MaterialCardView cardView = outer.findViewById(R.id.editMoodCard);
 
-        EditText titleEditText = dialogView.findViewById(R.id.edit_title);
-        EditText reasonEditText = dialogView.findViewById(R.id.edit_reason);
-        Spinner emotionSpinner = dialogView.findViewById(R.id.edit_emotion_spinner);
-        Spinner socialSituationSpinner = dialogView.findViewById(R.id.edit_social_situation_spinner);
-        editImage = dialogView.findViewById(R.id.image_edit_button);
-        Button deleteImageButton = dialogView.findViewById(R.id.delete_image_button);
+        outer.removeView(cardView);
+        builder.setView(cardView);
 
+        // Now, use 'cardView' to reference your UI elements.
+        EditText titleEditText = cardView.findViewById(R.id.edit_title);
+        EditText reasonEditText = cardView.findViewById(R.id.edit_reason);
+        Spinner emotionSpinner = cardView.findViewById(R.id.edit_emotion_spinner);
+        Spinner socialSituationSpinner = cardView.findViewById(R.id.edit_social_situation_spinner);
+        editImage = cardView.findViewById(R.id.image_edit_button);
+        ImageButton deleteImageButton = cardView.findViewById(R.id.delete_image_button);
+
+        // Populate the fields.
         titleEditText.setText(moodEvent.getTitle() != null ? moodEvent.getTitle() : "");
         reasonEditText.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "");
         imageBase64 = moodEvent.getAttachedImage();
@@ -328,9 +269,10 @@ public class HistoryFragment extends Fragment {
         emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         emotionSpinner.setAdapter(emotionAdapter);
 
-        if (moodEvent.getAttachedImage() != null) {
-            // If image already assigned it is displayed on image button, and blank if not
+        if (moodEvent.getAttachedImage() != null && !moodEvent.getAttachedImage().isEmpty()) {
             editImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
+        } else {
+            editImage.setImageResource(R.drawable.camera_icon);
         }
 
         if (moodEvent.getEmotionalState() != null) {
@@ -349,7 +291,7 @@ public class HistoryFragment extends Fragment {
             socialSituationSpinner.setSelection(socialAdapter.getPosition(moodEvent.getSocialSituation()));
         }
 
-        // Calls pickImage() when user chooses to change their image
+        // Set up image picking.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2) {
             editImage.setOnClickListener(v -> pickImage());
         }
@@ -360,46 +302,15 @@ public class HistoryFragment extends Fragment {
             editImage.setImageResource(R.drawable.camera_icon);
         });
 
-        // **Validation Listeners**
-        titleEditText.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                String titleText = titleEditText.getText().toString().trim();
-                if (titleText.isEmpty()) {
-                    titleEditText.setError("Title cannot be empty");
-                } else {
-                    titleEditText.setError(null);
-                }
-            }
-        });
-
-        reasonEditText.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                String reasonText = reasonEditText.getText().toString().trim();
-                if (!reasonText.isEmpty()) { // Only validate if reason is provided
-                    int charCount = reasonText.length();
-                    int wordCount = reasonText.split("\\s+").length;
-
-                    if (charCount > 20 || wordCount > 3) {
-                        reasonEditText.setError("Reason must be 20 characters or fewer and 3 words or fewer");
-                    } else {
-                        reasonEditText.setError(null);
-                    }
-                } else {
-                    reasonEditText.setError(null);
-                }
-            }
-        });
-
-        // **Override Save Button to Enforce Validation**
-        builder.setPositiveButton("Save", null); // We override it later to prevent closing
-        builder.setNegativeButton("Cancel", (d, which) -> d.dismiss());
+        Button updateButton = cardView.findViewById(R.id.saveButton);
+        Button cancelButton = cardView.findViewById(R.id.cancelButton);
 
         AlertDialog dialog = builder.create();
         dialog.show();
 
-        // **Override the Save Button Behavior**
-        Button saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        saveButton.setOnClickListener(v -> {
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
+
+        updateButton.setOnClickListener(v -> {
             boolean isValid = true;
 
             // Get values from inputs
@@ -429,11 +340,9 @@ public class HistoryFragment extends Fragment {
             }
 
             if (!isValid) {
-                // **Do not close the dialog if validation fails**
                 return;
             }
 
-            // **Only save if all validations passed**
             moodEvent.setTitle(newTitle);
             moodEvent.setEmotionalState(newEmotionalState);
             moodEvent.setReason(newReason);
@@ -442,16 +351,15 @@ public class HistoryFragment extends Fragment {
 
             int indexOfMood = moodEventArrayList.indexOf(moodEvent);
             if (indexOfMood >= 0) {
-                    moodEventArrayList.set(indexOfMood, moodEvent);
-
-                    int allEventIndex = allMoodEvents.indexOf(moodEvent);
-                    if (allEventIndex >= 0) {
-                        allMoodEvents.set(allEventIndex, moodEvent);
-                    }
-                    moodArrayAdapter.notifyDataSetChanged();
+                moodEventArrayList.set(indexOfMood, moodEvent);
+                int allEventIndex = allMoodEvents.indexOf(moodEvent);
+                if (allEventIndex >= 0) {
+                    allMoodEvents.set(allEventIndex, moodEvent);
+                }
+                moodArrayAdapter.notifyDataSetChanged();
             }
 
-            // Save to Firebase
+            // Save to Firebase.
             moodsRepo.updateMoodEvent(moodEvent,
                     aVoid -> {
                         if (isAdded() && getActivity() != null) {
@@ -461,7 +369,7 @@ public class HistoryFragment extends Fragment {
                                 }
                             });
                         }
-                        dialog.dismiss(); // Close the dialog only after a successful save
+                        dialog.dismiss();
                     },
                     e -> {
                         if (isAdded() && getActivity() != null) {
@@ -474,8 +382,6 @@ public class HistoryFragment extends Fragment {
                         }
                     }
             );
-            Toast.makeText(getContext(),"Mood updated successfully",Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
         });
     }
     // Edit / add image related functions
