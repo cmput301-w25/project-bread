@@ -288,7 +288,7 @@ public class MoodEventRepository {
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radius * 1000);
         final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
         for (GeoQueryBounds b : bounds) {
-            Query q = getMoodEventCollRef().orderBy("geoInfo.geohash").startAt(b.startHash).endAt(b.endHash);
+            Query q = getMoodEventCollRef().whereEqualTo("visibility", MoodEvent.Visibility.PUBLIC).orderBy("geoInfo.geohash").startAt(b.startHash).endAt(b.endHash);
             tasks.add(q.get());
         }
 

@@ -20,6 +20,9 @@ import static org.hamcrest.Matchers.is;
 import android.util.Log;
 
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.filters.LargeTest;
+
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -36,6 +39,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -47,6 +51,8 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
+@RunWith(AndroidJUnit4.class)
+@LargeTest
 public class MoodEventAddTest {
 
     @Rule
@@ -271,56 +277,54 @@ public class MoodEventAddTest {
         Thread.sleep(3000);
         onView(withId(R.id.eventTitleEditText)).check(matches(isDisplayed()));
     }
+    @After
+    public void tearDownAuth() {
+        String projectId = BuildConfig.FIREBASE_PROJECT_ID;
+        URL url = null;
+        try {
+            url = new URL("http://10.0.2.2:9099/emulator/v1/projects/"+projectId+"/accounts");
+        } catch (MalformedURLException exception) {
+            Log.e("URL Error", Objects.requireNonNull(exception.getMessage()));
+        }
+        HttpURLConnection urlConnection = null;
+        try {
+            assert url != null;
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("DELETE");
+            int response = urlConnection.getResponseCode();
+            Log.i("Response Code", "Response Code: " + response);
+        } catch (IOException exception) {
+            Log.e("IO Error", Objects.requireNonNull(exception.getMessage()));
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
+        }
+    }
 
     @After
-    public void tearDown() {
-        clearFirestoreEmulator();
-        clearAuthEmulator();
-    }
-
-    private void clearFirestoreEmulator() {
+    public void tearDownDb() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
-        String firestoreUrl = "http://10.0.2.2:8080/emulator/v1/projects/"
-                + projectId
-                + "/databases/(default)/documents";
-
-        HttpURLConnection connection = null;
+        URL url = null;
         try {
-            URL url = new URL(firestoreUrl);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("DELETE");
-
-            int responseCode = connection.getResponseCode();
-            Log.i("tearDown", "Cleared Firestore emulator, response code: " + responseCode);
-        } catch (IOException e) {
-            Log.e("tearDown", "Error clearing Firestore emulator", e);
+            url = new URL("http://10.0.2.2:8080/emulator/v1/projects/"+projectId+"/databases/(default)/documents");
+        } catch (MalformedURLException exception) {
+            Log.e("URL Error", Objects.requireNonNull(exception.getMessage()));
+        }
+        HttpURLConnection urlConnection = null;
+        try {
+            assert url != null;
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("DELETE");
+            int response = urlConnection.getResponseCode();
+            Log.i("Response Code", "Response Code: " + response);
+        } catch (IOException exception) {
+            Log.e("IO Error", Objects.requireNonNull(exception.getMessage()));
         } finally {
-            if (connection != null) {
-                connection.disconnect();
+            if (urlConnection != null) {
+                urlConnection.disconnect();
             }
         }
     }
 
-    private void clearAuthEmulator() {
-        String projectId = BuildConfig.FIREBASE_PROJECT_ID;
-        String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"
-                + projectId
-                + "/accounts";
-
-        HttpURLConnection connection = null;
-        try {
-            URL url = new URL(authUrl);
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("DELETE");
-
-            int responseCode = connection.getResponseCode();
-            Log.i("tearDown", "Cleared Auth emulator users, response code: " + responseCode);
-        } catch (IOException e) {
-            Log.e("tearDown", "Error clearing Auth emulator", e);
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-    }
 }
