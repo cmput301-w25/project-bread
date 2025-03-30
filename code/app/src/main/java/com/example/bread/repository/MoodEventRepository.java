@@ -152,6 +152,7 @@ public class MoodEventRepository {
                 for (String followingUsername : following) {
                     getMoodEventCollRef()
                             .whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                            .whereEqualTo("visibility", MoodEvent.Visibility.PUBLIC) // Add visibility filter
                             .orderBy("timestamp", Query.Direction.DESCENDING)
                             .limit(MAX_EVENTS_PER_USER)
                             .get(Source.CACHE)
@@ -165,7 +166,7 @@ public class MoodEventRepository {
                                     }
                                 }
 
-                                Log.d(TAG, "Successfully fetched " + moodEvents.size() + " events for " + followingUsername + " from CACHE");
+                                Log.d(TAG, "Successfully fetched " + moodEvents.size() + " public events for " + followingUsername + " from CACHE");
 
                                 synchronized (allMoodEvents) {
                                     allMoodEvents.addAll(moodEvents);
@@ -178,7 +179,7 @@ public class MoodEventRepository {
                                 }
                             })
                             .addOnFailureListener(e -> {
-                                Log.e(TAG, "Failed to fetch events for " + followingUsername + " from CACHE: " + e.getMessage());
+                                Log.e(TAG, "Failed to fetch public events for " + followingUsername + " from CACHE: " + e.getMessage());
 
                                 if (queriesRemaining.decrementAndGet() == 0) {
                                     onSuccessListener.onSuccess(allMoodEvents);
@@ -201,6 +202,7 @@ public class MoodEventRepository {
                 for (String followingUsername : following) {
                     getMoodEventCollRef()
                             .whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                            .whereEqualTo("visibility", MoodEvent.Visibility.PUBLIC) // Add visibility filter
                             .orderBy("timestamp", Query.Direction.DESCENDING)
                             .limit(MAX_EVENTS_PER_USER)
                             .get(Source.DEFAULT)
@@ -229,6 +231,7 @@ public class MoodEventRepository {
 
                                 getMoodEventCollRef()
                                         .whereEqualTo("participantRef", participantRepository.getParticipantRef(followingUsername))
+                                        .whereEqualTo("visibility", MoodEvent.Visibility.PUBLIC) // Add visibility filter
                                         .orderBy("timestamp", Query.Direction.DESCENDING)
                                         .limit(MAX_EVENTS_PER_USER)
                                         .get(Source.CACHE)
@@ -285,7 +288,7 @@ public class MoodEventRepository {
         List<GeoQueryBounds> bounds = GeoFireUtils.getGeoHashQueryBounds(center, radius * 1000);
         final List<Task<QuerySnapshot>> tasks = new ArrayList<>();
         for (GeoQueryBounds b : bounds) {
-            Query q = getMoodEventCollRef().orderBy("geoInfo.geohash").startAt(b.startHash).endAt(b.endHash);
+            Query q = getMoodEventCollRef().whereEqualTo("visibility", MoodEvent.Visibility.PUBLIC).orderBy("geoInfo.geohash").startAt(b.startHash).endAt(b.endHash);
             tasks.add(q.get());
         }
 

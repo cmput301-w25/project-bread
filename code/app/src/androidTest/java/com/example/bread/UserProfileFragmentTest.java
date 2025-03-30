@@ -1,26 +1,28 @@
 package com.example.bread;
 
-import static androidx.test.espresso.Espresso.onData;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
-import static androidx.test.espresso.action.ViewActions.typeText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.hasDescendant;
+import static androidx.test.espresso.matcher.ViewMatchers.isDescendantOfA;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.matcher.ViewMatchers.withParent;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.Matchers.anything;
+
+import static org.hamcrest.CoreMatchers.allOf;
 
 import android.util.Log;
 
-import androidx.test.core.app.ActivityScenario;
+import androidx.test.espresso.action.ViewActions;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
 import com.example.bread.firebase.FirebaseService;
-import com.example.bread.model.Comment;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
+import com.example.bread.utils.EmotionUtils;
 import com.example.bread.view.HomePage;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,8 +31,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -41,20 +43,20 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-public class EventDetailTest {
+public class UserProfileFragmentTest {
 
-    public ActivityScenario<HomePage> scenario;
+    @Rule
+    public ActivityScenarioRule<HomePage> activityScenarioRule = new ActivityScenarioRule<>(HomePage.class);
 
     @BeforeClass
     public static void testSetup() {
         FirebaseEmulatorRule.initializeEmulators();
-
 
         try {
             Tasks.await(
@@ -88,27 +90,44 @@ public class EventDetailTest {
 
         DocumentReference p1Ref = participants.document("testUser");
         p1Ref.set(p1);
+
+        Participant p2 = new Participant();
+        p2.setUsername("testUser2");
+        DocumentReference p2Ref = participants.document("testUser2");
+        p2Ref.set(p2);
+
+        Participant p3 = new Participant();
+        p3.setUsername("testUser3");
+        DocumentReference p3Ref = participants.document("testUser3");
+        p3Ref.set(p3);
+
         p1Ref.collection("following").document("testUser2").set(new HashMap<>() {
             {
                 put("username", "testUser2");
             }
         });
-
-        Participant p2 = new Participant();
-        p2.setUsername("testUser2");
-
-        DocumentReference p2Ref = participants.document("testUser2");
-        p2Ref.set(p2);
         p2Ref.collection("followers").document("testUser").set(new HashMap<>() {
             {
                 put("username", "testUser");
             }
         });
 
-        MoodEvent moodEvent1 = new MoodEvent("Test Event 1", "test reason", MoodEvent.EmotionalState.HAPPY, p2Ref);
+        p2Ref.collection("following").document("testUser").set(new HashMap<>() {
+            {
+                put("username", "testUser");
+            }
+        });
+        p1Ref.collection("followers").document("testUser2").set(new HashMap<>() {
+            {
+                put("username", "testUser2");
+            }
+        });
+
+        MoodEvent moodEvent1 = new MoodEvent("Test Event 1", "test reason 1", MoodEvent.EmotionalState.HAPPY, p2Ref);
         moodEvent1.setSocialSituation(MoodEvent.SocialSituation.ALONE);
-        MoodEvent moodEvent2 = new MoodEvent("Test Event 2", "test reason", MoodEvent.EmotionalState.ANGRY, p2Ref);
-        moodEvent2.setSocialSituation(MoodEvent.SocialSituation.WITH_FRIENDS);
+
+        MoodEvent moodEvent2 = new MoodEvent("Test Event 2", "test reason 2", MoodEvent.EmotionalState.SAD, p2Ref);
+        moodEvent2.setSocialSituation(MoodEvent.SocialSituation.ALONE);
 
         CollectionReference moodEvents = db.collection("moodEvents");
         MoodEvent[] events = {
@@ -118,72 +137,101 @@ public class EventDetailTest {
         for (MoodEvent event : events) {
             moodEvents.document(event.getId()).set(event);
         }
-
-        Comment comment1 = new Comment(p1Ref, "test comment 1");
-        Comment comment2 = new Comment(p1Ref, "test comment 2");
-
-        for (Comment comment : List.of(comment1, comment2)) {
-            moodEvents.document(moodEvent1.getId()).collection("comments")
-                    .document(comment.getId()).set(comment);
-        }
-
-        for (Comment comment : List.of(comment1, comment2)) {
-            moodEvents.document(moodEvent2.getId()).collection("comments")
-                    .document(comment.getId()).set(comment);
-        }
-        scenario = ActivityScenario.launch(HomePage.class);
     }
 
     @Test
-    public void testEventDetailOpens() {
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public void testNotFollowingUser() throws InterruptedException {
+        // Navigate to a user we do not follow through the search bar
+        Thread.sleep(1000);
+        onView(withId(R.id.search_button)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.search_edit_text)).perform(ViewActions.typeText("test"));
+        Thread.sleep(2000);
+        onView(withText("testUser3")).perform(click());
+        Thread.sleep(2000);
+        onView(withText("testUser3")).check(matches(isDisplayed()));
 
-        onData(anything()).inAdapterView(withId(R.id.homeListView)).atPosition(0).perform(click());
-
-        // Check that the event detail dialog is displayed
-        onView(withId(R.id.event_title)).check(matches(isDisplayed()));
-        onView(withId(R.id.emotional_state_text)).check(matches(isDisplayed()));
-        onView(withId(R.id.social_situation_text)).check(matches(isDisplayed()));
-        onView(withId(R.id.reason_text)).check(matches(isDisplayed()));
-        onView(withText("test comment 1")).check(matches(isDisplayed()));
-        onView(withText("test comment 2")).check(matches(isDisplayed()));
+        // Ensure proper NOT FOLLOWED user UI appears and that follow request works
+        onView(withText("Follow")).check(matches(isDisplayed()));
+        onView(withId(R.id.follow_button)).perform(click());
+        Thread.sleep(2000);
+        onView(withText("Requested")).check(matches(isDisplayed()));
     }
 
     @Test
-    public void testEventDetailsCommentDialog() {
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+    public void testFollowingUser() throws InterruptedException {
+        // Navigate to a user we follow through the search bar
+        Thread.sleep(1000);
+        onView(withId(R.id.search_button)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.search_edit_text)).perform(ViewActions.typeText("test"));
+        Thread.sleep(2000);
+        onView(Matchers.allOf(withId(R.id.follow_username_text), withText("testUser2"),
+                isDisplayed()
+        )).perform(click());
 
-        onData(anything()).inAdapterView(withId(R.id.homeListView)).atPosition(0).perform(click());
-        onView(withId(R.id.add_comment_fab)).perform(click());
-        onView(withId(R.id.comment_edit_text)).check(matches(isDisplayed()));
-        onView(withId(R.id.add_comment_button)).check(matches(isDisplayed()));
+        // Ensure proper FOLLOWED user information appears
+        Thread.sleep(3000);
+        onView(withText("Recents")).check(matches(isDisplayed()));
+        onView(withText("Sad " + EmotionUtils.getEmoticon(MoodEvent.EmotionalState.SAD))).check(matches(isDisplayed()));
+    }
 
-        onView(withId(R.id.comment_edit_text)).perform(typeText("test comment 3"));
-        onView(withId(R.id.add_comment_button)).perform(click());
+    @Test
+    public void testFollowerList() throws InterruptedException {
+        // Navigate to one of our followers
+        Thread.sleep(1000);
+        onView(withId(R.id.profile)).perform(click());
+        Thread.sleep(2000);
+        onView(withId(R.id.followers_layout)).perform(click());
+        Thread.sleep(2000);
+        onView(withText("testUser2")).perform(click());
+        Thread.sleep(2000);
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        // Ensuring proper follower information appears
+        onView(withText("Recents")).check(matches(isDisplayed()));
+        onView(withText("Sad " + EmotionUtils.getEmoticon(MoodEvent.EmotionalState.SAD))).check(matches(isDisplayed()));
+    }
 
-        onView(withText("test comment 3")).check(matches(isDisplayed()));
+    @Test
+    public void testFollowingList() throws InterruptedException {
+        // Navigate to a user we are following
+        Thread.sleep(1000);
+        onView(withId(R.id.profile)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.following_layout)).perform(click());
+        Thread.sleep(2000);
+        onView(withText("testUser2")).perform(click());
+        Thread.sleep(2000);
+
+        // Ensure we can see their recent mood
+        onView(withText("Recents")).check(matches(isDisplayed()));
+        onView(withText("Sad " + EmotionUtils.getEmoticon(MoodEvent.EmotionalState.SAD))).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testReturnUserToSelf() throws InterruptedException {
+        // Navigate to a different user first
+        Thread.sleep(1000);
+        onView(withId(R.id.profile)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.following_layout)).perform(click());
+        Thread.sleep(2000);
+        onView(withText("testUser2")).perform(click());
+        Thread.sleep(2000);
+
+        // Navigate back to current user
+        onView(withId(R.id.following_layout)).perform(click());
+        onView(withText("testUser")).perform(click());
+        Thread.sleep(1000);
+
+        // Only current user can view requests so we check for this
+        onView(withText("Requests")).check(matches(isDisplayed()));
     }
 
     @After
     public void tearDown() {
-        if (scenario != null) {
-            scenario.close();
-        }
         clearFirestoreEmulator();
+        clearAuthEmulator();
     }
 
     private void clearFirestoreEmulator() {
@@ -209,8 +257,7 @@ public class EventDetailTest {
         }
     }
 
-    @AfterClass
-    public static void clearAuthEmulator() {
+    private void clearAuthEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"

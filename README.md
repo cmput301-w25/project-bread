@@ -27,6 +27,57 @@
 2. [Step 2]
 3. [Step 3]
 
+## Test Instructions
+
+To run the tests make sure that you have `google-services.json` file in your `code/app` directory
+
+Add `GOOGLE_MAPS_API_KEY` in your `local.properties`
+
+Set `FIREBASE_PROJECT_ID` as `testdb-123` in your `local.properties` file, and gradle sync the project
+
+Override `project_id` in `google-services.json` file as `testdb-123`
+
+(Both the secrets are available in the team discord)
+
+Before you can run the tests make sure that you have firebase emulators running. To start the emulator:
+```
+firebase emulators:start --project testdb-123
+```
+This will launch emulators for firestore and FirebaseAuth that are required to run Android UI tests
+
+After all these steps are complete and the build is successful you can run the tests by going into `code` directory:
+
+To run Android tests:
+```
+./gradlew connectedAndroidTest
+```
+
+To run Unit tests:
+```
+./gradlew test
+```
+If the above steps doesn't execute the tests, you can open the `code` directory in Android Studio and run the tests manually
+to achieve the same result.
+
+While testing we have found that UI tests can be flaky sometimes and might require re-runs.
+
+### Extra Setup
+
+To run the `MapFragmentTest` it is required that Sentio is selected as mock location app in developer settings.
+
+Follow these steps to make sure that test runs:
+1. Enable Developer options on your Android device/Emulator
+2. Goto Settings -> Developer Options -> Select mock location app (pick Sentio) (Requires a app build to be present on device first)
+
+OR
+
+execute this command if you have adb installed:
+```
+adb shell appops set com.example.bread android:mock_location allow
+```
+
+After this setup process map ui tests should pass as expected and we have verified these steps to work.
+
 ## Documentation
 
 - https://github.com/cmput301-w25/project-bread/wiki

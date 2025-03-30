@@ -1,15 +1,15 @@
 package com.example.bread.controller;
 
+import android.graphics.Paint;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.bread.R;
 import com.example.bread.model.Participant;
 import com.example.bread.repository.ParticipantRepository;
@@ -59,6 +59,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
     public interface UserInteractionListener {
         void onFollowClick(Participant participant);
+        void onUserClick(Participant participant);
     }
 
     class UserViewHolder extends RecyclerView.ViewHolder {
@@ -69,7 +70,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
             profileImage = itemView.findViewById(R.id.profile_image);
-            usernameText = itemView.findViewById(R.id.username_text);
+
+            usernameText = itemView.findViewById(R.id.follow_username_text);
+            usernameText.setPaintFlags(usernameText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
             nameText = itemView.findViewById(R.id.name_text);
             followButton = itemView.findViewById(R.id.follow_button);
         }
@@ -102,6 +106,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                     }
                 });
             }
+
+            usernameText.setOnClickListener(v -> {
+                listener.onUserClick(participant);
+            });
         }
 
         private void updateFollowButtonState(Participant participant) {

@@ -79,18 +79,9 @@ public class HomePage extends AppCompatActivity {
             } else if (itemId == R.id.map) {
                 replaceFragment(new MapFragment());
             } else if (itemId == R.id.add) {
-                // Different approaches in the two versions:
-                // 1. Your branch: Starts AddMoodEventActivity
-                // 2. Main branch: Uses AddMoodEventFragment
-                // We'll use the fragment approach from main:
-                replaceFragment(new AddMoodEventFragment());
-
-                // If you need the activity approach, uncomment these lines:
-                /*
-                Intent intent = new Intent(HomePage.this, AddMoodEventActivity.class);
-                startActivity(intent);
-                return false; // Don't select the tab
-                */
+                AddMoodEventFragment dialogFragment = new AddMoodEventFragment();
+                dialogFragment.show(getSupportFragmentManager(), "AddMoodEventFragment");
+                return true; // Keep the current fragment (e.g., HomeFragment) displayed
             } else if (itemId == R.id.history) {
                 replaceFragment(new HistoryFragment());
             } else if (itemId == R.id.profile) {

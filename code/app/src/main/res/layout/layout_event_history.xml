@@ -132,6 +132,7 @@
                     android:scaleType="centerCrop" />
             </androidx.cardview.widget.CardView>
 
+
             <ImageView
                 android:id="@+id/visibility_icon"
                 android:layout_width="24dp"
