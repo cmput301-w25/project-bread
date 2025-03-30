@@ -47,7 +47,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -62,15 +61,14 @@ import java.util.Set;
 public class HistoryFragment extends Fragment {
 
     private static final String TAG = "HistoryFragment";
-    private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
     private HistoryMoodEventArrayAdapter moodArrayAdapter;
-
-    private MoodEventRepository moodsRepo;
-    private ParticipantRepository userRepo;
+    private ListView moodEventListView;
+    private MoodEventRepository moodEventRepository;
+    private ParticipantRepository participantRepository;
     private Set<MoodEvent> selectedEvents = new HashSet<>();
 
-    private String username;
+    private String currentUsername;
     private DocumentReference participantRef;
 
     // Image related variables
@@ -95,13 +93,8 @@ public class HistoryFragment extends Fragment {
         moodArrayAdapter = new HistoryMoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodArrayAdapter);
 
-        // Set click listener for mood events
-        moodArrayAdapter.setOnMoodEventClickListener(this::showEditMoodDialog);
-
-        moodsRepo = new MoodEventRepository();
-        userRepo = new ParticipantRepository();
-
-        fetchParticipantAndLoadEvents();
+        moodEventRepository = new MoodEventRepository();
+        participantRepository = new ParticipantRepository();
 
         FloatingActionButton deleteButton = view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
@@ -128,7 +121,8 @@ public class HistoryFragment extends Fragment {
         if (filterButton != null) {
             filterButton.setOnClickListener(v -> showFilterDialog());
         }
-
+        moodArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
+        fetchParticipantAndLoadEvents();
         // Image editing, required to ensure it is available throughout whole lifecycle
         registerResult();
 
@@ -143,12 +137,12 @@ public class HistoryFragment extends Fragment {
     private void fetchParticipantAndLoadEvents() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
-            username = currentUser.getDisplayName();
-            if (username == null) {
+            currentUsername = currentUser.getDisplayName();
+            if (currentUsername == null) {
                 Log.e(TAG, "Username is null. Cannot load mood events.");
                 return;
             }
-            participantRef = userRepo.getParticipantRef(username);
+            participantRef = participantRepository.getParticipantRef(currentUsername);
             loadMoodEvents();
         } else {
             Log.e(TAG, "No authenticated user found.");
@@ -162,7 +156,7 @@ public class HistoryFragment extends Fragment {
      * Sorts mood events by date and time added
      */
     private void loadMoodEvents() {
-        moodsRepo.fetchEventsWithParticipantRef(participantRef, moodEvents -> {
+        moodEventRepository.fetchEventsWithParticipantRef(participantRef, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
@@ -187,6 +181,23 @@ public class HistoryFragment extends Fragment {
                     Log.e("History Fragment", "Failed to listen for mood events", error);
                 });
     }
+
+    /**
+     * Shows detailed view for a selected mood event
+     *
+     * @param moodEvent The selected mood event
+     */
+    private void showMoodDetailsDialog(MoodEvent moodEvent) {
+        EventDetail fragment = EventDetail.newInstance(moodEvent);
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+        );
+        transaction.add(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
 
     /**
      * Displays a confirmation dialog asking the user if they want to delete the selected mood events.
@@ -231,9 +242,6 @@ public class HistoryFragment extends Fragment {
         Toast.makeText(getContext(), deleteCount + " event deleted", Toast.LENGTH_SHORT).show();// just for logcat check
         selectedEvents.clear();  // Clear the selection after deletion
     }
-
-
-
 
     /**
      * Shows a dialog to edit the selected mood event.
@@ -371,7 +379,7 @@ public class HistoryFragment extends Fragment {
             }
 
             // Save to Firebase.
-            moodsRepo.updateMoodEvent(moodEvent,
+            moodEventRepository.updateMoodEvent(moodEvent,
                     aVoid -> {
                         if (isAdded() && getActivity() != null) {
                             getActivity().runOnUiThread(() -> {

@@ -28,25 +28,31 @@
             android:padding="12dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.0">
 
             <!-- Profile Image -->
 
             <!-- Username -->
 
             <!-- Date -->
+
+            <!-- Reason / Title -->
+
             <TextView
                 android:id="@+id/date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="4dp"
                 android:text="DD/MM/YYYY"
                 android:textColor="@android:color/white"
                 android:textSize="12sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textMood" />
 
-            <!-- Reason / Title -->
             <TextView
                 android:id="@+id/history_title_text"
                 android:layout_width="0dp"
@@ -59,11 +65,43 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <!-- Mood Label -->
+
+            <!-- Emoticon -->
+
+            <!-- Optional Checkbox (if still needed) -->
+
+            <CheckBox
+                android:id="@+id/checkbox"
+                android:layout_width="39dp"
+                android:layout_height="39dp"
+                android:layout_marginTop="1dp"
+                app:layout_constraintBottom_toTopOf="@+id/textMood"
+                app:layout_constraintEnd_toStartOf="@+id/event_home_image_holder"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/history_title_text"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <TextView
+                android:id="@+id/history_social_situation_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="40dp"
+                android:background="@drawable/flair_background"
+                android:paddingHorizontal="8dp"
+                android:paddingVertical="4dp"
+                android:text="Social Situation"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"
+                app:layout_constraintStart_toEndOf="@+id/textMood"
+                app:layout_constraintTop_toBottomOf="@id/history_title_text" />
+
             <TextView
                 android:id="@+id/textMood"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="40dp"
                 android:background="@drawable/flair_background"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
@@ -73,33 +111,25 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/history_title_text" />
 
-            <!-- Emoticon -->
-            <TextView
-                android:id="@+id/history_social_situation_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/flair_background"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:text="Social Situation"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                app:layout_constraintStart_toEndOf="@id/textMood"
-                app:layout_constraintTop_toBottomOf="@id/history_title_text" />
-
-            <!-- Optional Checkbox (if still needed) -->
-            <CheckBox
-                android:id="@+id/checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toBottomOf="@+id/history_social_situation_text"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/event_home_image_holder"
+                android:layout_width="60dp"
+                android:layout_height="58dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="2dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.986"
+                app:layout_constraintHorizontal_bias="0.97"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/history_social_situation_text"
-                app:layout_constraintVertical_bias="0.642" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.72">
+
+                <ImageView
+                    android:id="@+id/event_home_image"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop" />
+            </androidx.cardview.widget.CardView>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
