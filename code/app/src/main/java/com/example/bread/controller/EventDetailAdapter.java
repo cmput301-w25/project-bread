@@ -102,7 +102,7 @@ public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 socialSituationText.setText(event.getSocialSituation().toString());
                 socialSituationText.setVisibility(View.VISIBLE);
             } else {
-                socialSituationText.setVisibility(View.GONE);
+                socialSituationText.setVisibility(View.INVISIBLE);
             }
             reasonText.setText(event.getReason());
             if (event.getAttachedImage() != null) {
