@@ -274,6 +274,15 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
                 moodEventRepository.fetchForEventsFromFollowing(username, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
+
+                        if (moodEvents.isEmpty()) {
+                            // Inject a placeholder mood event to show empty view
+                            MoodEvent sampleEvent = new MoodEvent("Follow users to see their moods!", "", MoodEvent.EmotionalState.NEUTRAL, null);
+                            sampleEvent.setTimestamp(new Date());
+                            sampleEvent.setSocialSituation(MoodEvent.SocialSituation.ALONE);
+                            moodEventArrayList.add(sampleEvent);
+                        }
+
                         moodEventArrayList.addAll(moodEvents);
                         moodEventArrayList.sort(Comparator.reverseOrder());
 

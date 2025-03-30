@@ -108,7 +108,7 @@ public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
             }
 
             convertView.setOnClickListener(v -> {
-                if (clickListener != null) {
+                if (clickListener != null && moodEvent.getParticipantRef() != null) {
                     clickListener.onMoodEventClick(moodEvent);
                 }
             });

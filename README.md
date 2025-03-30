@@ -45,7 +45,7 @@ Add `GOOGLE_MAPS_API_KEY` in your `local.properties`
 
 (Both secrets are available in the team discord)
 
-It is preferred that you use `Medium Phone API 35` with `Android 15 (VanillaIceCream)` to acheieve the best and most identical results, as all of our work
+It is preferred that you use `Medium Phone API 35` with `Android 15 (VanillaIceCream)` to achieve the best and most identical results, as all of our work
 and testing is done on that specific emulator.
 
 ## Test Instructions
