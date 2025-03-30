@@ -358,7 +358,6 @@ public class UserProfileFragment extends Fragment {
         super.onResume();
         // Refresh data when returning to this fragment
         fetchParticipantData();
-//        loadRecentMoodEvent();
     }
 
     @Override
