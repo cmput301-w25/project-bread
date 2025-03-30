@@ -15,9 +15,12 @@ import static org.hamcrest.Matchers.is;
 
 import android.util.Log;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
+
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -28,6 +31,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -45,16 +49,13 @@ import java.util.concurrent.ExecutionException;
 @LargeTest
 public class MoodEventAddTest {
 
-
-    @Rule
-    public ActivityScenarioRule<HomePage> activityRule = new ActivityScenarioRule<>(HomePage.class);
+    public ActivityScenario<HomePage> scenario;
 
     @BeforeClass
     public static void testSetup() {
         // Connecting to emulators and creating test participant
-        String androidLocalHost = "10.0.2.2";
-        FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
-        FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
+        FirebaseEmulatorRule.initializeEmulators();
+
 
         try {
             Tasks.await(
@@ -76,17 +77,19 @@ public class MoodEventAddTest {
         } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
 
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+    @Before
+    public void navigateToAddTab() {
+        FirebaseFirestore db = new FirebaseService().getDb();
         CollectionReference participants = db.collection("participants");
         Participant p1 = new Participant();
         p1.setUsername("testUserRandom");
         DocumentReference p1Ref = participants.document("testUserRandom");
         p1Ref.set(p1);
-    }
 
-    @Before
-    public void navigateToAddTab() {
+        scenario = ActivityScenario.launch(HomePage.class);
+
         // Navigate to the "add" tab
         onView(withId(R.id.add)).perform(click());
         onIdle(); // Wait for UI to settle
@@ -200,8 +203,8 @@ public class MoodEventAddTest {
         onView(withId(R.id.eventTitleEditText)).check(matches(isDisplayed()));
     }
 
-    @After
-    public void tearDownAuth() {
+    @AfterClass
+    public static void tearDownAuth() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         URL url = null;
         try {
@@ -227,6 +230,10 @@ public class MoodEventAddTest {
 
     @After
     public void tearDownDb() {
+        if (scenario != null) {
+            scenario.close();
+        }
+
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         URL url = null;
         try {
