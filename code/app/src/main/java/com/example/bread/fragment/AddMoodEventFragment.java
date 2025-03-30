@@ -289,33 +289,34 @@ public class AddMoodEventFragment extends DialogFragment {
             Log.d(TAG, "No location attached (chip unchecked or location null)");
         }
 
-        // Save to Firebase
+
+        if (isAdded() && getActivity() != null) {
+            // Navigate back to HomeFragment
+            requireActivity().getSupportFragmentManager()
+                    .beginTransaction().setCustomAnimations(
+                            R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+                    )
+                    .replace(R.id.frame_layout, new HomeFragment())
+                    .commit();
+
+            if (getActivity() instanceof HomePage) {
+                ((HomePage) getActivity()).selectHomeNavigation();
+            }
+        }
+        dismiss();
+        Toast.makeText(requireContext(), "Mood Saved", Toast.LENGTH_SHORT).show();
         Log.i(TAG, "Saving mood event to Firebase");
         moodEventRepository.addMoodEvent(
                 moodEvent,
                 aVoid -> {
-                    Log.i(TAG, "Mood event saved successfully");
-                    Toast.makeText(requireContext(), "Mood saved!", Toast.LENGTH_SHORT).show();
-
-                    // Dismiss the dialog
-                    dismiss();
-
-                    // Navigate back to HomeFragment
-                    requireActivity().getSupportFragmentManager()
-                            .beginTransaction().setCustomAnimations(
-                                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
-                            )
-                            .replace(R.id.frame_layout, new HomeFragment())
-                            .commit();
-
-                    if (getActivity() instanceof HomePage) {
-                        ((HomePage) getActivity()).selectHomeNavigation();
-                    }
+                    Log.i(TAG, "Mood event saved successfully in background");
                 },
                 e -> {
                     Log.e(TAG, "Failed to save mood event: " + e.getMessage(), e);
                 }
         );
+
+
     }
 
     private String getCurrentUsername() {
