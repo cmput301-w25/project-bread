@@ -177,6 +177,7 @@ public class UserProfileFragment extends Fragment {
             TextView titleView = recentMoodEventView.findViewById(R.id.textTitle);
             TextView dateView = recentMoodEventView.findViewById(R.id.textDate);
             TextView moodView = recentMoodEventView.findViewById(R.id.textMood);
+            TextView socialView = recentMoodEventView.findViewById(R.id.textSocialSituation);
             ImageView profileImageView = recentMoodEventView.findViewById(R.id.profile_image_home);
             ImageView moodImageView = recentMoodEventView.findViewById(R.id.event_home_image);
             View cardBackground = recentMoodEventView.findViewById(R.id.moodCard);
@@ -187,6 +188,11 @@ public class UserProfileFragment extends Fragment {
             titleView.setText(recentMood.getTitle());
             dateView.setText(TimestampUtils.transformTimestamp(recentMood.getTimestamp()));
             moodView.setText(recentMood.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(recentMood.getEmotionalState()));
+            if (recentMood.getSocialSituation() != null && recentMood.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
+                socialView.setText(recentMood.getSocialSituation().toString());
+            } else {
+                socialView.setVisibility(View.INVISIBLE);
+            }
 
             // Handle image visibility
             if (recentMood.getAttachedImage() != null && !recentMood.getAttachedImage().isEmpty()) {

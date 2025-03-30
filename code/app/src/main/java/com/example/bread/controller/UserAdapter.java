@@ -71,7 +71,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             super(itemView);
             profileImage = itemView.findViewById(R.id.profile_image);
 
-            usernameText = itemView.findViewById(R.id.username_text);
+            usernameText = itemView.findViewById(R.id.follow_username_text);
             usernameText.setPaintFlags(usernameText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
             nameText = itemView.findViewById(R.id.name_text);

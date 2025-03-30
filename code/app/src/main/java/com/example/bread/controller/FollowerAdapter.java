@@ -59,7 +59,7 @@ public class FollowerAdapter extends RecyclerView.Adapter<FollowerAdapter.Follow
         public FollowerViewHolder(@NonNull View itemView) {
             super(itemView);
             profileImage = itemView.findViewById(R.id.profile_image);
-            usernameText = itemView.findViewById(R.id.username_text);
+            usernameText = itemView.findViewById(R.id.follow_username_text);
             nameText = itemView.findViewById(R.id.name_text);
             removeButton = itemView.findViewById(R.id.remove_button);
 
