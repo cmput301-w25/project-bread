@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,12 +27,12 @@ import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
+import com.example.bread.utils.TimestampUtils;
 import com.example.bread.view.LoginPage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.example.bread.utils.TimestampUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -314,6 +313,7 @@ public class ProfileFragment extends Fragment {
             TextView titleView = recentMoodEventView.findViewById(R.id.textTitle);
             TextView dateView = recentMoodEventView.findViewById(R.id.textDate);
             TextView moodView = recentMoodEventView.findViewById(R.id.textMood);
+            TextView socialView = recentMoodEventView.findViewById(R.id.textSocialSituation);
             ImageView profileImageView = recentMoodEventView.findViewById(R.id.profile_image_home);
             ImageView moodImageView = recentMoodEventView.findViewById(R.id.event_home_image);
             View cardBackground = recentMoodEventView.findViewById(R.id.moodCard);
@@ -324,6 +324,11 @@ public class ProfileFragment extends Fragment {
             titleView.setText(recentMood.getTitle());
             dateView.setText(TimestampUtils.transformTimestamp(recentMood.getTimestamp()));
             moodView.setText(recentMood.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(recentMood.getEmotionalState()));
+            if (recentMood.getSocialSituation() != null && recentMood.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
+                socialView.setText(recentMood.getSocialSituation().toString());
+            } else {
+                socialView.setVisibility(View.INVISIBLE);
+            }
 
             // Handle image visibility
             if (recentMood.getAttachedImage() != null && !recentMood.getAttachedImage().isEmpty()) {

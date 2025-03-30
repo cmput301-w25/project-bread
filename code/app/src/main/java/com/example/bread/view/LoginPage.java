@@ -51,7 +51,6 @@ public class LoginPage extends AppCompatActivity {
         Button loginButton = findViewById(R.id.login_button);
 
         TextView signupButton = findViewById(R.id.login_signup_button);
-        //https://stackoverflow.com/questions/10019001/how-do-you-underline-a-text-in-android-xml
         signupButton.setPaintFlags(signupButton.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
         emailEditText = findViewById(R.id.login_email_text);

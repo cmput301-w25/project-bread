@@ -47,6 +47,7 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -92,6 +93,9 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
     private boolean isFilteringByWeek = false;
     private MoodEvent.EmotionalState selectedEmotionalState = null;
     private String searchKeyword = "";
+
+    private String usernameText;
+    UserProfileFragment userProfileFragment = new UserProfileFragment();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -403,6 +407,34 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
             Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
             searchProgressBar.setVisibility(View.GONE);
         });
+    }
+
+    @Override
+    public void onUserClick(Participant participant){
+        usernameText = participant.getUsername();
+
+        if (Objects.equals(usernameText, currentUsername)){
+            Toast.makeText(getContext(), "Tapped on your profile", Toast.LENGTH_SHORT).show();
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+            );
+            transaction.add(R.id.frame_layout, new ProfileFragment());
+            transaction.commit();
+        }
+        else{
+            Toast.makeText(getContext(), "Tapped on " + participant.getUsername(), Toast.LENGTH_SHORT).show();
+            Bundle bundle = new Bundle();
+            bundle.putString("text", usernameText);
+            bundle.putSerializable("participant", participant);
+            userProfileFragment.setArguments(bundle);
+
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out);
+            transaction.replace(R.id.frame_layout, userProfileFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
     }
 
     /**
