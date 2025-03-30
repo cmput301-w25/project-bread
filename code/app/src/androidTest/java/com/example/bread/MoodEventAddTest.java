@@ -11,10 +11,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.hasErrorText;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
-import static org.hamcrest.CoreMatchers.anything;
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 
 import android.util.Log;
@@ -23,6 +20,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -33,7 +31,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -45,8 +42,6 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -60,10 +55,7 @@ public class MoodEventAddTest {
 
     @BeforeClass
     public static void testSetup() {
-        // Connecting to emulators and creating test participant
-        String androidLocalHost = "10.0.2.2";
-        FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
-        FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
+        FirebaseEmulatorRule.initializeEmulators();
 
         try {
             Tasks.await(
@@ -88,15 +80,9 @@ public class MoodEventAddTest {
     }
 
     @Before
-    public void navigateToAddTab() {
-        // Navigate to the "add" tab
-        onView(withId(R.id.add)).perform(click());
-    }
-
-    @Before
     public void seedDatabase() {
         // Seed the database with users and relationships
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestore db = new FirebaseService().getDb();
         CollectionReference participants = db.collection("participants");
 
         // Create testUser
@@ -118,6 +104,8 @@ public class MoodEventAddTest {
         p1Ref.collection("followers").document("testUser2").set(new HashMap<String, Object>() {{
             put("username", "testUser2");
         }});
+
+        onView(withId(R.id.add)).perform(click());
     }
 
     @Test
@@ -219,7 +207,6 @@ public class MoodEventAddTest {
     }
 
 
-
     @Test
     public void testUiElementsAreDisplayed() {
         // Verify that key UI elements are displayed
@@ -276,12 +263,13 @@ public class MoodEventAddTest {
         Thread.sleep(3000);
         onView(withId(R.id.eventTitleEditText)).check(matches(isDisplayed()));
     }
+
     @After
     public void tearDownAuth() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         URL url = null;
         try {
-            url = new URL("http://10.0.2.2:9099/emulator/v1/projects/"+projectId+"/accounts");
+            url = new URL("http://10.0.2.2:9099/emulator/v1/projects/" + projectId + "/accounts");
         } catch (MalformedURLException exception) {
             Log.e("URL Error", Objects.requireNonNull(exception.getMessage()));
         }
@@ -306,7 +294,7 @@ public class MoodEventAddTest {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         URL url = null;
         try {
-            url = new URL("http://10.0.2.2:8080/emulator/v1/projects/"+projectId+"/databases/(default)/documents");
+            url = new URL("http://10.0.2.2:8080/emulator/v1/projects/" + projectId + "/databases/(default)/documents");
         } catch (MalformedURLException exception) {
             Log.e("URL Error", Objects.requireNonNull(exception.getMessage()));
         }
