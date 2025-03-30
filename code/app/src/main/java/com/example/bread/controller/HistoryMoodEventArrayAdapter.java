@@ -44,6 +44,7 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
         TextView title;
         ImageView moodImage;
         CardView miniImageHolder;
+        ImageView visibilityIcon;
         ConstraintLayout eventLayout;
     }
 
@@ -63,12 +64,14 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
             holder.checkBox = convertView.findViewById(R.id.checkbox);
             holder.moodImage = convertView.findViewById(R.id.event_home_image);
             holder.miniImageHolder = convertView.findViewById(R.id.event_home_image_holder);
+            holder.visibilityIcon = convertView.findViewById(R.id.visibility_icon);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
         MoodEvent moodEvent = getItem(position);
+
         if (moodEvent != null) {
             int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
             holder.eventLayout.setBackgroundResource(colorResId);
@@ -94,9 +97,29 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
             if (moodEvent.getSocialSituation() != null && moodEvent.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
                 holder.socialSituation.setText(moodEvent.getSocialSituation().toString());
                 holder.socialSituation.setVisibility(View.VISIBLE);
+                // Set the visibility icon's start constraint to be after the social situation
+                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) holder.visibilityIcon.getLayoutParams();
+                params.startToEnd = holder.socialSituation.getId();
+                holder.visibilityIcon.setLayoutParams(params);
             } else {
                 holder.socialSituation.setVisibility(View.INVISIBLE);
+                // Set the visibility icon's start constraint to be after the mood text
+                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) holder.visibilityIcon.getLayoutParams();
+                params.startToEnd = holder.mood.getId();
+                holder.visibilityIcon.setLayoutParams(params);
             }
+
+            if (moodEvent.getVisibility() != null) {
+                if(moodEvent.getVisibility().toString().equals("PUBLIC")){
+                    holder.visibilityIcon.setImageResource(R.drawable.ic_public); //Create ic_public.xml in drawable
+                }else{
+                    holder.visibilityIcon.setImageResource(R.drawable.ic_private); //create ic_private.xml in drawable
+                }
+                holder.visibilityIcon.setVisibility(View.VISIBLE);
+            } else {
+                holder.visibilityIcon.setVisibility(View.GONE);
+            }
+
             if (holder.checkBox != null) {
 
                 holder.checkBox.setOnCheckedChangeListener(null);
