@@ -1,5 +1,6 @@
 package com.example.bread.controller;
 
+import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,6 +83,8 @@ public class FollowerAdapter extends RecyclerView.Adapter<FollowerAdapter.Follow
 
         void bind(Participant participant) {
             usernameText.setText(participant.getUsername());
+            usernameText.setPaintFlags(usernameText.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
+
             nameText.setText(participant.getFirstName() + " " + participant.getLastName());
 
             // Set profile image if available

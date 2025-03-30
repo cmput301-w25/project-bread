@@ -45,7 +45,7 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
     private AtomicBoolean isSearching = new AtomicBoolean(false);
 
     private String usernameText;
-    UserProfileFragment userProfileFragment = new UserProfileFragment();
+    private UserProfileFragment userProfileFragment = new UserProfileFragment();
 
 
     @Override
@@ -188,6 +188,9 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
     //https://www.youtube.com/watch?v=dh-zw64LKLg passing through bundle
     @Override
     public void onUserClick(Participant participant){
+        // Navigate to user profile or other actions when clicking on a follower/following
+        Toast.makeText(getContext(), "Tapped on " + participant.getUsername(), Toast.LENGTH_SHORT).show();
+
         usernameText = participant.getUsername();
         Bundle bundle = new Bundle();
         bundle.putString("text", usernameText);

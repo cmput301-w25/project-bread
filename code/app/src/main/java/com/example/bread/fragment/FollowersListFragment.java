@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -46,6 +47,9 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
     private List<Participant> filteredList = new ArrayList<>();
     private FollowerAdapter followerAdapter;
     private ParticipantRepository participantRepository;
+
+    private String usernameText;
+    private UserProfileFragment userProfileFragment = new UserProfileFragment();
 
     public FollowersListFragment() {
         // Required empty public constructor
@@ -215,7 +219,17 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         // Navigate to user profile or other actions when clicking on a follower/following
         Toast.makeText(getContext(), "Tapped on " + participant.getUsername(), Toast.LENGTH_SHORT).show();
 
-        // You could navigate to a user profile page here in the future
+        usernameText = participant.getUsername();
+        Bundle bundle = new Bundle();
+        bundle.putString("text", usernameText);
+        bundle.putSerializable("participant", participant);
+        userProfileFragment.setArguments(bundle);
+
+        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out);
+        transaction.replace(R.id.frame_layout, userProfileFragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     @Override

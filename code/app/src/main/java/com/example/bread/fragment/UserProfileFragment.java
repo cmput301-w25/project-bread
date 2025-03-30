@@ -279,15 +279,6 @@ public class UserProfileFragment extends Fragment {
         transaction.commit();
     }
 
-//    private void navigateToLogin() {
-//        Intent intent = new Intent(getContext(), LoginPage.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        startActivity(intent);
-//        if (getActivity() != null) {
-//            getActivity().finish();
-//        }
-//    }
-
     private void onFollowClickProfile(String username) {
         // First check if already following
         participantRepository.isFollowing(currentUsername, username, isFollowing -> {
