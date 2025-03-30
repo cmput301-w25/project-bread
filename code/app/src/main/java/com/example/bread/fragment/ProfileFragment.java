@@ -364,9 +364,27 @@ public class ProfileFragment extends Fragment {
                 constraintLayout.setBackgroundResource(colorResId);
             }
 
+            // Add click listener to navigate to the event detail page
+            recentMoodEventView.setOnClickListener(v -> {
+                // Navigate to the EventDetail fragment
+                navigateToEventDetail(recentMood);
+            });
+
             recentMoodEventView.setVisibility(View.VISIBLE);
             emptyMoodText.setVisibility(View.GONE);
         }
+    }
+
+    // Method to navigate to the EventDetail fragment
+    private void navigateToEventDetail(MoodEvent moodEvent) {
+        EventDetail fragment = EventDetail.newInstance(moodEvent);
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+        );
+        transaction.add(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     private void setupParticipantListener() {
