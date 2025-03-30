@@ -21,6 +21,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.view.HomePage;
@@ -92,7 +93,7 @@ public class MapFragmentTest {
     public void seedDatabase() {
 
         // Seed the database with some mood events
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestore db = new FirebaseService().getDb();
         CollectionReference participants = db.collection("participants");
         Participant p1 = new Participant();
         p1.setUsername("testUser");
