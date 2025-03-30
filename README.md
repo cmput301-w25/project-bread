@@ -57,6 +57,8 @@ To run Unit tests:
 If the above steps doesn't execute the tests, you can open the `code` directory in Android Studio and run the tests manually
 to achieve the same result.
 
+While testing we have found that UI tests can be flaky sometimes and might require re-runs.
+
 ### Extra Setup
 
 To run the `MapFragmentTest` it is required that Sentio is selected as mock location app in developer settings.
