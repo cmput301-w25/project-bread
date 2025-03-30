@@ -22,6 +22,9 @@ import com.example.bread.utils.TimestampUtils;
 
 import java.util.List;
 
+/**
+ * EXPLANATION
+ */
 public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final String TAG = "EventDetailAdapter";
