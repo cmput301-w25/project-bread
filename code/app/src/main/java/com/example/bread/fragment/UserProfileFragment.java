@@ -1,6 +1,5 @@
 package com.example.bread.fragment;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,7 +22,6 @@ import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
-import com.example.bread.view.LoginPage;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
@@ -138,6 +136,15 @@ public class UserProfileFragment extends Fragment {
         }, e -> {
             Log.e(TAG, "Error checking follow status", e);
             Toast.makeText(getContext(), "Error checking follow status", Toast.LENGTH_SHORT).show();
+        });
+
+        ImageView closeButton = view.findViewById(R.id.analytics_close_button);
+        closeButton.setOnClickListener(v -> {
+            getParentFragmentManager().beginTransaction()
+                    .setCustomAnimations(R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out)
+                    .remove(this)
+                    .commit();
+            getParentFragmentManager().popBackStack();
         });
 
         return view;

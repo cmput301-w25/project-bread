@@ -14,6 +14,23 @@
         android:paddingBottom="24dp">
 
         <ImageView
+            android:id="@+id/analytics_close_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="5dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Close"
+            android:elevation="10dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_close"
+            app:layout_constraintBottom_toBottomOf="@+id/sentio_logo"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.855"
+            app:layout_constraintStart_toEndOf="@+id/sentio_logo"
+            app:layout_constraintTop_toTopOf="@+id/sentio_logo"
+            app:layout_constraintVertical_bias="1.0" />
+
+        <ImageView
             android:id="@+id/sentio_logo"
             android:layout_width="94dp"
             android:layout_height="74dp"
