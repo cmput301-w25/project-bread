@@ -365,10 +365,9 @@ public class ProfileFragment extends Fragment {
             }
 
             // Add click listener to navigate to the event detail page
-            final MoodEvent moodEventCopy = recentMood; // Create a final copy for the listener
             recentMoodEventView.setOnClickListener(v -> {
                 // Navigate to the EventDetail fragment
-                navigateToEventDetail(moodEventCopy);
+                navigateToEventDetail(recentMood);
             });
 
             recentMoodEventView.setVisibility(View.VISIBLE);
