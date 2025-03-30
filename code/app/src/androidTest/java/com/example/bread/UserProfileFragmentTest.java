@@ -113,6 +113,17 @@ public class UserProfileFragmentTest {
             }
         });
 
+        p2Ref.collection("following").document("testUser").set(new HashMap<>() {
+            {
+                put("username", "testUser");
+            }
+        });
+        p1Ref.collection("followers").document("testUser2").set(new HashMap<>() {
+            {
+                put("username", "testUser2");
+            }
+        });
+
         MoodEvent moodEvent1 = new MoodEvent("Test Event 1", "test reason 1", MoodEvent.EmotionalState.HAPPY, p2Ref);
         moodEvent1.setSocialSituation(MoodEvent.SocialSituation.ALONE);
 
@@ -131,6 +142,7 @@ public class UserProfileFragmentTest {
 
     @Test
     public void testNotFollowingUser() throws InterruptedException {
+        // Navigate to a user we do not follow through the search bar
         Thread.sleep(1000);
         onView(withId(R.id.search_button)).perform(click());
         Thread.sleep(1000);
@@ -139,6 +151,8 @@ public class UserProfileFragmentTest {
         onView(withText("testUser3")).perform(click());
         Thread.sleep(2000);
         onView(withText("testUser3")).check(matches(isDisplayed()));
+
+        // Ensure proper NOT FOLLOWED user UI appears and that follow request works
         onView(withText("Follow")).check(matches(isDisplayed()));
         onView(withId(R.id.follow_button)).perform(click());
         Thread.sleep(2000);
@@ -147,18 +161,17 @@ public class UserProfileFragmentTest {
 
     @Test
     public void testFollowingUser() throws InterruptedException {
+        // Navigate to a user we follow through the search bar
         Thread.sleep(1000);
         onView(withId(R.id.search_button)).perform(click());
         Thread.sleep(1000);
         onView(withId(R.id.search_edit_text)).perform(ViewActions.typeText("test"));
         Thread.sleep(2000);
-
-        onView(Matchers.allOf(
-                withId(R.id.follow_username_text),
-                withText("testUser2"),
+        onView(Matchers.allOf(withId(R.id.follow_username_text), withText("testUser2"),
                 isDisplayed()
         )).perform(click());
 
+        // Ensure proper FOLLOWED user information appears
         Thread.sleep(3000);
         onView(withText("Recents")).check(matches(isDisplayed()));
         onView(withText("Sad " + EmotionUtils.getEmoticon(MoodEvent.EmotionalState.SAD))).check(matches(isDisplayed()));
@@ -166,12 +179,54 @@ public class UserProfileFragmentTest {
 
     @Test
     public void testFollowerList() throws InterruptedException {
+        // Navigate to one of our followers
+        Thread.sleep(1000);
+        onView(withId(R.id.profile)).perform(click());
+        Thread.sleep(2000);
+        onView(withId(R.id.followers_layout)).perform(click());
+        Thread.sleep(2000);
+        onView(withText("testUser2")).perform(click());
+        Thread.sleep(2000);
 
+        // Ensuring proper follower information appears
+        onView(withText("Recents")).check(matches(isDisplayed()));
+        onView(withText("Sad " + EmotionUtils.getEmoticon(MoodEvent.EmotionalState.SAD))).check(matches(isDisplayed()));
     }
 
     @Test
     public void testFollowingList() throws InterruptedException {
+        // Navigate to a user we are following
+        Thread.sleep(1000);
+        onView(withId(R.id.profile)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.following_layout)).perform(click());
+        Thread.sleep(2000);
+        onView(withText("testUser2")).perform(click());
+        Thread.sleep(2000);
 
+        // Ensure we can see their recent mood
+        onView(withText("Recents")).check(matches(isDisplayed()));
+        onView(withText("Sad " + EmotionUtils.getEmoticon(MoodEvent.EmotionalState.SAD))).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testReturnUserToSelf() throws InterruptedException {
+        // Navigate to a different user first
+        Thread.sleep(1000);
+        onView(withId(R.id.profile)).perform(click());
+        Thread.sleep(1000);
+        onView(withId(R.id.following_layout)).perform(click());
+        Thread.sleep(2000);
+        onView(withText("testUser2")).perform(click());
+        Thread.sleep(2000);
+
+        // Navigate back to current user
+        onView(withId(R.id.following_layout)).perform(click());
+        onView(withText("testUser")).perform(click());
+        Thread.sleep(1000);
+
+        // Only current user can view requests so we check for this
+        onView(withText("Requests")).check(matches(isDisplayed()));
     }
 
     @After

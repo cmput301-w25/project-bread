@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,9 +25,12 @@ import com.example.bread.R;
 import com.example.bread.controller.FollowerAdapter;
 import com.example.bread.model.Participant;
 import com.example.bread.repository.ParticipantRepository;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FollowersListFragment extends Fragment implements FollowerAdapter.OnUserInteractionListener {
 
@@ -217,19 +221,33 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
     @Override
     public void onUserClick(Participant participant) {
         // Navigate to user profile or other actions when clicking on a follower/following
-        Toast.makeText(getContext(), "Tapped on " + participant.getUsername(), Toast.LENGTH_SHORT).show();
-
         usernameText = participant.getUsername();
-        Bundle bundle = new Bundle();
-        bundle.putString("text", usernameText);
-        bundle.putSerializable("participant", participant);
-        userProfileFragment.setArguments(bundle);
 
-        FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out);
-        transaction.replace(R.id.frame_layout, userProfileFragment);
-        transaction.addToBackStack(null);
-        transaction.commit();
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        String currentUsername = currentUser.getDisplayName();
+
+        if (Objects.equals(usernameText, currentUsername)){
+            Toast.makeText(getContext(), "Tapped on your profile", Toast.LENGTH_SHORT).show();
+            FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
+            FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                    R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+            );
+            transaction.add(R.id.frame_layout, new ProfileFragment());
+            transaction.commit();
+        }
+        else{
+            Toast.makeText(getContext(), "Tapped on " + participant.getUsername(), Toast.LENGTH_SHORT).show();
+            Bundle bundle = new Bundle();
+            bundle.putString("text", usernameText);
+            bundle.putSerializable("participant", participant);
+            userProfileFragment.setArguments(bundle);
+
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out);
+            transaction.replace(R.id.frame_layout, userProfileFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        }
     }
 
     @Override
