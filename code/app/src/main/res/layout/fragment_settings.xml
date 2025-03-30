@@ -18,7 +18,6 @@
             android:id="@+id/sentio_logo_settings"
             android:layout_width="94dp"
             android:layout_height="74dp"
-            android:layout_marginTop="24dp"
             android:scaleType="centerCrop"
             android:scaleX="0.75"
             android:scaleY="0.75"
@@ -27,7 +26,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@mipmap/sound_wave_layer" />
 
-        <!-- Profile Title -->
         <TextView
             android:id="@+id/settings_title"
             android:layout_width="wrap_content"
@@ -44,7 +42,7 @@
             android:id="@+id/settings_close_button"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_margin="24dp"
+            android:layout_margin="12dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Close"
             android:elevation="10dp"
@@ -55,7 +53,6 @@
             app:layout_constraintTop_toTopOf="@+id/sentio_logo_settings" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Profile Image Button -->
     <androidx.cardview.widget.CardView
         android:id="@+id/profile_image_container"
         android:layout_width="127dp"
@@ -88,26 +85,11 @@
         app:layout_constraintTop_toBottomOf="@+id/profile_image_container" />
 
     <Button
-        android:id="@+id/change_username_button"
-        android:layout_width="0dp"
-        android:layout_height="71dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="48dp"
-        android:layout_marginEnd="24dp"
-        android:backgroundTint="@color/settingsButton"
-        android:text="Change Username"
-        android:textColor="@color/white"
-        android:textSize="20sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_change_text" />
-
-    <Button
         android:id="@+id/edit_account_button"
         android:layout_width="0dp"
         android:layout_height="71dp"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="48dp"
         android:layout_marginEnd="24dp"
         android:backgroundTint="@color/settingsButton"
         android:text="Edit Name"
@@ -115,7 +97,7 @@
         android:textSize="20sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/change_username_button" />
+        app:layout_constraintTop_toBottomOf="@+id/profile_change_text" />
 
     <Button
         android:id="@+id/log_out_button"
