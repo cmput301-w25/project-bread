@@ -33,7 +33,9 @@ To run the tests make sure that you have `google-services.json` file in your `co
 
 Add `GOOGLE_MAPS_API_KEY` in your `local.properties`
 
-Set `FIREBASE_PROJECT_ID` as `testdb-123` in your `local.properties` file
+Set `FIREBASE_PROJECT_ID` as `testdb-123` in your `local.properties` file, and gradle sync the project
+
+Override `project_id` in `google-services.json` file as `testdb-123`
 
 (Both the secrets are available in the team discord)
 

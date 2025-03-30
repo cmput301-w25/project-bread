@@ -101,10 +101,10 @@ public class MoodHistoryFragmentTest {
         m3.setTimestamp(new GregorianCalendar(2025, Calendar.MARCH, 3).getTime());
         m4.setTimestamp(new GregorianCalendar(2025, Calendar.MARCH, 4).getTime());
 
-        db.collection("moodEvents").document("mood1").set(m1);
-        db.collection("moodEvents").document("mood2").set(m2);
-        db.collection("moodEvents").document("mood3").set(m3);
-        db.collection("moodEvents").document("mood4").set(m4);
+        db.collection("moodEvents").document(m1.getId()).set(m1);
+        db.collection("moodEvents").document(m2.getId()).set(m2);
+        db.collection("moodEvents").document(m3.getId()).set(m3);
+        db.collection("moodEvents").document(m4.getId()).set(m4);
 
         scenario = ActivityScenario.launch(HomePage.class);
     }
@@ -186,8 +186,8 @@ public class MoodHistoryFragmentTest {
         }
     }
 
-    @AfterClass
-    public static void clearAuthEmulator() {
+    @After
+    public void clearAuthEmulator() {
         String projectId = BuildConfig.FIREBASE_PROJECT_ID;
         // This is the Auth emulator endpoint for deleting all test users
         String authUrl = "http://10.0.2.2:9099/emulator/v1/projects/"
