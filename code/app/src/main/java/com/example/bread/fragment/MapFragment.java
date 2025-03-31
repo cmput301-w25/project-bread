@@ -55,16 +55,16 @@ import java.util.Map;
 
 /**
  * MapFragment - Fragment
- *
+ * <p>
  * Role / Purpose
  * Displays a map showing nearby mood events with filtering options.
  * Handles user location, mood filtering, and displays map markers with mood icons.
- *
+ * <p>
  * Design Pattern
  * Fragment Pattern: Encapsulates map UI logic.
  * Singleton Pattern: Uses LocationHandler as a centralized utility.
  * Observer Pattern: Reacts to location and Firestore data updates.
- *
+ * <p>
  * Outstanding Issues / Comments
  * Initial fetch may occur before permissions are granted; consider sequencing fetch after permission result.
  */

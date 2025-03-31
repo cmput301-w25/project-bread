@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.Toast;
+
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -27,6 +28,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.repository.MoodEventRepository;
@@ -43,19 +45,19 @@ import java.util.Map;
 
 /**
  * AddMoodEventFragment - Fragment
- *
+ * <p>
  * Role / Purpose
  * A DialogFragment that provides a form interface for users to create and submit a new MoodEvent.
  * It allows the user to input a title, select emotional state and social situation, optionally attach an image and/or location, and set the visibility of the mood event.
  * The form includes input validation and persists the mood event to Firestore using MoodEventRepository.
  * The fragment also navigates back to HomeFragment after a successful save.
- *
+ * <p>
  * Design Patterns
  * Observer Pattern: Uses listeners and callbacks for handling UI interactions and activity results.
  * Repository Pattern: Abstracts data operations via MoodEventRepository and ParticipantRepository.
  * Singleton Pattern: Accesses shared services like FirebaseAuth and LocationHandler.
  * MVC Pattern: Fragment acts as a controller managing view input and model updates.
- *
+ * <p>
  * Outstanding Issues
  * Updates UI before Firebase save confirms success, can lead to misleading UI.
  */
@@ -287,7 +289,7 @@ public class AddMoodEventFragment extends DialogFragment {
         moodEvent.setSocialSituation(socialSituation);
         moodEvent.setVisibility(visibility);
         moodEvent.setAttachedImage(imageBase64); // Set the attached image (may be null if removed)
-        Log.d(TAG, "MoodEvent created: " + moodEvent.toString());
+        Log.d(TAG, "MoodEvent created: " + moodEvent);
         Log.d(TAG, "Timestamp (before save): " + (moodEvent.getTimestamp() != null ? moodEvent.getTimestamp().toString() : "null (to be set by server)"));
 
         // Handle location based on chip state

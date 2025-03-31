@@ -33,15 +33,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * UserSearchFragment - Fragment
- *
+ * <p>
  * Role / Purpose
  * Enables searching for participants by username and sending follow requests.
  * Filters out the current user and handles request status checking.
- *
+ * <p>
  * Design Pattern
  * Fragment Pattern: Modular part of the screen.
  * Observer Pattern: Uses Firebase callbacks to reflect real-time changes.
- *
+ * <p>
  * Outstanding Issues / Comments
  * No debouncing logic for search input; repeated queries may be sent quickly.
  */
@@ -58,11 +58,11 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
     private UserAdapter userAdapter;
     private ParticipantRepository participantRepository;
     private String currentUsername;
-    private List<Participant> userList = new ArrayList<>();
-    private AtomicBoolean isSearching = new AtomicBoolean(false);
+    private final List<Participant> userList = new ArrayList<>();
+    private final AtomicBoolean isSearching = new AtomicBoolean(false);
 
     private String usernameText;
-    private UserProfileFragment userProfileFragment = new UserProfileFragment();
+    private final UserProfileFragment userProfileFragment = new UserProfileFragment();
 
 
     @Override
@@ -95,10 +95,12 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
         // Set up search text watcher
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -118,6 +120,12 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
         return view;
     }
 
+    /**
+     * Performs a search for users whose usernames match the given query.
+     * Filters out the current user from the results and updates the RecyclerView.
+     *
+     * @param query The search term to filter users by username.
+     */
     private void searchUsers(String query) {
         if (isSearching.get()) {
             return; // Prevent multiple concurrent searches
@@ -132,7 +140,7 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
 
             // Filter out the current user from results
             for (Participant participant : participants) {
-                if (!participant.getUsername().toLowerCase().equals(currentUsername.toLowerCase())) {
+                if (!participant.getUsername().equalsIgnoreCase(currentUsername)) {
                     userList.add(participant);
                 }
             }
@@ -150,6 +158,10 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
         });
     }
 
+    /**
+     * Updates the visibility of the empty view and user list based on search results.
+     * Shows the empty view if no users are found.
+     */
     private void updateEmptyView() {
         if (userList.isEmpty()) {
             emptyView.setVisibility(View.VISIBLE);
@@ -203,11 +215,11 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
     }
 
     @Override
-    public void onUserClick(Participant participant){
+    public void onUserClick(Participant participant) {
         // Navigate to user profile or other actions when clicking on a follower/following
         usernameText = participant.getUsername();
 
-        if (Objects.equals(usernameText, currentUsername)){
+        if (Objects.equals(usernameText, currentUsername)) {
             Toast.makeText(getContext(), "Tapped on your profile", Toast.LENGTH_SHORT).show();
 
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
@@ -216,8 +228,7 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
             );
             transaction.add(R.id.frame_layout, new ProfileFragment());
             transaction.commit();
-        }
-        else{
+        } else {
             Toast.makeText(getContext(), "Tapped on " + participant.getUsername(), Toast.LENGTH_SHORT).show();
 
             Bundle bundle = new Bundle();
@@ -233,6 +244,11 @@ public class UserSearchFragment extends Fragment implements UserAdapter.UserInte
         }
     }
 
+    /**
+     * Notifies the adapter to update the follow button state for a specific user.
+     *
+     * @param username The username of the user whose follow button should be updated.
+     */
     private void updateFollowButtonState(String username) {
         for (int i = 0; i < userList.size(); i++) {
             if (userList.get(i).getUsername().equals(username)) {

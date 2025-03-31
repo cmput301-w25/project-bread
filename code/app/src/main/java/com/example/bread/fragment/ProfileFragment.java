@@ -40,15 +40,15 @@ import java.util.List;
 
 /**
  * ProfileFragment - Fragment
- *
+ * <p>
  * Role / Purpose
  * Shows the current user's profile, recent mood event, and a preview of follow requests.
  * Provides navigation to followers, following, settings, and full request list.
- *
+ * <p>
  * Design Pattern
  * Fragment Pattern: Modular UI unit.
  * MVC Pattern: Interfaces with repository and adapters to manage state and interactions.
- *
+ * <p>
  * Outstanding Issues / Comments
  * Recent mood event reloads on every resume; caching could improve performance.
  */
@@ -72,9 +72,9 @@ public class ProfileFragment extends Fragment {
     private ListenerRegistration participantListener;
 
     private FollowRequestAdapter requestAdapter;
-    private List<FollowRequest> requestsList = new ArrayList<>();
+    private final List<FollowRequest> requestsList = new ArrayList<>();
 
-    private ArrayList<MoodEvent> userMoodEvents = new ArrayList<>();
+    private final ArrayList<MoodEvent> userMoodEvents = new ArrayList<>();
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -152,6 +152,10 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Initializes the RecyclerView for displaying incoming follow requests.
+     * Sets up the adapter with accept/decline listeners and triggers the initial request load.
+     */
     private void setupFollowRequests() {
         // Set up RecyclerView
         requestAdapter = new FollowRequestAdapter(requestsList, new FollowRequestAdapter.RequestActionListener() {
@@ -173,6 +177,11 @@ public class ProfileFragment extends Fragment {
         loadFollowRequests();
     }
 
+    /**
+     * Loads the list of follow requests for the current user from the repository.
+     * Displays a maximum of 3 requests for preview on the profile page.
+     * Updates the adapter and view visibility accordingly.
+     */
     private void loadFollowRequests() {
         if (currentUsername == null || currentUsername.isEmpty()) {
             updateRequestsVisibility();
@@ -196,6 +205,10 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    /**
+     * Updates the visibility of the follow requests section based on the current request list.
+     * Shows a placeholder message if there are no requests.
+     */
     private void updateRequestsVisibility() {
         if (requestsList.isEmpty()) {
             emptyRequestsText.setVisibility(View.VISIBLE);
@@ -206,6 +219,13 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Accepts a follow request from another user.
+     * Removes the request from the list and checks if the user should be prompted to follow back.
+     *
+     * @param requestorUsername The username of the user who sent the follow request.
+     * @param position          The position of the request in the list to remove.
+     */
     private void handleAcceptRequest(String requestorUsername, int position) {
         participantRepository.acceptFollowRequest(currentUsername, requestorUsername, unused -> {
             // Remove from list and update UI
@@ -257,6 +277,13 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    /**
+     * Declines a follow request from another user.
+     * Removes the request from the UI and updates the RecyclerView.
+     *
+     * @param requestorUsername The username of the user who sent the follow request.
+     * @param position          The index of the request to remove from the list.
+     */
     private void handleDeclineRequest(String requestorUsername, int position) {
         participantRepository.declineFollowRequest(currentUsername, requestorUsername, unused -> {
             if (position < requestsList.size()) {
@@ -269,6 +296,11 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    /**
+     * Displays a dialog prompting the user to follow back someone who just sent a follow request.
+     *
+     * @param username The username of the user to potentially follow back.
+     */
     private void showFollowBackDialog(String username) {
         if (getContext() != null) {
             new AlertDialog.Builder(getContext())
@@ -283,6 +315,11 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Sends a follow-back request to a user.
+     *
+     * @param username The username of the user to follow back.
+     */
     private void sendFollowBackRequest(String username) {
         participantRepository.sendFollowRequest(currentUsername, username, unused -> {
             // Success
@@ -291,6 +328,10 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    /**
+     * Loads the most recent mood event of the current user.
+     * Fetches data from Firestore and updates the view.
+     */
     private void loadRecentMoodEvent() {
         if (currentUsername == null) return;
 
@@ -312,6 +353,10 @@ public class ProfileFragment extends Fragment {
         });
     }
 
+    /**
+     * Updates the UI with the most recent mood event details.
+     * Handles layout visibility, data binding, and conditional styling.
+     */
     private void updateRecentMoodEvent() {
         if (userMoodEvents.isEmpty()) {
             recentMoodEventView.setVisibility(View.GONE);
@@ -392,7 +437,11 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    // Method to navigate to the EventDetail fragment
+    /**
+     * Navigates to the EventDetail fragment to display full details of the given mood event.
+     *
+     * @param moodEvent The mood event to view in detail.
+     */
     private void navigateToEventDetail(MoodEvent moodEvent) {
         EventDetail fragment = EventDetail.newInstance(moodEvent);
         FragmentManager fragmentManager = getParentFragmentManager();
@@ -404,11 +453,17 @@ public class ProfileFragment extends Fragment {
         transaction.commit();
     }
 
+    /**
+     * Sets up the real-time participant data listener.
+     */
     private void setupParticipantListener() {
         // Replace with fetchBaseParticipant
         fetchParticipantData();
     }
 
+    /**
+     * Fetches the latest participant data for the current user and updates the UI.
+     */
     private void fetchParticipantData() {
         participantRepository.fetchBaseParticipant(currentUsername, participant -> {
             if (participant != null) {
@@ -418,7 +473,9 @@ public class ProfileFragment extends Fragment {
     }
 
     /**
-     * Update UI with participant data
+     * Updates the UI with the provided participant’s follower/following counts and profile picture.
+     *
+     * @param participant The participant object containing updated user data.
      */
     private void updateUI(Participant participant) {
         // Update follower and following counts
@@ -440,6 +497,11 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Navigates to the followers or following list fragment based on the selected type.
+     *
+     * @param listType The list type to view (followers or following).
+     */
     private void navigateToFollowersList(ParticipantRepository.ListType listType) {
         String type = listType == ParticipantRepository.ListType.FOLLOWERS ? "followers" : "following";
         FollowersListFragment fragment = FollowersListFragment.newInstance(currentUsername, type);
@@ -451,6 +513,9 @@ public class ProfileFragment extends Fragment {
         transaction.commit();
     }
 
+    /**
+     * Navigates to the full follow requests management screen.
+     */
     private void navigateToFollowRequests() {
         FollowRequestsFragment fragment = new FollowRequestsFragment();
         FragmentTransaction transaction = getParentFragmentManager().beginTransaction().setCustomAnimations(
@@ -461,6 +526,9 @@ public class ProfileFragment extends Fragment {
         transaction.commit();
     }
 
+    /**
+     * Logs the user out, clears preferences, and navigates back to the login page.
+     */
     private void navigateToLogin() {
         Intent intent = new Intent(getContext(), LoginPage.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

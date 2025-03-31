@@ -12,20 +12,19 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
+
 /**
- *
  * Role / Purpose:
  * - Represents a service class for handling Firebase Cloud Messaging (FCM) messages.
  * - Receives and processes FCM messages.
  * - Handles token management and updates.
  * - Manages different types of data payloads from FCM.
- *
+ * <p>
  * - Design Patterns:
  * - Observer: The `FirebaseMessagingService` is an observer of FCM messages.
- *
+ * <p>
  * Outstanding Issues:
  * - Error handling for token saving and message processing could be made more comprehensive.
- *
  */
 public class SentioFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";

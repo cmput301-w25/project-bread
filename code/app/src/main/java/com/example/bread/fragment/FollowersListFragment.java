@@ -34,15 +34,15 @@ import java.util.Objects;
 
 /**
  * FollowersListFragment - Fragment
- *
+ * <p>
  * Role / Purpose
  * Displays a list of followers or following users for a given participant.
  * Provides search and interaction features, such as unfollowing or removing a follower.
- *
+ * <p>
  * Design Pattern
  * Fragment Pattern: Modular UI component.
  * MVC Pattern: Uses ParticipantRepository (Model) and FollowerAdapter (Controller).
- *
+ * <p>
  * Outstanding Issues / Comments
  * User interaction logic is tightly coupled with UI update logic; potential for refactoring for separation of concerns.
  */
@@ -63,13 +63,13 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
     private ProgressBar progressBar;
     private TextView emptyView;
 
-    private List<Participant> originalList = new ArrayList<>();
-    private List<Participant> filteredList = new ArrayList<>();
+    private final List<Participant> originalList = new ArrayList<>();
+    private final List<Participant> filteredList = new ArrayList<>();
     private FollowerAdapter followerAdapter;
     private ParticipantRepository participantRepository;
 
     private String usernameText;
-    private UserProfileFragment userProfileFragment = new UserProfileFragment();
+    private final UserProfileFragment userProfileFragment = new UserProfileFragment();
 
     public FollowersListFragment() {
         // Required empty public constructor
@@ -126,10 +126,12 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         // Set up search
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -242,7 +244,7 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String currentUsername = currentUser.getDisplayName();
 
-        if (Objects.equals(usernameText, currentUsername)){
+        if (Objects.equals(usernameText, currentUsername)) {
             Toast.makeText(getContext(), "Tapped on your profile", Toast.LENGTH_SHORT).show();
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
@@ -250,8 +252,7 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
             );
             transaction.add(R.id.frame_layout, new ProfileFragment());
             transaction.commit();
-        }
-        else{
+        } else {
             Toast.makeText(getContext(), "Tapped on " + participant.getUsername(), Toast.LENGTH_SHORT).show();
             Bundle bundle = new Bundle();
             bundle.putString("text", usernameText);

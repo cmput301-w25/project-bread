@@ -58,15 +58,15 @@ import java.util.Set;
 
 /**
  * HistoryFragment - Fragment
- *
+ * <p>
  * Role / Purpose
  * Shows a list of the user's mood events with options to view, filter, and edit or delete them.
  * Supports weekly filtering and analytics navigation.
- *
+ * <p>
  * Design Pattern
  * Fragment Pattern: Modular screen element.
  * MVC Pattern: MoodEventRepository (Model), Adapter (Controller), Fragment (View).
- *
+ * <p>
  * Outstanding Issues / Comments
  * Filters reset on screen re-entry; state persistence may improve user experience.
  */

@@ -1,9 +1,9 @@
 package com.example.bread.firebase;
 
 import android.util.Log;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.lang.reflect.Member;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,10 +11,10 @@ import java.util.Map;
  * Role / Purpose
  * Manages Firebase Cloud Messaging (FCM) tokens by saving them to Firestore.
  * This class provides methods to store and retrieve FCM tokens associated with user accounts.
- *
+ * <p>
  * Design Patterns:
  * - Singleton: Ensures a single instance of FirebaseService.
- *
+ * <p>
  * Outstanding Issues:
  * - No method to delete tokens when a user logs out or uninstalls the app.
  */
@@ -62,7 +62,6 @@ public class FCMTokenManager {
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "Token saved for user: " + username))
                 .addOnFailureListener(e -> Log.e(TAG, "Error saving token for user: " + username, e));
     }
-
 
 
 }

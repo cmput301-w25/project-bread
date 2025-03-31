@@ -30,22 +30,20 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * EventDetail - Fragment
- *
+ * <p>
  * Role / Purpose
  * Displays a detailed view of a specific MoodEvent and its comments.
  * Allows users to view, add, and interact with comments related to the event.
- *
+ * <p>
  * Design Pattern
  * Fragment Pattern: Encapsulates UI and behavior for a modular part of the screen.
  * MVC Pattern: Acts as the View, working with MoodEventRepository (Model) and Adapter (Controller).
- *
+ * <p>
  * Outstanding Issues / Comments
  * Comments are re-fetched on each new addition, which could be optimized with live updates or incremental loading.
  */
@@ -199,7 +197,6 @@ public class EventDetail extends Fragment {
             eventRecyclerView.setAdapter(eventDetailAdapter);
         }, e -> Log.e(TAG, "Error fetching comments", e));
     }
-
 
 
 }

@@ -1,7 +1,6 @@
 package com.example.bread.controller;
 
 import android.graphics.Paint;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,16 +18,16 @@ import java.util.List;
 
 /**
  * FollowerAdapter - Controller
- *
+ * <p>
  * Role / Purpose
  * Adapter that populates a RecyclerView list with followers or following profiles of current user
  * Handles profile picture, username, and unfollow button
- *
+ * <p>
  * Design Pattern
  * Adapter Pattern: Binds Participant data to the RecyclerView UI.
  * ViewHolder Pattern: Caches view lookups for smooth scrolling and better performance.
  * Listener Pattern: Uses a custom listener interface to decouple interaction logic.
- *
+ * <p>
  * Outstanding Issues / Comments
  * Currently assumes the user list and list type won't change dynamically after instantiation.
  */
@@ -68,6 +67,7 @@ public class FollowerAdapter extends RecyclerView.Adapter<FollowerAdapter.Follow
      */
     public interface OnUserInteractionListener {
         void onUserClick(Participant participant);
+
         void onRemoveClick(Participant participant, int position);
     }
 

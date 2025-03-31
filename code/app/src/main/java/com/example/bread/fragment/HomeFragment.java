@@ -52,15 +52,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * HomeFragment - Fragment
- *
+ * <p>
  * Role / Purpose
  * Displays recent mood events from followed users and provides user search with follow capability.
  * Includes filters and interactive mood detail views.
- *
+ * <p>
  * Design Pattern
  * Fragment Pattern: Encapsulates home screen UI and behavior.
  * MVC Pattern: Combines MoodEventRepository (Model), Adapter (Controller), and Fragment (View).
- *
+ * <p>
  * Outstanding Issues / Comments
  * Search input is debounced manually but could be improved with lifecycle-aware coroutines or Rx.
  */
@@ -91,8 +91,8 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
 
     // User search
     private UserAdapter userAdapter;
-    private List<Participant> userList = new ArrayList<>();
-    private AtomicBoolean isSearching = new AtomicBoolean(false);
+    private final List<Participant> userList = new ArrayList<>();
+    private final AtomicBoolean isSearching = new AtomicBoolean(false);
 
     // Handler for delayed searches
     private Runnable searchRunnable;
@@ -190,10 +190,12 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
         // Set up search text watcher with debounce
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -340,7 +342,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
 
             // Filter out the current user from results
             for (Participant participant : participants) {
-                if (!participant.getUsername().toLowerCase().equals(currentUsername.toLowerCase())) {
+                if (!participant.getUsername().equalsIgnoreCase(currentUsername)) {
                     userList.add(participant);
                 }
             }
@@ -430,10 +432,10 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
     }
 
     @Override
-    public void onUserClick(Participant participant){
+    public void onUserClick(Participant participant) {
         usernameText = participant.getUsername();
 
-        if (Objects.equals(usernameText, currentUsername)){
+        if (Objects.equals(usernameText, currentUsername)) {
             Toast.makeText(getContext(), "Tapped on your profile", Toast.LENGTH_SHORT).show();
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
@@ -441,8 +443,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
             );
             transaction.add(R.id.frame_layout, new ProfileFragment());
             transaction.commit();
-        }
-        else{
+        } else {
             Toast.makeText(getContext(), "Tapped on " + participant.getUsername(), Toast.LENGTH_SHORT).show();
             Bundle bundle = new Bundle();
             bundle.putString("text", usernameText);
@@ -626,7 +627,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
      * Filters mood events by emotional state
      *
      * @param events List of events to filter
-     * @param state Emotional state to filter by
+     * @param state  Emotional state to filter by
      * @return Filtered list containing only events with the specified emotional state
      */
     private ArrayList<MoodEvent> filterByEmotionalState(ArrayList<MoodEvent> events, MoodEvent.EmotionalState state) {
@@ -644,7 +645,7 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
     /**
      * Filters mood events by keyword in reason
      *
-     * @param events List of events to filter
+     * @param events  List of events to filter
      * @param keyword Keyword to search for in reason field
      * @return Filtered list containing only events with reasons containing the keyword
      */

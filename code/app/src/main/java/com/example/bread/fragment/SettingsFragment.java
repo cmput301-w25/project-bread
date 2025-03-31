@@ -1,5 +1,6 @@
 package com.example.bread.fragment;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -29,7 +30,6 @@ import androidx.annotation.RequiresExtension;
 import androidx.fragment.app.Fragment;
 
 import com.example.bread.R;
-import com.example.bread.model.Participant;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.ImageHandler;
 import com.example.bread.view.LoginPage;
@@ -42,15 +42,15 @@ import java.util.Objects;
 
 /**
  * SettingsFragment - Fragment
- *
+ * <p>
  * Role / Purpose
  * Allows users to view and update their account settings including profile image and name.
  * Supports logout functionality and navigational dismissal back to previous screen.
- *
+ * <p>
  * Design Pattern
  * Fragment Pattern: Encapsulates account settings UI.
  * MVC Pattern: Connects UI to data using ParticipantRepository and Firebase interactions.
- *
+ * <p>
  * Outstanding Issues / Comments
  * Profile picture updates do not confirm upload completion before UI feedback.
  * Image handling requires API 30+ (R+); limited device support without fallback.
@@ -147,7 +147,8 @@ public class SettingsFragment extends Fragment {
     }
 
     /**
-     * Loads the user's profile picture from Firestore and sets it on the profile image button
+     * Loads the user's profile picture from Firestore and sets it on the profile image button.
+     * If a valid image exists, it is decoded from Base64 and displayed.
      */
     private void loadProfilePicture() {
         if (currentUsername == null) return;
@@ -163,7 +164,8 @@ public class SettingsFragment extends Fragment {
     }
 
     /**
-     * Opens the system image picker to select a profile picture
+     * Opens the system image picker to allow the user to select a new profile picture.
+     * Requires Android 11 (API level 30) with extension version 2 or higher.
      */
     @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
     private void pickImage() {
@@ -172,7 +174,8 @@ public class SettingsFragment extends Fragment {
     }
 
     /**
-     * Registers the image picker launcher
+     * Registers an ActivityResultLauncher to handle the result of image selection.
+     * Converts the selected image to Base64 and triggers a profile update in Firestore.
      */
     private void registerImagePicker() {
         imagePickerLauncher = registerForActivityResult(
@@ -180,7 +183,8 @@ public class SettingsFragment extends Fragment {
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
                     public void onActivityResult(ActivityResult result) {
-                        if (result.getResultCode() == getActivity().RESULT_OK) {
+                        getActivity();
+                        if (result.getResultCode() == Activity.RESULT_OK) {
                             if (result.getData() != null) {
                                 try {
                                     Uri imageUri = result.getData().getData();
@@ -208,9 +212,9 @@ public class SettingsFragment extends Fragment {
     }
 
     /**
-     * Updates the profile picture in Firestore
+     * Updates the profile picture of the current user in Firestore.
      *
-     * @param base64Image the Base64 encoded image
+     * @param base64Image The new profile picture encoded as a Base64 string.
      */
     private void updateProfilePicture(String base64Image) {
         if (currentUsername == null || base64Image == null) return;
@@ -227,6 +231,10 @@ public class SettingsFragment extends Fragment {
                 });
     }
 
+    /**
+     * Opens a dialog allowing the user to edit their first and last name.
+     * Pre-fills the dialog with existing name data and updates Firestore upon confirmation.
+     */
     public void editName() {
         if (getContext() == null) return;
 
