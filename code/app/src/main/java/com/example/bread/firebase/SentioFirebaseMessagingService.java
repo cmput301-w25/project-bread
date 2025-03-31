@@ -12,10 +12,29 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
-
+/**
+ *
+ * Role / Purpose:
+ * - Represents a service class for handling Firebase Cloud Messaging (FCM) messages.
+ * - Receives and processes FCM messages.
+ * - Handles token management and updates.
+ * - Manages different types of data payloads from FCM.
+ *
+ * - Design Patterns:
+ * - Observer: The `FirebaseMessagingService` is an observer of FCM messages.
+ *
+ * Outstanding Issues:
+ * - Error handling for token saving and message processing could be made more comprehensive.
+ *
+ */
 public class SentioFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FirebaseMsgService";
 
+    /**
+     * Called when a message is received.
+     *
+     * @param remoteMessage The remote message.
+     */
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
         Log.d(TAG, "From: " + remoteMessage.getFrom());
@@ -42,6 +61,11 @@ public class SentioFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
+    /**
+     * Handles data messages received from FCM.
+     *
+     * @param data The data payload of the message.
+     */
     private void handleDataMessage(Map<String, String> data) {
         String notificationType = data.get("type");
         String title = data.get("title");
@@ -88,6 +112,11 @@ public class SentioFirebaseMessagingService extends FirebaseMessagingService {
         saveFCMTokenToFirestore(token);
     }
 
+    /**
+     * Saves the FCM token to Firestore.
+     *
+     * @param token The FCM token to save.
+     */
     private void saveFCMTokenToFirestore(String token) {
         // Get current user
         String username = getCurrentUsername();
@@ -96,6 +125,11 @@ public class SentioFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
+    /**
+     * Retrieves the current username from SharedPreferences.
+     *
+     * @return The current username.
+     */
     private String getCurrentUsername() {
         // Get username from SharedPreferences
         return getSharedPreferences("sharedPrefs", MODE_PRIVATE)
