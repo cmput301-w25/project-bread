@@ -51,9 +51,20 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * Represents the home page of the app, where users can view mood events from users they follow.
- * Also includes search functionality to find and follow other users.
+ * HomeFragment - Fragment
+ *
+ * Role / Purpose
+ * Displays recent mood events from followed users and provides user search with follow capability.
+ * Includes filters and interactive mood detail views.
+ *
+ * Design Pattern
+ * Fragment Pattern: Encapsulates home screen UI and behavior.
+ * MVC Pattern: Combines MoodEventRepository (Model), Adapter (Controller), and Fragment (View).
+ *
+ * Outstanding Issues / Comments
+ * Search input is debounced manually but could be improved with lifecycle-aware coroutines or Rx.
  */
+
 public class HomeFragment extends Fragment implements UserAdapter.UserInteractionListener {
 
     private static final String TAG = "HomeFragment";

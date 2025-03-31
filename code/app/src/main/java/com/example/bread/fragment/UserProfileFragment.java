@@ -32,8 +32,21 @@ import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
- * Represents the profile page of the app, where users can view their profile information.
+ * UserProfileFragment - Fragment
+ *
+ * Role / Purpose
+ * Displays another user's profile information including follower/following count, profile picture,
+ * and most recent mood event. Allows current user to send a follow request.
+ *
+ * Design Pattern
+ * Fragment Pattern: Represents a UI screen within the navigation flow.
+ * MVC Pattern: Uses repositories to retrieve and bind participant and mood event data.
+ *
+ * Outstanding Issues / Comments
+ * Does not currently support loading the full list of mood events or followers.
+ * Real-time updates are limited to initial fetch; no active listeners on mood changes.
  */
+
 public class UserProfileFragment extends Fragment {
 
     private static final String TAG = "UserProfileFragment";

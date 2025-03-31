@@ -25,15 +25,15 @@ import java.util.List;
 /**
  * EventDetailAdapter - Controller
  *
- * Role / Purpose:
+ * Role / Purpose
  * Adapter uses a RecyclerView to display a MoodEvent and associated comments
  * Used in the Event Details screen to allow users to view and scroll through an event and its responses.
  *
- * Design Pattern:
+ * Design Pattern
  * Adapter Pattern: Bridges between data (MoodEvent, Comment) and the RecyclerView UI.
  * ViewHolder Pattern: Used for performance optimization in view recycling.
  *
- * Outstanding Issues / Comments:
+ * Outstanding Issues / Comments
  * Comment loading is static and doesn't support pagination or real-time updates.
  */
 

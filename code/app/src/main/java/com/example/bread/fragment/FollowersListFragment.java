@@ -32,6 +32,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * FollowersListFragment - Fragment
+ *
+ * Role / Purpose
+ * Displays a list of followers or following users for a given participant.
+ * Provides search and interaction features, such as unfollowing or removing a follower.
+ *
+ * Design Pattern
+ * Fragment Pattern: Modular UI component.
+ * MVC Pattern: Uses ParticipantRepository (Model) and FollowerAdapter (Controller).
+ *
+ * Outstanding Issues / Comments
+ * User interaction logic is tightly coupled with UI update logic; potential for refactoring for separation of concerns.
+ */
+
+
 public class FollowersListFragment extends Fragment implements FollowerAdapter.OnUserInteractionListener {
 
     private static final String TAG = "FollowersListFragment";

@@ -20,20 +20,20 @@ import java.util.List;
 /**
  * FollowRequestAdapter - Controller
  *
- * Role / Purpose:
+ * Role / Purpose
  * Adapter that populates RecylerView list with follow requests
  * Displays participant information (username, name, and profile image) per request
  * Uses RequestActionListener to handle interactions
  *
- * Design Pattern:
+ * Design Pattern
  * Adapter Pattern: Binds FollowRequest data to the RecyclerView.
  * ViewHolder Pattern: Improves performance through view recycling.
  * Listener Pattern: Delegates interaction handling (accept/decline) outside of adapter.
  * Repository Pattern: Uses ParticipantRepository to fetch participant display data.
  *
- * Outstanding Issues:
- * - Error handling is minimal when fetching participant data (null on failure).
- * - Assumes stable data (no real-time updates or pagination).
+ * Outstanding Issues
+ * Error handling is minimal when fetching participant data (null on failure).
+ * Assumes stable data (no real-time updates or pagination).
  */
 
 public class FollowRequestAdapter extends RecyclerView.Adapter<FollowRequestAdapter.RequestViewHolder> {

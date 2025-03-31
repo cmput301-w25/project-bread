@@ -20,16 +20,16 @@ import java.util.List;
 /**
  * FollowerAdapter - Controller
  *
- * Role / Purpose:
+ * Role / Purpose
  * Adapter that populates a RecyclerView list with followers or following profiles of current user
  * Handles profile picture, username, and unfollow button
  *
- * Design Pattern:
+ * Design Pattern
  * Adapter Pattern: Binds Participant data to the RecyclerView UI.
  * ViewHolder Pattern: Caches view lookups for smooth scrolling and better performance.
  * Listener Pattern: Uses a custom listener interface to decouple interaction logic.
  *
- * Outstanding Issues / Comments:
+ * Outstanding Issues / Comments
  * Currently assumes the user list and list type won't change dynamically after instantiation.
  */
 

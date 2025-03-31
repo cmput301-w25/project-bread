@@ -26,7 +26,6 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresExtension;
 import androidx.fragment.app.DialogFragment;
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
@@ -43,8 +42,24 @@ import com.google.firebase.firestore.DocumentReference;
 import java.util.Map;
 
 /**
- * Represents a dialog where users can add a mood event to their history.
+ * AddMoodEventFragment - Fragment
+ *
+ * Role / Purpose
+ * A DialogFragment that provides a form interface for users to create and submit a new MoodEvent.
+ * It allows the user to input a title, select emotional state and social situation, optionally attach an image and/or location, and set the visibility of the mood event.
+ * The form includes input validation and persists the mood event to Firestore using MoodEventRepository.
+ * The fragment also navigates back to HomeFragment after a successful save.
+ *
+ * Design Patterns
+ * Observer Pattern: Uses listeners and callbacks for handling UI interactions and activity results.
+ * Repository Pattern: Abstracts data operations via MoodEventRepository and ParticipantRepository.
+ * Singleton Pattern: Accesses shared services like FirebaseAuth and LocationHandler.
+ * MVC Pattern: Fragment acts as a controller managing view input and model updates.
+ *
+ * Outstanding Issues
+ * Updates UI before Firebase save confirms success, can lead to misleading UI.
  */
+
 public class AddMoodEventFragment extends DialogFragment {
     private static final String TAG = "AddMoodEventFragment";
     private Spinner emotionalStateSpinner, socialSituationSpinner;
@@ -196,6 +211,9 @@ public class AddMoodEventFragment extends DialogFragment {
         return view;
     }
 
+    /**
+     *
+     */
     private void saveMoodEvent() {
         Log.i(TAG, "Starting saveMoodEvent");
 

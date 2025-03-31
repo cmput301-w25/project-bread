@@ -54,9 +54,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents the map page of the app, where users can view a map of their location and nearby
- * mood events.
+ * MapFragment - Fragment
+ *
+ * Role / Purpose
+ * Displays a map showing nearby mood events with filtering options.
+ * Handles user location, mood filtering, and displays map markers with mood icons.
+ *
+ * Design Pattern
+ * Fragment Pattern: Encapsulates map UI logic.
+ * Singleton Pattern: Uses LocationHandler as a centralized utility.
+ * Observer Pattern: Reacts to location and Firestore data updates.
+ *
+ * Outstanding Issues / Comments
+ * Initial fetch may occur before permissions are granted; consider sequencing fetch after permission result.
  */
+
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = "MapFragment";

@@ -39,8 +39,20 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Represents the profile page of the app, where users can view their profile information.
+ * ProfileFragment - Fragment
+ *
+ * Role / Purpose
+ * Shows the current user's profile, recent mood event, and a preview of follow requests.
+ * Provides navigation to followers, following, settings, and full request list.
+ *
+ * Design Pattern
+ * Fragment Pattern: Modular UI unit.
+ * MVC Pattern: Interfaces with repository and adapters to manage state and interactions.
+ *
+ * Outstanding Issues / Comments
+ * Recent mood event reloads on every resume; caching could improve performance.
  */
+
 public class ProfileFragment extends Fragment {
 
     private static final String TAG = "ProfileFragment";

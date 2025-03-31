@@ -31,6 +31,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * UserSearchFragment - Fragment
+ *
+ * Role / Purpose
+ * Enables searching for participants by username and sending follow requests.
+ * Filters out the current user and handles request status checking.
+ *
+ * Design Pattern
+ * Fragment Pattern: Modular part of the screen.
+ * Observer Pattern: Uses Firebase callbacks to reflect real-time changes.
+ *
+ * Outstanding Issues / Comments
+ * No debouncing logic for search input; repeated queries may be sent quickly.
+ */
+
 public class UserSearchFragment extends Fragment implements UserAdapter.UserInteractionListener {
 
     private static final String TAG = "UserSearchFragment";

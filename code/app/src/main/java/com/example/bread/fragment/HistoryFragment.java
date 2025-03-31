@@ -56,10 +56,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
 /**
- * Represents the history page of the app, where users can view their mood events and apply filters.
+ * HistoryFragment - Fragment
+ *
+ * Role / Purpose
+ * Shows a list of the user's mood events with options to view, filter, and edit or delete them.
+ * Supports weekly filtering and analytics navigation.
+ *
+ * Design Pattern
+ * Fragment Pattern: Modular screen element.
+ * MVC Pattern: MoodEventRepository (Model), Adapter (Controller), Fragment (View).
+ *
+ * Outstanding Issues / Comments
+ * Filters reset on screen re-entry; state persistence may improve user experience.
  */
+
 public class HistoryFragment extends Fragment {
 
     private static final String TAG = "HistoryFragment";

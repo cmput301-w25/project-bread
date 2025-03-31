@@ -35,6 +35,20 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * EventDetail - Fragment
+ *
+ * Role / Purpose
+ * Displays a detailed view of a specific MoodEvent and its comments.
+ * Allows users to view, add, and interact with comments related to the event.
+ *
+ * Design Pattern
+ * Fragment Pattern: Encapsulates UI and behavior for a modular part of the screen.
+ * MVC Pattern: Acts as the View, working with MoodEventRepository (Model) and Adapter (Controller).
+ *
+ * Outstanding Issues / Comments
+ * Comments are re-fetched on each new addition, which could be optimized with live updates or incremental loading.
+ */
 
 public class EventDetail extends Fragment {
 

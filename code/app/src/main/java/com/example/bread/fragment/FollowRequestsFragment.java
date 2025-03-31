@@ -26,9 +26,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Fragment that displays follow requests for the current user.
- * Allows accepting or declining follow requests and offers to follow back when accepting.
+ * FollowRequestsFragment - Fragment
+ *
+ * Role / Purpose
+ * Displays incoming follow requests for the current user and allows accepting or declining them.
+ * Provides option to follow back upon acceptance.
+ *
+ * Design Pattern
+ * Fragment Pattern: Encapsulates UI logic for request handling.
+ * Observer Pattern: Listens for follow request data changes.
+ *
+ * Outstanding Issues / Comments
+ * UI may briefly flicker on data reload due to full refresh; could benefit from a diff-based adapter update.
  */
+
+
 public class FollowRequestsFragment extends Fragment implements FollowRequestAdapter.RequestActionListener {
 
     private static final String TAG = "FollowRequestsFragment";

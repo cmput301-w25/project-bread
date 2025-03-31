@@ -34,6 +34,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * AnalyticsFragment
+ *
+ * Role / Purpose:
+ * A Fragment that visualizes the user's mood data using interactive charts. Displays:
+ * - Current streak and longest streak of daily mood logging.
+ * - A pie chart representing the frequency of each emotional state.
+ * - A stacked bar chart showing monthly mood distributions for the current year.
+ * - A line chart with a 30-day trend and 7-day moving average of mood scores.
+ *
+ * The mood events are passed in as arguments via the `newInstance()` factory method and
+ * rendered using the MPAndroidChart library.
+ *
+ * Design Patterns:
+ * - Factory Pattern: Uses a static `newInstance()` method to create a configured fragment instance.
+ * - MVC Pattern: Fragment acts as a controller, coordinating data processing and chart rendering.
+ * - Observer Pattern: UI updates react to data passed in via arguments (though not LiveData or ViewModel-based).
+ * - Strategy Pattern (conceptually): Different chart types encapsulate different data visualization strategies.
+ *
+ * Outstanding Issues:
+ * - Chart interactions (e.g., tapping, zooming) are not enabled or configured.
+ * - Data passed via arguments must implement Serializable; may be better with Parcelable or ViewModel for large datasets.
+ * - Streak calculations assume fixed 24-hour periods; may not account for timezone or edge cases.
+ * - Pie chart, bar chart, and line chart could be extracted to helper methods or a utility class for better separation of concerns.
+ * - No unit tests or input validation on mood data consistency.
+ */
+
 public class AnalyticsFragment extends Fragment {
 
     private static final String ARG_PARAM1 = "moodEvents";

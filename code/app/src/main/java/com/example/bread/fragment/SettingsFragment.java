@@ -41,8 +41,21 @@ import com.google.firebase.firestore.DocumentReference;
 import java.util.Objects;
 
 /**
- * Represents the settings page of the app, where users can edit their account details, and log out.
+ * SettingsFragment - Fragment
+ *
+ * Role / Purpose
+ * Allows users to view and update their account settings including profile image and name.
+ * Supports logout functionality and navigational dismissal back to previous screen.
+ *
+ * Design Pattern
+ * Fragment Pattern: Encapsulates account settings UI.
+ * MVC Pattern: Connects UI to data using ParticipantRepository and Firebase interactions.
+ *
+ * Outstanding Issues / Comments
+ * Profile picture updates do not confirm upload completion before UI feedback.
+ * Image handling requires API 30+ (R+); limited device support without fallback.
  */
+
 public class SettingsFragment extends Fragment {
 
     private static final String TAG = "SettingsFragment";
