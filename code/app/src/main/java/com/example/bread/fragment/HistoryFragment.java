@@ -40,20 +40,8 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * HistoryFragment - Fragment
- * <p>
- * Role / Purpose
- * Shows a list of the user's mood events with options to view, filter, and edit or delete them.
- * Supports weekly filtering and analytics navigation.
- * <p>
- * Design Pattern
- * Fragment Pattern: Modular screen element.
- * MVC Pattern: MoodEventRepository (Model), Adapter (Controller), Fragment (View).
- * <p>
- * Outstanding Issues / Comments
- * Filters reset on screen re-entry; state persistence may improve user experience.
+ * Represents the history page of the app, where users can view their mood events and apply filters.
  */
-
 public class HistoryFragment extends Fragment {
 
     private static final String TAG = "HistoryFragment";
@@ -172,6 +160,23 @@ public class HistoryFragment extends Fragment {
     }
 
     /**
+     * Shows detailed view for a selected mood event
+     *
+     * @param moodEvent The selected mood event
+     */
+    private void showMoodDetailsDialog(MoodEvent moodEvent) {
+        PersonalEventDetail fragment = PersonalEventDetail.newInstance(moodEvent);
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+        );
+        transaction.add(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+
+    /**
      * Displays a confirmation dialog asking the user if they want to delete the selected mood events.
      * If the user confirms, deletion is triggered.
      */
@@ -281,11 +286,6 @@ public class HistoryFragment extends Fragment {
         });
     }
 
-    /**
-     * Applies the currently selected filters to the mood events list.
-     * Filters by recent week, emotional state, and keyword.
-     * Updates the adapter and notifies the user if no matches are found.
-     */
     private void applyFilters() {
         if (allMoodEvents.isEmpty() && !moodEventArrayList.isEmpty()) {
             allMoodEvents.addAll(moodEventArrayList);
@@ -314,12 +314,6 @@ public class HistoryFragment extends Fragment {
         }
     }
 
-    /**
-     * Filters a list of mood events to only include those from the past 7 days.
-     *
-     * @param events The list of mood events to filter.
-     * @return A list of mood events that occurred within the past week.
-     */
     private ArrayList<MoodEvent> filterByRecentWeek(ArrayList<MoodEvent> events) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
@@ -335,13 +329,6 @@ public class HistoryFragment extends Fragment {
         return filteredList;
     }
 
-    /**
-     * Filters a list of mood events to only include those with a matching emotional state.
-     *
-     * @param events The list of mood events to filter.
-     * @param state The emotional state to match.
-     * @return A list of mood events with the specified emotional state.
-     */
     private ArrayList<MoodEvent> filterByEmotionalState(ArrayList<MoodEvent> events, MoodEvent.EmotionalState state) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
 
@@ -354,13 +341,6 @@ public class HistoryFragment extends Fragment {
         return filteredList;
     }
 
-    /**
-     * Filters a list of mood events to only include those whose reason field contains a given keyword.
-     *
-     * @param events The list of mood events to filter.
-     * @param keyword The keyword to search for in the reason.
-     * @return A list of mood events whose reason contains the keyword.
-     */
     private ArrayList<MoodEvent> filterByKeyword(ArrayList<MoodEvent> events, String keyword) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
 
@@ -373,10 +353,6 @@ public class HistoryFragment extends Fragment {
         return filteredList;
     }
 
-    /**
-     * Resets all filters and restores the full list of mood events.
-     * Sorts the list by timestamp (most recent first).
-     */
     private void resetFilters() {
         if (!allMoodEvents.isEmpty()) {
             moodEventArrayList.clear();
