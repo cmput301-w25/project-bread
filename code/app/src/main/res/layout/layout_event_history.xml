@@ -41,19 +41,20 @@
 
             <!-- Reason / Title -->
 
+            <!-- Reason / Title -->
+
             <TextView
                 android:id="@+id/date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:layout_marginStart="264dp"
                 android:layout_marginTop="4dp"
                 android:text="DD/MM/YYYY"
                 android:textColor="@android:color/white"
                 android:textSize="12sp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textMood" />
+                app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Reason / Title -->
             <TextView
                 android:id="@+id/history_title_text"
                 android:layout_width="0dp"
@@ -71,17 +72,17 @@
 
             <!-- Optional Checkbox (if still needed) -->
 
-            <CheckBox
+            <ImageView
                 android:id="@+id/checkbox"
                 android:layout_width="39dp"
                 android:layout_height="39dp"
                 android:layout_marginTop="1dp"
+                android:src="@drawable/outline_toggle_off_24"
                 app:layout_constraintBottom_toTopOf="@+id/textMood"
-                app:layout_constraintEnd_toStartOf="@+id/event_home_image_holder"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/history_title_text"
                 app:layout_constraintVertical_bias="0.0" />
+
 
             <TextView
                 android:id="@+id/history_social_situation_text"
@@ -112,38 +113,15 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/history_title_text" />
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/event_home_image_holder"
-                android:layout_width="60dp"
-                android:layout_height="58dp"
-                app:cardCornerRadius="8dp"
-                app:cardElevation="2dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.97"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.72">
-
-                <ImageView
-                    android:id="@+id/event_home_image"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop" />
-            </androidx.cardview.widget.CardView>
-
-
             <ImageView
                 android:id="@+id/visibility_icon"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="43dp"
                 android:contentDescription="Visibility Icon"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.12"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
+                app:layout_constraintStart_toEndOf="@+id/history_social_situation_text"
+                app:layout_constraintTop_toBottomOf="@+id/history_title_text" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
