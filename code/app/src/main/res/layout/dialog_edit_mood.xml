@@ -194,7 +194,7 @@
                     android:layout_height="56dp"
                     android:layout_marginStart="12dp"
                     android:layout_marginTop="4dp"
-                    android:text="Make Public"
+                    android:text="Make Private"
                     android:textColor="@color/white"
                     app:checkedIcon="@drawable/ic_check"
                     app:checkedIconEnabled="true"
@@ -231,11 +231,11 @@
 
                 <ImageButton
                     android:id="@+id/image_edit_button"
-                    android:layout_width="50dp"
-                    android:layout_height="40dp"
-                    android:background="@drawable/camera_rounded_baclground"
+                    android:layout_width="55dp"
+                    android:layout_height="55dp"
+                    android:background="@drawable/rounded_background"
+                    android:src="@drawable/material_camera"
                     android:contentDescription="Select image"
-                    android:src="@drawable/camera_icon"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -244,7 +244,7 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_marginStart="8dp"
-                    android:background="@drawable/camera_rounded_baclground"
+                    android:background="@drawable/camera_rounded_background"
                     android:contentDescription="Remove image"
                     android:src="@android:drawable/ic_menu_delete"
                     android:visibility="gone"
