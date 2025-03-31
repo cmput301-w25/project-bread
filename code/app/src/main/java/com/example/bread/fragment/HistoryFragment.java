@@ -1,7 +1,6 @@
 package com.example.bread.fragment;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
@@ -12,14 +11,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
-
-
-import androidx.activity.result.ActivityResultLauncher;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -28,7 +23,6 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
 import com.example.bread.controller.HistoryMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
-
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -187,13 +181,25 @@ public class HistoryFragment extends Fragment {
      * If the user confirms, deletion is triggered.
      */
     private void showDeleteConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Confirm Deletion");
-        builder.setMessage("Are you sure you want to delete the selected mood events?");
-        builder.setPositiveButton("Delete", (dialog, which) -> deleteSelectedMoodEvents());
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_delete_mood, null);
+        builder.setView(dialogView);
+
+        Button deleteButton = dialogView.findViewById(R.id.delete_mood_button);
+        Button cancelButton = dialogView.findViewById(R.id.cancel_delete_mood);
+
         AlertDialog alertDialog = builder.create();
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
         alertDialog.show();
+
+        deleteButton.setOnClickListener(v -> {
+            deleteSelectedMoodEvents();
+            alertDialog.dismiss();
+        });
+
+        cancelButton.setOnClickListener(v -> alertDialog.dismiss());
     }
 
     /**

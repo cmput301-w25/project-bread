@@ -89,9 +89,9 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
             }
 
             if (moodEvent.getVisibility() != null) {
-                if(moodEvent.getVisibility().toString().equals("PUBLIC")){
+                if (moodEvent.getVisibility().toString().equals("PUBLIC")) {
                     holder.visibilityIcon.setImageResource(R.drawable.ic_public); //Create ic_public.xml in drawable
-                }else{
+                } else {
                     holder.visibilityIcon.setImageResource(R.drawable.ic_private); //create ic_private.xml in drawable
                 }
                 holder.visibilityIcon.setVisibility(View.VISIBLE);
@@ -99,7 +99,7 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
                 holder.visibilityIcon.setVisibility(View.GONE);
             }
 
-            // Setting the toggle drawable based on whether this event is selected
+            holder.toggleButton.setChecked(selectedEvents.contains(moodEvent));
             holder.toggleButton.setOnClickListener(v -> {
                 if (selectedEvents.contains(moodEvent)) {
                     selectedEvents.remove(moodEvent);

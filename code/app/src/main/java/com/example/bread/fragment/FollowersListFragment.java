@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -47,13 +48,13 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
     private ProgressBar progressBar;
     private TextView emptyView;
 
-    private List<Participant> originalList = new ArrayList<>();
-    private List<Participant> filteredList = new ArrayList<>();
+    private final List<Participant> originalList = new ArrayList<>();
+    private final List<Participant> filteredList = new ArrayList<>();
     private FollowerAdapter followerAdapter;
     private ParticipantRepository participantRepository;
 
     private String usernameText;
-    private UserProfileFragment userProfileFragment = new UserProfileFragment();
+    private final UserProfileFragment userProfileFragment = new UserProfileFragment();
 
     public FollowersListFragment() {
         // Required empty public constructor
@@ -110,10 +111,12 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         // Set up search
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -226,7 +229,7 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String currentUsername = currentUser.getDisplayName();
 
-        if (Objects.equals(usernameText, currentUsername)){
+        if (Objects.equals(usernameText, currentUsername)) {
             Toast.makeText(getContext(), "Tapped on your profile", Toast.LENGTH_SHORT).show();
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
@@ -234,8 +237,7 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
             );
             transaction.add(R.id.frame_layout, new ProfileFragment());
             transaction.commit();
-        }
-        else{
+        } else {
             Toast.makeText(getContext(), "Tapped on " + participant.getUsername(), Toast.LENGTH_SHORT).show();
             Bundle bundle = new Bundle();
             bundle.putString("text", usernameText);
@@ -258,19 +260,34 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
                 ? "Are you sure you want to remove " + participant.getUsername() + " from your followers?"
                 : "Are you sure you want to unfollow " + participant.getUsername() + "?";
 
-        new AlertDialog.Builder(getContext())
-                .setTitle("Confirm " + action)
-                .setMessage(message)
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    // Perform the removal based on the list type
-                    if (listType == ParticipantRepository.ListType.FOLLOWERS) {
-                        removeFollower(participant, position);
-                    } else {
-                        unfollowUser(participant, position);
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_remove_follow, null);
+        builder.setView(dialogView);
+
+        TextView messageText = dialogView.findViewById(R.id.remove_follow_confirmation_text);
+        Button removeButton = dialogView.findViewById(R.id.button_remove_follow);
+        Button cancelButton = dialogView.findViewById(R.id.cancel_remove_follow);
+
+        messageText.setText(message);
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        dialog.show();
+
+        removeButton.setOnClickListener(v -> {
+            // Perform the removal based on the list type
+            if (listType == ParticipantRepository.ListType.FOLLOWERS) {
+                removeFollower(participant, position);
+            } else {
+                unfollowUser(participant, position);
+            }
+            dialog.dismiss();
+        });
+
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
     }
 
     private void removeFollower(Participant participant, int position) {
