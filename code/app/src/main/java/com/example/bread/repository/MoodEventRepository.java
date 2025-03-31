@@ -33,7 +33,22 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Repository class for handling mood events in the database
+ * MoodEventRepository - Repository
+ *
+ * Role / Purpose
+ * Handles all interactions with the Firestore database related to MoodEvent objects.
+ * Supports creating, updating, deleting, and retrieving mood events and associated comments.
+ * Enables fetching mood events from followed users, with filtering by location, visibility, and recency.
+ * Employs caching strategies to improve performance and reduce unnecessary network requests.
+ *
+ * Design Patterns
+ * Repository Pattern: Abstracts data access and operations, separating business logic from data layer.
+ * Singleton Pattern: Leverages shared instances like FirebaseService and ParticipantRepository.
+ * Observer Pattern: Uses success and failure listeners to handle asynchronous operations and UI updates.
+ * Caching Strategy: Implements a simple memory-based cache for mood events to minimize redundant queries.
+ *
+ * Outstanding Issues
+ * - Partial real-time support: methods rely on direct fetches rather than listeners for data changes.
  */
 public class MoodEventRepository {
     private final FirebaseService firebaseService;

@@ -23,8 +23,22 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Repository class for handling participants in the database
+ * ParticipantRepository - Repository
+ *
+ * Role / Purpose
+ * Manages all Firestore operations related to `Participant` entities, including profile data, followers, following relationships, and follow requests.
+ * Provides methods to add, fetch, and update participant information, and to manage social connections (follow/unfollow/remove/search).
+ * Acts as the single point of access for participant-related data and abstracts the underlying Firestore interactions.
+ *
+ * Design Patterns
+ * Repository Pattern: Encapsulates Firestore queries and updates for participant data.
+ * Singleton Pattern (indirect via FirebaseService): Shares one instance of the database service across repository usage.
+ * Observer Pattern: Uses Firestore listeners and callbacks for asynchronous updates.
+ *
+ * Outstanding Issues
+ * - Username-based lookups rely on document structure; changes to Firestore schema will require adjustments.
  */
+
 public class ParticipantRepository {
     private final FirebaseService firebaseService;
     private static final String TAG = "ParticipantRepository";
@@ -498,6 +512,5 @@ public class ParticipantRepository {
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e ->
                         Log.e(TAG, "Failed to remove " + targetUsername + " from " + username + "'s following", e));
     }
-
 
 }
