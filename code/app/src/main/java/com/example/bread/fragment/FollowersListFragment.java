@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -294,19 +295,34 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
                 ? "Are you sure you want to remove " + participant.getUsername() + " from your followers?"
                 : "Are you sure you want to unfollow " + participant.getUsername() + "?";
 
-        new AlertDialog.Builder(getContext())
-                .setTitle("Confirm " + action)
-                .setMessage(message)
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    // Perform the removal based on the list type
-                    if (listType == ParticipantRepository.ListType.FOLLOWERS) {
-                        removeFollower(participant, position);
-                    } else {
-                        unfollowUser(participant, position);
-                    }
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_remove_follow, null);
+        builder.setView(dialogView);
+
+        TextView messageText = dialogView.findViewById(R.id.remove_follow_confirmation_text);
+        Button removeButton = dialogView.findViewById(R.id.button_remove_follow);
+        Button cancelButton = dialogView.findViewById(R.id.cancel_remove_follow);
+
+        messageText.setText(message);
+
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        dialog.show();
+
+        removeButton.setOnClickListener(v -> {
+            // Perform the removal based on the list type
+            if (listType == ParticipantRepository.ListType.FOLLOWERS) {
+                removeFollower(participant, position);
+            } else {
+                unfollowUser(participant, position);
+            }
+            dialog.dismiss();
+        });
+
+        cancelButton.setOnClickListener(v -> dialog.dismiss());
     }
 
     /**

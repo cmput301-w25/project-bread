@@ -211,4 +211,7 @@ public class EventDetail extends Fragment {
             eventRecyclerView.setAdapter(eventDetailAdapter);
         }, e -> Log.e(TAG, "Error fetching comments", e));
     }
+
+
+
 }
