@@ -2,23 +2,19 @@ package com.example.bread.controller;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.bread.R;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.utils.EmotionUtils;
-import com.example.bread.utils.ImageHandler;
 import com.example.bread.utils.TimestampUtils;
 
 import java.util.ArrayList;
@@ -37,13 +33,11 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
     }
 
     static class ViewHolder {
-        CheckBox checkBox;
+        ImageView toggleButton;
         TextView socialSituation;
         TextView date;
         TextView mood;
         TextView title;
-        ImageView moodImage;
-        CardView miniImageHolder;
         ImageView visibilityIcon;
         ConstraintLayout eventLayout;
     }
@@ -61,9 +55,7 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
             holder.mood = convertView.findViewById(R.id.textMood);
             holder.eventLayout = convertView.findViewById(R.id.historyConstraintLayout);
             holder.socialSituation = convertView.findViewById(R.id.history_social_situation_text);
-            holder.checkBox = convertView.findViewById(R.id.checkbox);
-            holder.moodImage = convertView.findViewById(R.id.event_home_image);
-            holder.miniImageHolder = convertView.findViewById(R.id.event_home_image_holder);
+            holder.toggleButton = convertView.findViewById(R.id.checkbox);
             holder.visibilityIcon = convertView.findViewById(R.id.visibility_icon);
             convertView.setTag(holder);
         } else {
@@ -75,20 +67,6 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
         if (moodEvent != null) {
             int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
             holder.eventLayout.setBackgroundResource(colorResId);
-            if (moodEvent.getAttachedImage() != null && !moodEvent.getAttachedImage().isEmpty()) {
-                Bitmap imageBitmap = ImageHandler.base64ToBitmap(moodEvent.getAttachedImage());
-                if (imageBitmap != null) {
-                    holder.moodImage.setImageBitmap(imageBitmap);
-                    holder.moodImage.setVisibility(View.VISIBLE);
-                    holder.miniImageHolder.setVisibility(View.VISIBLE);
-                } else {
-                    holder.moodImage.setVisibility(View.GONE);
-                    holder.miniImageHolder.setVisibility(View.GONE);
-                }
-            } else {
-                holder.moodImage.setVisibility(View.GONE);
-                holder.miniImageHolder.setVisibility(View.GONE);
-            }
 
             holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
             holder.title.setText(moodEvent.getTitle());
@@ -120,19 +98,29 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
                 holder.visibilityIcon.setVisibility(View.GONE);
             }
 
-            if (holder.checkBox != null) {
-
-                holder.checkBox.setOnCheckedChangeListener(null);
-                holder.checkBox.setChecked(selectedEvents.contains(moodEvent));
-                holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-
-                    if (isChecked) {
-                        selectedEvents.add(moodEvent);
-                    } else {
-                        selectedEvents.remove(moodEvent);
-                    }
-                });
-            }
+            // Setting the toggle drawable based on whether this event is selected
+            holder.toggleButton.setOnClickListener(v -> {
+                holder.toggleButton.animate()
+                        .scaleX(1.1f)
+                        .scaleY(1.1f)
+                        .setDuration(100)
+                        .withEndAction(() -> {
+                            // Toggle the selection state and change the drawable
+                            if (selectedEvents.contains(moodEvent)) {
+                                selectedEvents.remove(moodEvent);
+                                holder.toggleButton.setImageResource(R.drawable.outline_toggle_off_24);
+                            } else {
+                                selectedEvents.add(moodEvent);
+                                holder.toggleButton.setImageResource(R.drawable.outline_toggle_on_24);
+                            }
+                            // Animate scale back to normal
+                            holder.toggleButton.animate()
+                                    .scaleX(1f)
+                                    .scaleY(1f)
+                                    .setDuration(100)
+                                    .start();
+                        }).start();
+            });
 
             convertView.setOnClickListener(v -> {
                 if (clickListener != null) {
