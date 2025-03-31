@@ -100,6 +100,14 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         }
     }
 
+    /**
+     * Enum representing the visibility of the mood event
+     */
+    public enum Visibility {
+        PRIVATE,
+        PUBLIC;
+    }
+
     private String id;
     private String title;
     @ServerTimestamp
@@ -111,7 +119,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
     private EmotionalState emotionalState;
     private SocialSituation socialSituation;
     private String attachedImage;
-    private String trigger;
+    private Visibility visibility;
 
 
     /**
@@ -135,6 +143,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         this.reason = reason;
         this.emotionalState = emotionalState;
         this.participantRef = participantRef;
+        this.visibility = Visibility.PUBLIC;
     }
 
 
@@ -146,11 +155,11 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
                 ", timestamp=" + timestamp +
                 ", title=" + title +
                 ", reason=" + reason +
-                ", trigger=" + trigger +
                 ", participantRef=" + participantRef.getPath() +
                 ", emotionalState=" + emotionalState +
                 ", socialSituation=" + socialSituation +
                 ", geoInfo=" + geoInfo +
+                ", visibility=" + visibility +
                 '}';
     }
 
@@ -317,21 +326,21 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
     }
 
     /**
-     * Returns the trigger for this mood event.
+     * Returns the visibility of this mood event.
      *
-     * @return the trigger as a String.
+     * @return the visibility as a Visibility enum.
      */
-    public String getTrigger() {
-        return trigger;
+    public Visibility getVisibility() {
+        return visibility;
     }
 
     /**
-     * Sets the trigger for this mood event.
+     * Sets the visibility of this mood event.
      *
-     * @param trigger the trigger to set.
+     * @param visibility the Visibility to set.
      */
-    public void setTrigger(String trigger) {
-        this.trigger = trigger;
+    public void setVisibility(Visibility visibility) {
+        this.visibility = visibility;
     }
 
 
