@@ -12,8 +12,19 @@ import com.google.firebase.firestore.PersistentCacheIndexManager;
 import com.google.firebase.firestore.PersistentCacheSettings;
 
 /**
- * Service class for handling Firebase Firestore database operations,
- * including enabling offline persistent caching and optional auto-indexing.
+ *
+ * Role / Purpose:
+ * - Represents a service class for handling Firebase Firestore database operations.
+ * - Initializes and provides access to Firebase Firestore.
+ * - Enables offline persistent caching and optional auto-indexing.
+ * - Manages network connectivity checks for Firestore operations.
+ *
+ * Design Patterns:
+ * - Singleton: Ensures a single instance of FirebaseFirestore.
+ *
+ * Outstanding Issues:
+ * - Error handling and logging for Firestore operations could be made more comprehensive.
+ *
  */
 public class FirebaseService {
     private static final String TAG = "FirebaseService";
