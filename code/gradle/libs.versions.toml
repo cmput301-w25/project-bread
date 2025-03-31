@@ -10,13 +10,18 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 material = "1.12.0"
+mapsSecret = "2.0.1"
 activity = "1.10.0"
+googlemaps = "18.1.0"
 constraintlayout = "2.2.0"
 mockitoCore = "5.7.0"
 mockitoInline = "5.2.0"
+mpandroidchart = "v3.1.0"
 playServicesLocation = "21.3.0"
 firebaseAuth = "23.2.0"
+firebaseMessaging = "24.1.0"
 legacySupportV4 = "1.0.0"
+espressoContrib = "3.6.1"
 
 [libraries]
 byte-buddy = { module = "net.bytebuddy:byte-buddy", version.ref = "byteBuddy" }
@@ -32,12 +37,16 @@ junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.re
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junitJupiterApi" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+google-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "googlemaps" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockitoCore" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
+mpandroidchart = { module = "com.github.PhilJay:MPAndroidChart", version.ref = "mpandroidchart" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
+espresso-contrib = { group = "androidx.test.espresso", name = "espresso-contrib", version.ref = "espressoContrib" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-
+map-secret = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "mapsSecret" }

@@ -30,6 +30,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.RequiresExtension;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
 import com.example.bread.R;
 import com.example.bread.controller.HistoryMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
@@ -44,6 +47,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -77,7 +81,8 @@ public class HistoryFragment extends Fragment {
 
     // Filter-related variables
     private FloatingActionButton filterButton;
-    private ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
+    private final ArrayList<MoodEvent> allMoodEvents = new ArrayList<>();
+    private final ArrayList<MoodEvent> analyticsMoodEvents = new ArrayList<>();
     private boolean isFilteringByWeek = false;
     private MoodEvent.EmotionalState selectedEmotionalState = null;
     private String searchKeyword = "";
@@ -99,8 +104,25 @@ public class HistoryFragment extends Fragment {
 
         fetchParticipantAndLoadEvents();
 
-        Button deleteButton = view.findViewById(R.id.deleteButton);
+        FloatingActionButton deleteButton = view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
+
+        ImageView chartButton = view.findViewById(R.id.chartButton);
+        chartButton.setOnClickListener(v -> {
+            if (moodEventArrayList.isEmpty()) {
+                Toast.makeText(getContext(), "No mood events to display", Toast.LENGTH_SHORT).show();
+            } else {
+                List<MoodEvent> moodEvents = new ArrayList<>(analyticsMoodEvents);
+                AnalyticsFragment fragment = AnalyticsFragment.newInstance(moodEvents);
+                FragmentManager fragmentManager = getParentFragmentManager();
+                FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                        R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+                );
+                transaction.add(R.id.frame_layout, fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
 
         // Add filter button click listener
         filterButton = view.findViewById(R.id.filter_button);
@@ -151,6 +173,10 @@ public class HistoryFragment extends Fragment {
                         allMoodEvents.clear();
                         allMoodEvents.addAll(moodEventArrayList);
 
+                        // Save mood events for analytics
+                        analyticsMoodEvents.clear();
+                        analyticsMoodEvents.addAll(moodEventArrayList);
+
                         // Reapply any existing filters
                         if (isFilteringByWeek || selectedEmotionalState != null || !searchKeyword.isEmpty()) {
                             applyFilters();
@@ -185,17 +211,25 @@ public class HistoryFragment extends Fragment {
     private void deleteSelectedMoodEvents() {
         MoodEventRepository repository = new MoodEventRepository();
         selectedEvents = ((HistoryMoodEventArrayAdapter) moodEventListView.getAdapter()).getSelectedEvents();
+
+        int deleteCount = selectedEvents.size();
+
         for (MoodEvent event : selectedEvents) {
+            // Remove the event from the list before syncing for the ui to update when user is offline
+            moodEventArrayList.remove(event);
+            allMoodEvents.remove(event);
             repository.deleteMoodEvent(event, new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     getActivity().runOnUiThread(() -> {
-                        moodArrayAdapter.remove(event);
-                        moodArrayAdapter.notifyDataSetChanged();
+                        // This will run when Firebase sync happens, but UI is already updated
+                        Log.d(TAG, "Mood event synced with Firebase: " + event.getId());
                     });
                 }
             }, e -> Toast.makeText(getContext(), "Error deleting event", Toast.LENGTH_SHORT).show());
         }
+        moodArrayAdapter.notifyDataSetChanged();
+        Toast.makeText(getContext(), deleteCount + " event deleted", Toast.LENGTH_SHORT).show();// just for logcat check
         selectedEvents.clear();  // Clear the selection after deletion
     }
 
@@ -224,10 +258,15 @@ public class HistoryFragment extends Fragment {
         // Set the data
         emotionTextView.setText(moodEvent.getEmotionalState().toString());
 
-        // Format date
-        SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
-        String dateString = formatter.format(moodEvent.getTimestamp());
-        dateTextView.setText(dateString);
+        Date timestamp = moodEvent.getTimestamp();
+        //set the date if the timestamp is null to avoid nullpointer exception
+        if (timestamp == null) {
+            dateTextView.setText("No date provided");
+        } else {
+            SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
+            String dateString = formatter.format(timestamp);
+            dateTextView.setText(dateString);
+        }
 
         // Set reason
         reasonTextView.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "No reason provided");
@@ -293,7 +332,7 @@ public class HistoryFragment extends Fragment {
         emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         emotionSpinner.setAdapter(emotionAdapter);
 
-        if (moodEvent.getAttachedImage() != null){
+        if (moodEvent.getAttachedImage() != null) {
             // If image already assigned it is displayed on image button, and blank if not
             editImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
         }
@@ -398,12 +437,25 @@ public class HistoryFragment extends Fragment {
                 return;
             }
 
+            int indexOfMood = moodEventArrayList.indexOf(moodEvent);
+
+
             // **Only save if all validations passed**
             moodEvent.setTitle(newTitle);
             moodEvent.setEmotionalState(newEmotionalState);
             moodEvent.setReason(newReason);
             moodEvent.setSocialSituation(newSocialSituation);
             moodEvent.setAttachedImage(imageBase64);
+
+            if (indexOfMood >= 0) {
+                moodEventArrayList.set(indexOfMood, moodEvent);
+
+                int allEventIndex = allMoodEvents.indexOf(moodEvent);
+                if (allEventIndex >= 0) {
+                    allMoodEvents.set(allEventIndex, moodEvent);
+                }
+                moodArrayAdapter.notifyDataSetChanged();
+            }
 
             // Save to Firebase
             moodsRepo.updateMoodEvent(moodEvent,
@@ -428,13 +480,16 @@ public class HistoryFragment extends Fragment {
                         }
                     }
             );
+            Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
         });
     }
     // Edit / add image related functions
+
     /**
      *
      */
-    private void registerResult(){
+    private void registerResult() {
         resultLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 new ActivityResultCallback<ActivityResult>() {
@@ -446,14 +501,13 @@ public class HistoryFragment extends Fragment {
                         }
                         try {
                             Uri imageUri = result.getData().getData();
-                            if (imageUri != null){
+                            if (imageUri != null) {
                                 // Changes image on the button if user changes image
                                 editImage.setImageURI(imageUri);
                                 // Assigns new image to our global variable that is then assigned to moodEvent
                                 imageBase64 = ImageHandler.compressImageToBase64(requireContext(), result.getData().getData());
                                 Log.d(TAG, "Image selected and converted: " + imageBase64);
-                            }
-                            else{
+                            } else {
                                 Log.e(TAG, "No image selected.");
                             }
                         } catch (Exception e) {
@@ -469,7 +523,7 @@ public class HistoryFragment extends Fragment {
      * Uses resultLauncher to launch image picking activity
      */
     @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
-    private void pickImage(){
+    private void pickImage() {
         Intent intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
         resultLauncher.launch(intent);
     }

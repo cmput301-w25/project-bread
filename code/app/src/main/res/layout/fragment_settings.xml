@@ -2,74 +2,130 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#121318">
 
-    <ImageButton
-        android:id="@+id/profile_change_button"
-        android:layout_width="127dp"
-        android:layout_height="127dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/settings_page_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.026"
-        app:srcCompat="@drawable/default_avatar" />
+        app:layout_constraintTop_toTopOf="parent">
+        <!-- App Logo -->
+        <ImageView
+            android:id="@+id/sentio_logo_settings"
+            android:layout_width="94dp"
+            android:layout_height="74dp"
+            android:scaleType="centerCrop"
+            android:scaleX="0.75"
+            android:scaleY="0.75"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@mipmap/sound_wave_layer" />
+
+        <TextView
+            android:id="@+id/settings_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:fontFamily="@font/righteous"
+            android:text="Settings"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/sentio_logo_settings"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/sentio_logo_settings" />
+
+        <ImageView
+            android:id="@+id/settings_close_button"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_margin="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Close"
+            android:elevation="10dp"
+            android:padding="10dp"
+            android:src="@drawable/ic_close"
+            app:layout_constraintBottom_toBottomOf="@+id/sentio_logo_settings"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/sentio_logo_settings" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/profile_image_container"
+        android:layout_width="127dp"
+        android:layout_height="127dp"
+        android:layout_marginTop="48dp"
+        app:cardCornerRadius="63.5dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/settings_page_header">
+
+        <ImageButton
+            android:id="@+id/profile_change_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/default_avatar" />
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/profile_change_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Tap to edit"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:text="Tap to change profile photo"
+        android:textColor="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_change_button"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toBottomOf="@+id/profile_image_container" />
 
     <Button
         android:id="@+id/edit_account_button"
-        android:layout_width="392dp"
+        android:layout_width="0dp"
         android:layout_height="71dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="48dp"
+        android:layout_marginEnd="24dp"
         android:backgroundTint="@color/settingsButton"
         android:text="Edit Name"
         android:textColor="@color/white"
         android:textSize="20sp"
-        app:layout_constraintBottom_toTopOf="@+id/log_out_button"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.473"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/profile_change_text"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toBottomOf="@+id/profile_change_text" />
 
     <Button
         android:id="@+id/log_out_button"
-        android:layout_width="392dp"
+        android:layout_width="0dp"
         android:layout_height="71dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="328dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="24dp"
         android:backgroundTint="@color/settingsButton"
         android:text="Logout"
         android:textColor="@color/white"
         android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.473"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/edit_account_button" />
 
     <Button
         android:id="@+id/delete_account_button"
-        android:layout_width="213dp"
+        android:layout_width="0dp"
         android:layout_height="52dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginBottom="40dp"
+        android:backgroundTint="@color/design_default_color_error"
         android:text="Delete Account"
         android:textColor="@color/white"
-        android:backgroundTint="@color/design_default_color_error"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/log_out_button"
-        app:layout_constraintVertical_bias="0.933" />
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

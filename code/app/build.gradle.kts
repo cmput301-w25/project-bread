@@ -3,13 +3,14 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.gms.google-services")
+    alias(libs.plugins.map.secret)
 }
 
 android {
     namespace = "com.example.bread"
     compileSdk = 35
 
-    defaultConfig {
+      defaultConfig {
         applicationId = "com.example.bread"
         minSdk = 24
         targetSdk = 35
@@ -70,6 +71,10 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.legacy.support.v4)
 
+    // Charts
+    implementation(libs.mpandroidchart)
+    implementation(libs.firebase.messaging)
+
     // testing
     testImplementation(libs.junit)
     testImplementation(libs.junit.jupiter.api)
@@ -82,4 +87,12 @@ dependencies {
 
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // Map
+    implementation(libs.google.maps)
+    implementation("com.google.android.gms:play-services-maps:18.1.0")
+    implementation("com.google.android.gms:play-services-location:21.0.1")
+
+    // UI automator for testing
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.2.0")
 }
