@@ -2,6 +2,20 @@ package com.example.bread.utils;
 
 import java.util.Date;
 
+/**
+ * TimestampUtils - Utils
+ * <p>
+ * Role / Purpose
+ * Provides helper methods to transform `Date` objects into human-readable relative time strings such as "5h ago" or "2d ago".
+ * Primarily used to display timestamps in a user-friendly format throughout the app (e.g., in mood events, comments).
+ * <p>
+ * Design Patterns
+ * Utility Class Pattern: Implements static methods and prevents instantiation via a private constructor.
+ * <p>
+ * Outstanding Issues
+ * - N/A
+ */
+
 public final class TimestampUtils {
 
     // Private constructor to prevent instantiation.

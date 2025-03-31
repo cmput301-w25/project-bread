@@ -20,8 +20,19 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 
 /**
- * A singleton class that handles location-related tasks.
- * It fetches the user's location and sets up continuous updates to handle changes (such as emulator location changes).
+ * LocationHandler - Utils
+ * <p>
+ * Role / Purpose
+ * Provides centralized access to device location services using Google's FusedLocationProviderClient.
+ * Manages permission checks, fetching the last known location, and subscribing to continuous location updates.
+ * Ensures up-to-date user location is accessible across the application for features such as mood event geolocation.
+ * <p>
+ * Design Patterns
+ * Singleton Pattern: Ensures only one instance exists and provides global access.
+ * Observer Pattern: Uses a callback interface to notify when the location is available.
+ * <p>
+ * Outstanding Issues
+ * - No fallback for devices without Google Play Services or when location is permanently denied.
  */
 public class LocationHandler {
     private static final String TAG = "LocationHandler";

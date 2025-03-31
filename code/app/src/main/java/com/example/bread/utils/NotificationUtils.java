@@ -4,7 +4,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -13,23 +12,21 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 
 import com.example.bread.R;
-import com.example.bread.view.HomePage;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 /**
  * NotificationUtils - Utility
- *
+ * <p>
  * Role / Purpose:
  * Provides helper methods for managing and displaying local notifications related to app events
  * such as follow requests. Handles notification channel creation and message display logic.
- *
+ * <p>
  * Design Pattern:
  * - Utility Pattern: Contains only static methods and constants; not meant to be instantiated.
  * - Singleton-like static access: Ensures notification channels are initialized only once.
- *
+ * <p>
  * Outstanding Issues / Comments:
  * - Currently supports only one notification channel (follow requests); future expansion could
- *   modularize different types (e.g., comments).
+ * modularize different types (e.g., comments).
  */
 public class NotificationUtils {
     private static final String TAG = "NotificationUtils";

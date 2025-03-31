@@ -11,10 +11,23 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Utility class for handling images that are stored in Firebase.
- * <a href="https://stackoverflow.com/questions/4830711/how-can-i-convert-an-image-into-a-base64-string">Convert Image to Base64</a>
- * <a href="https://stackoverflow.com/questions/18545246/how-to-compress-image-size">Compress Image Size</a>
+ * ImageHandler - Utils
+ * * <a href="https://stackoverflow.com/questions/4830711/how-can-i-convert-an-image-into-a-base64-string">Convert Image to Base64</a>
+ * * <a href="https://stackoverflow.com/questions/18545246/how-to-compress-image-size">Compress Image Size</a>
+ * <p>
+ * Role / Purpose
+ * Provides utility methods for compressing and converting images to and from Base64 strings, specifically for storing and retrieving user-uploaded images in Firebase Firestore.
+ * Ensures images meet Firestore's size constraints by resizing and reducing quality during encoding.
+ * <p>
+ * Design Patterns
+ * Utility Pattern: Offers static helper methods without requiring instantiation.
+ * Adapter Pattern (loosely): Adapts image content into a Base64 format suitable for Firestore storage.
+ * <p>
+ * Outstanding Issues
+ * - Compression algorithm may result in visible quality loss for large or high-resolution images.
+ * - Relies on a fixed MAX_IMAGE_SIZE; may need adjustment if Firestore constraints change.
  */
+
 public class ImageHandler {
 
     public static final int MAX_IMAGE_SIZE = 64 * 1024; // 64 KB

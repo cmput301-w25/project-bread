@@ -13,8 +13,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.ListenerRegistration;
-import com.example.bread.repository.NotificationService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,17 +22,17 @@ import java.util.Objects;
 
 /**
  * ParticipantRepository - Repository
- *
+ * <p>
  * Role / Purpose
  * Manages all Firestore operations related to `Participant` entities, including profile data, followers, following relationships, and follow requests.
  * Provides methods to add, fetch, and update participant information, and to manage social connections (follow/unfollow/remove/search).
  * Acts as the single point of access for participant-related data and abstracts the underlying Firestore interactions.
- *
+ * <p>
  * Design Patterns
  * Repository Pattern: Encapsulates Firestore queries and updates for participant data.
  * Singleton Pattern (indirect via FirebaseService): Shares one instance of the database service across repository usage.
  * Observer Pattern: Uses Firestore listeners and callbacks for asynchronous updates.
- *
+ * <p>
  * Outstanding Issues
  * - Username-based lookups rely on document structure; changes to Firestore schema will require adjustments.
  */
@@ -282,7 +280,7 @@ public class ParticipantRepository {
                                   @NonNull OnSuccessListener<Void> onSuccessListener,
                                   OnFailureListener onFailureListener) {
         FollowRequest followRequest = new FollowRequest(fromUsername);
-                getParticipantCollRef().document(toUsername).collection("followRequests").document(fromUsername).set(followRequest.toMap())
+        getParticipantCollRef().document(toUsername).collection("followRequests").document(fromUsername).set(followRequest.toMap())
                 .addOnSuccessListener(aVoid -> {
                     // Send notification
                     NotificationService.sendFollowRequestNotification(fromUsername, toUsername);

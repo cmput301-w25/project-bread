@@ -6,8 +6,21 @@ import com.example.bread.model.MoodEvent;
 import java.util.HashMap;
 
 /**
- * Utility class for handling emotions and their corresponding emoticons and colors.
+ * EmotionUtils - Utils
+ * <p>
+ * Role / Purpose
+ * Provides mapping between `MoodEvent.EmotionalState` enums and their corresponding visual representations, including emoticons and color resources.
+ * Used throughout the application to standardize emotional visuals in the UI.
+ * <p>
+ * Design Patterns
+ * Utility Pattern: Offers static methods and mappings without requiring instantiation.
+ * Enum Mapping: Uses a HashMap and switch-case structure to associate enums with resources.
+ * <p>
+ * Outstanding Issues
+ * - Emotion-to-color mapping is tightly coupled to specific resource IDs, reducing flexibility across themes.
+ * - Emoticons may not render uniformly across devices due to font differences.
  */
+
 public class EmotionUtils {
     private static final HashMap<MoodEvent.EmotionalState, String> emotionEmoticonMap = new HashMap<>();
 
