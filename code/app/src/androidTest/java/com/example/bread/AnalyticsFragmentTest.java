@@ -2,6 +2,7 @@ package com.example.bread;
 
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.action.ViewActions.scrollTo;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
@@ -108,7 +109,6 @@ public class AnalyticsFragmentTest {
         // Check that the chart is displayed
         onView(withId(R.id.pie_chart)).check(matches(isDisplayed()));
         onView(withId(R.id.bar_monthly_chart)).check(matches(isDisplayed()));
-        onView(withId(R.id.line_monthly_chart)).check(matches(isDisplayed()));
 
         // Check the streaks are displayed
         onView(withId(R.id.streak_text)).check(matches(isDisplayed()));
@@ -116,6 +116,8 @@ public class AnalyticsFragmentTest {
 
         onView(withId(R.id.streak_text)).check(matches(withText("3")));
         onView(withId(R.id.longest_streak_text)).check(matches(withText("3")));
+
+        onView(withId(R.id.line_monthly_chart)).perform(scrollTo()).check(matches(isDisplayed()));
     }
 
     @After
