@@ -259,7 +259,7 @@ public class FollowFunctionalityTest {
         // Check if search results are there
         try {
             onView(allOf(
-                    withId(R.id.username_text),
+                    withId(R.id.follow_username_text),
                     withText(USER2_USERNAME),
                     isDisplayed()
             )).check(matches(isDisplayed()));

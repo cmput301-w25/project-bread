@@ -151,7 +151,7 @@ public class MoodHistoryFragmentTest {
 
         onView(withId(R.id.deleteButton)).perform(click());
 
-        onView(withId(android.R.id.button1)).perform(click());
+        onView(withId(R.id.delete_mood_button)).perform(click());
         onView(withText("Test Event 4")).check(doesNotExist());
     }
 

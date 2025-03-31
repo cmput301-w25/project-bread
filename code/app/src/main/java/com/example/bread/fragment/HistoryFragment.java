@@ -1,15 +1,9 @@
 package com.example.bread.fragment;
 
 import android.app.AlertDialog;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.ext.SdkExtensions;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,18 +11,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.RequiresExtension;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -36,11 +23,8 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
 import com.example.bread.controller.HistoryMoodEventArrayAdapter;
 import com.example.bread.model.MoodEvent;
-import com.example.bread.model.MoodEvent.EmotionalState;
-import com.example.bread.model.MoodEvent.SocialSituation;
 import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
-import com.example.bread.utils.ImageHandler;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -48,7 +32,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -56,28 +39,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
 /**
  * Represents the history page of the app, where users can view their mood events and apply filters.
  */
 public class HistoryFragment extends Fragment {
 
     private static final String TAG = "HistoryFragment";
-    private ListView moodEventListView;
     private ArrayList<MoodEvent> moodEventArrayList;
     private HistoryMoodEventArrayAdapter moodArrayAdapter;
-
-    private MoodEventRepository moodsRepo;
-    private ParticipantRepository userRepo;
+    private ListView moodEventListView;
+    private MoodEventRepository moodEventRepository;
+    private ParticipantRepository participantRepository;
     private Set<MoodEvent> selectedEvents = new HashSet<>();
 
-    private String username;
+    private String currentUsername;
     private DocumentReference participantRef;
-
-    // Image related variables
-    private ImageButton editImage;
-    private ActivityResultLauncher<Intent> resultLauncher;
-    private String imageBase64;
 
     // Filter-related variables
     private FloatingActionButton filterButton;
@@ -96,13 +72,8 @@ public class HistoryFragment extends Fragment {
         moodArrayAdapter = new HistoryMoodEventArrayAdapter(getContext(), moodEventArrayList);
         moodEventListView.setAdapter(moodArrayAdapter);
 
-        // Set click listener for mood events
-        moodArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
-
-        moodsRepo = new MoodEventRepository();
-        userRepo = new ParticipantRepository();
-
-        fetchParticipantAndLoadEvents();
+        moodEventRepository = new MoodEventRepository();
+        participantRepository = new ParticipantRepository();
 
         FloatingActionButton deleteButton = view.findViewById(R.id.deleteButton);
         deleteButton.setOnClickListener(v -> showDeleteConfirmationDialog());
@@ -129,9 +100,8 @@ public class HistoryFragment extends Fragment {
         if (filterButton != null) {
             filterButton.setOnClickListener(v -> showFilterDialog());
         }
-
-        // Image editing, required to ensure it is available throughout whole lifecycle
-        registerResult();
+        moodArrayAdapter.setOnMoodEventClickListener(this::showMoodDetailsDialog);
+        fetchParticipantAndLoadEvents();
 
         return view;
     }
@@ -144,12 +114,12 @@ public class HistoryFragment extends Fragment {
     private void fetchParticipantAndLoadEvents() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
-            username = currentUser.getDisplayName();
-            if (username == null) {
+            currentUsername = currentUser.getDisplayName();
+            if (currentUsername == null) {
                 Log.e(TAG, "Username is null. Cannot load mood events.");
                 return;
             }
-            participantRef = userRepo.getParticipantRef(username);
+            participantRef = participantRepository.getParticipantRef(currentUsername);
             loadMoodEvents();
         } else {
             Log.e(TAG, "No authenticated user found.");
@@ -163,7 +133,7 @@ public class HistoryFragment extends Fragment {
      * Sorts mood events by date and time added
      */
     private void loadMoodEvents() {
-        moodsRepo.fetchEventsWithParticipantRef(participantRef, moodEvents -> {
+        moodEventRepository.fetchEventsWithParticipantRef(participantRef, moodEvents -> {
                     if (moodEvents != null) {
                         moodEventArrayList.clear();
                         moodEventArrayList.addAll(moodEvents);
@@ -190,17 +160,46 @@ public class HistoryFragment extends Fragment {
     }
 
     /**
+     * Shows detailed view for a selected mood event
+     *
+     * @param moodEvent The selected mood event
+     */
+    private void showMoodDetailsDialog(MoodEvent moodEvent) {
+        PersonalEventDetail fragment = PersonalEventDetail.newInstance(moodEvent);
+        FragmentManager fragmentManager = getParentFragmentManager();
+        FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
+                R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
+        );
+        transaction.add(R.id.frame_layout, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+
+    /**
      * Displays a confirmation dialog asking the user if they want to delete the selected mood events.
      * If the user confirms, deletion is triggered.
      */
     private void showDeleteConfirmationDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Confirm Deletion");
-        builder.setMessage("Are you sure you want to delete the selected mood events?");
-        builder.setPositiveButton("Delete", (dialog, which) -> deleteSelectedMoodEvents());
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_delete_mood, null);
+        builder.setView(dialogView);
+
+        Button deleteButton = dialogView.findViewById(R.id.delete_mood_button);
+        Button cancelButton = dialogView.findViewById(R.id.cancel_delete_mood);
+
         AlertDialog alertDialog = builder.create();
+        if (alertDialog.getWindow() != null) {
+            alertDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        }
         alertDialog.show();
+
+        deleteButton.setOnClickListener(v -> {
+            deleteSelectedMoodEvents();
+            alertDialog.dismiss();
+        });
+
+        cancelButton.setOnClickListener(v -> alertDialog.dismiss());
     }
 
     /**
@@ -231,301 +230,6 @@ public class HistoryFragment extends Fragment {
         moodArrayAdapter.notifyDataSetChanged();
         Toast.makeText(getContext(), deleteCount + " event deleted", Toast.LENGTH_SHORT).show();// just for logcat check
         selectedEvents.clear();  // Clear the selection after deletion
-    }
-
-    /**
-     * Shows a dialog with the details of the selected mood event.
-     *
-     * @param moodEvent The mood event to show details for
-     */
-    private void showMoodDetailsDialog(MoodEvent moodEvent) {
-        if (getContext() == null) return;
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("View Mood");
-
-        // Inflate a custom layout for the dialog
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_mood_details, null);
-
-        // Set up the views
-        TextView emotionTextView = dialogView.findViewById(R.id.detail_emotion);
-        TextView dateTextView = dialogView.findViewById(R.id.detail_date);
-        TextView reasonTextView = dialogView.findViewById(R.id.detail_reason);
-        TextView socialSituationTextView = dialogView.findViewById(R.id.detail_social_situation);
-        ImageView moodImageView = dialogView.findViewById(R.id.mood_event_image);
-        TextView imageSelection = dialogView.findViewById(R.id.image_selection);
-
-        // Set the data
-        emotionTextView.setText(moodEvent.getEmotionalState().toString());
-
-        Date timestamp = moodEvent.getTimestamp();
-        //set the date if the timestamp is null to avoid nullpointer exception
-        if (timestamp == null) {
-            dateTextView.setText("No date provided");
-        } else {
-            SimpleDateFormat formatter = new SimpleDateFormat("dd MMM yyyy hh:mm a");
-            String dateString = formatter.format(timestamp);
-            dateTextView.setText(dateString);
-        }
-
-        // Set reason
-        reasonTextView.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "No reason provided");
-
-        // Set social situation
-        SocialSituation situation = moodEvent.getSocialSituation();
-        socialSituationTextView.setText(situation != null ? situation.toString() : "Not specified");
-
-        // Set image
-        String imageBase64 = moodEvent.getAttachedImage();
-        if (imageBase64 == null || imageBase64.isEmpty()) {
-            moodImageView.setVisibility(View.GONE);  // Hide if image not uploaded
-            imageSelection.setText("No image uploaded.");
-        } else {
-            Bitmap bitmap = ImageHandler.base64ToBitmap(imageBase64);
-            moodImageView.setImageBitmap(bitmap);
-            moodImageView.setVisibility(View.VISIBLE);  // Show when image is uploaded
-            imageSelection.setText("");
-        }
-
-        builder.setView(dialogView);
-        builder.setPositiveButton("Close", (dialog, which) -> dialog.dismiss());
-
-        // Add an Edit button
-        builder.setNeutralButton("Edit", (dialog, which) -> {
-            showEditMoodDialog(moodEvent);
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-    }
-
-    /**
-     * Shows a dialog to edit the selected mood event.
-     *
-     * @param moodEvent The mood event to edit
-     */
-    private void showEditMoodDialog(MoodEvent moodEvent) {
-        if (getContext() == null) return;
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Edit Mood");
-
-        View dialogView = getLayoutInflater().inflate(R.layout.dialog_edit_mood, null);
-        builder.setView(dialogView);
-
-        EditText titleEditText = dialogView.findViewById(R.id.edit_title);
-        EditText reasonEditText = dialogView.findViewById(R.id.edit_reason);
-        Spinner emotionSpinner = dialogView.findViewById(R.id.edit_emotion_spinner);
-        Spinner socialSituationSpinner = dialogView.findViewById(R.id.edit_social_situation_spinner);
-        editImage = dialogView.findViewById(R.id.image_edit_button);
-        Button deleteImageButton = dialogView.findViewById(R.id.delete_image_button);
-
-        titleEditText.setText(moodEvent.getTitle() != null ? moodEvent.getTitle() : "");
-        reasonEditText.setText(moodEvent.getReason() != null ? moodEvent.getReason() : "");
-        imageBase64 = moodEvent.getAttachedImage();
-
-        ArrayAdapter<EmotionalState> emotionAdapter = new ArrayAdapter<>(
-                getContext(),
-                android.R.layout.simple_spinner_item,
-                EmotionalState.values()
-        );
-        emotionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        emotionSpinner.setAdapter(emotionAdapter);
-
-        if (moodEvent.getAttachedImage() != null) {
-            // If image already assigned it is displayed on image button, and blank if not
-            editImage.setImageBitmap(ImageHandler.base64ToBitmap(moodEvent.getAttachedImage()));
-        }
-
-        if (moodEvent.getEmotionalState() != null) {
-            emotionSpinner.setSelection(emotionAdapter.getPosition(moodEvent.getEmotionalState()));
-        }
-
-        ArrayAdapter<SocialSituation> socialAdapter = new ArrayAdapter<>(
-                getContext(),
-                android.R.layout.simple_spinner_item,
-                SocialSituation.values()
-        );
-        socialAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        socialSituationSpinner.setAdapter(socialAdapter);
-
-        if (moodEvent.getSocialSituation() != null) {
-            socialSituationSpinner.setSelection(socialAdapter.getPosition(moodEvent.getSocialSituation()));
-        }
-
-        // Calls pickImage() when user chooses to change their image
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2) {
-            editImage.setOnClickListener(v -> pickImage());
-        }
-
-        deleteImageButton.setOnClickListener(v -> {
-            imageBase64 = null;
-            editImage.setImageDrawable(null);
-            editImage.setImageResource(R.drawable.camera_icon);
-        });
-
-        // **Validation Listeners**
-        titleEditText.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                String titleText = titleEditText.getText().toString().trim();
-                if (titleText.isEmpty()) {
-                    titleEditText.setError("Title cannot be empty");
-                } else {
-                    titleEditText.setError(null);
-                }
-            }
-        });
-
-        reasonEditText.setOnFocusChangeListener((v, hasFocus) -> {
-            if (!hasFocus) {
-                String reasonText = reasonEditText.getText().toString().trim();
-                if (!reasonText.isEmpty()) { // Only validate if reason is provided
-                    int charCount = reasonText.length();
-                    int wordCount = reasonText.split("\\s+").length;
-
-                    if (charCount > 20 || wordCount > 3) {
-                        reasonEditText.setError("Reason must be 20 characters or fewer and 3 words or fewer");
-                    } else {
-                        reasonEditText.setError(null);
-                    }
-                } else {
-                    reasonEditText.setError(null);
-                }
-            }
-        });
-
-        // **Override Save Button to Enforce Validation**
-        builder.setPositiveButton("Save", null); // We override it later to prevent closing
-        builder.setNegativeButton("Cancel", (d, which) -> d.dismiss());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-        // **Override the Save Button Behavior**
-        Button saveButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
-        saveButton.setOnClickListener(v -> {
-            boolean isValid = true;
-
-            // Get values from inputs
-            String newTitle = titleEditText.getText().toString().trim();
-            EmotionalState newEmotionalState = (EmotionalState) emotionSpinner.getSelectedItem();
-            String newReason = reasonEditText.getText().toString().trim();
-            SocialSituation newSocialSituation = (SocialSituation) socialSituationSpinner.getSelectedItem();
-
-            // **Validation Checks**
-            if (newTitle.isEmpty()) {
-                titleEditText.setError("Title cannot be empty");
-                isValid = false;
-            }
-
-            if (!newReason.isEmpty()) { // Validate reason only if provided
-                int charCount = newReason.length();
-                int wordCount = newReason.split("\\s+").length;
-                if (charCount > 20 || wordCount > 3) {
-                    reasonEditText.setError("Reason must be 20 characters or fewer and 3 words or fewer");
-                    isValid = false;
-                }
-            }
-
-            if (newEmotionalState == EmotionalState.NONE) {
-                Toast.makeText(getContext(), "Emotional state cannot be None", Toast.LENGTH_SHORT).show();
-                isValid = false;
-            }
-
-            if (!isValid) {
-                // **Do not close the dialog if validation fails**
-                return;
-            }
-
-            int indexOfMood = moodEventArrayList.indexOf(moodEvent);
-
-
-            // **Only save if all validations passed**
-            moodEvent.setTitle(newTitle);
-            moodEvent.setEmotionalState(newEmotionalState);
-            moodEvent.setReason(newReason);
-            moodEvent.setSocialSituation(newSocialSituation);
-            moodEvent.setAttachedImage(imageBase64);
-
-            if (indexOfMood >= 0) {
-                moodEventArrayList.set(indexOfMood, moodEvent);
-
-                int allEventIndex = allMoodEvents.indexOf(moodEvent);
-                if (allEventIndex >= 0) {
-                    allMoodEvents.set(allEventIndex, moodEvent);
-                }
-                moodArrayAdapter.notifyDataSetChanged();
-            }
-
-            // Save to Firebase
-            moodsRepo.updateMoodEvent(moodEvent,
-                    aVoid -> {
-                        if (isAdded() && getActivity() != null) {
-                            getActivity().runOnUiThread(() -> {
-                                if (getContext() != null) {
-                                    Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                        dialog.dismiss(); // Close the dialog only after a successful save
-                    },
-                    e -> {
-                        if (isAdded() && getActivity() != null) {
-                            getActivity().runOnUiThread(() -> {
-                                if (getContext() != null) {
-                                    Toast.makeText(getContext(), "Failed to update mood", Toast.LENGTH_SHORT).show();
-                                    Log.e("HistoryFragment", "Error updating mood", e);
-                                }
-                            });
-                        }
-                    }
-            );
-            Toast.makeText(getContext(), "Mood updated successfully", Toast.LENGTH_SHORT).show();
-            dialog.dismiss();
-        });
-    }
-    // Edit / add image related functions
-
-    /**
-     *
-     */
-    private void registerResult() {
-        resultLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-                    @Override
-                    public void onActivityResult(ActivityResult result) {
-                        if (result.getData() == null) {
-                            Log.e(TAG, "No image selected.");
-                            return;
-                        }
-                        try {
-                            Uri imageUri = result.getData().getData();
-                            if (imageUri != null) {
-                                // Changes image on the button if user changes image
-                                editImage.setImageURI(imageUri);
-                                // Assigns new image to our global variable that is then assigned to moodEvent
-                                imageBase64 = ImageHandler.compressImageToBase64(requireContext(), result.getData().getData());
-                                Log.d(TAG, "Image selected and converted: " + imageBase64);
-                            } else {
-                                Log.e(TAG, "No image selected.");
-                            }
-                        } catch (Exception e) {
-                            Log.e(TAG, "User did not change image.");
-                        }
-                    }
-                }
-        );
-    }
-
-    /**
-     * Allows user to pick an image from camera roll
-     * Uses resultLauncher to launch image picking activity
-     */
-    @RequiresExtension(extension = Build.VERSION_CODES.R, version = 2)
-    private void pickImage() {
-        Intent intent = new Intent(MediaStore.ACTION_PICK_IMAGES);
-        resultLauncher.launch(intent);
     }
 
     // Filter-related methods

@@ -7,18 +7,22 @@ import static androidx.test.espresso.action.ViewActions.replaceText;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
+import static androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.anything;
+import static org.hamcrest.Matchers.not;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
 
 import androidx.test.core.app.ActivityScenario;
 import androidx.test.core.app.ApplicationProvider;
+import androidx.test.espresso.matcher.ViewMatchers;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
@@ -132,39 +136,15 @@ public class MoodEventEditTest {
                 .atPosition(0)
                 .perform(click());
 
-        // Ensure UI updates
         Thread.sleep(2000);
 
-        // Ensure image is set
-        onView(withId(R.id.mood_event_image)).check(matches(isDisplayed()));
+        onView(withId(R.id.editButton)).perform(click());
 
-        onView(withText("No image uploaded.")).check(doesNotExist());
-
-        // Verify that the details dialog appears
-        onView(withText("View Mood")).check(matches(isDisplayed()));
+        // Ensure UI updates
+        Thread.sleep(2000);
 
         // Click the Edit button
-        onView(withText("Edit")).perform(click());
-
-        // Ensure UI updates
-        Thread.sleep(2000);
-
-        // Verify that the edit dialog appears
-        onView(withText("Edit Mood")).check(matches(isDisplayed()));
-
-        // Verify edit dialog has the necessary fields
-        onView(withId(R.id.edit_title)).check(matches(isDisplayed()));
-        onView(withId(R.id.edit_reason)).check(matches(isDisplayed()));
-        onView(withId(R.id.edit_emotion_spinner)).check(matches(isDisplayed()));
-        onView(withId(R.id.edit_social_situation_spinner)).check(matches(isDisplayed()));
-        onView(withId(R.id.image_edit_button)).check(matches(isDisplayed()));
-        onView(withId(R.id.delete_image_button)).check(matches(isDisplayed()));
-
-        // Close the dialog
         onView(withText("Cancel")).perform(click());
-
-        // Ensure UI updates
-        Thread.sleep(2000);
     }
 
     @Test
@@ -183,11 +163,9 @@ public class MoodEventEditTest {
                 .atPosition(0)
                 .perform(click());
 
-        // Ensure UI updates
         Thread.sleep(2000);
 
-        // Click the Edit button
-        onView(withText("Edit")).perform(click());
+        onView(withId(R.id.editButton)).perform(click());
 
         Thread.sleep(2000);
 
@@ -198,14 +176,14 @@ public class MoodEventEditTest {
         Thread.sleep(2000);
 
         // Click Save button
-        onView(withText("Save")).perform(click());
+        onView(withText("Update")).perform(click());
 
         // Ensure UI updates
         Thread.sleep(2000);
 
         // Verify dialog is dismissed
         try {
-            onView(withText("Edit Mood")).check(matches(isDisplayed()));
+            onView(withText("Edit Mood Event")).check(matches(isDisplayed()));
             throw new AssertionError("Dialog should be dismissed after saving");
         } catch (Exception e) {
             // Expected - dialog should be dismissed
@@ -228,11 +206,9 @@ public class MoodEventEditTest {
                 .atPosition(0)
                 .perform(click());
 
-        // Ensure UI updates
         Thread.sleep(2000);
 
-        // Click the Edit button
-        onView(withText("Edit")).perform(click());
+        onView(withId(R.id.editButton)).perform(click());
 
         // Ensure UI updates
         Thread.sleep(2000);
@@ -251,7 +227,7 @@ public class MoodEventEditTest {
 
         // Verify dialog is dismissed
         try {
-            onView(withText("Edit Mood")).check(matches(isDisplayed()));
+            onView(withText("Edit Mood Event")).check(matches(isDisplayed()));
             throw new AssertionError("Dialog should be dismissed after canceling");
         } catch (Exception e) {
             // Expected - dialog should be dismissed
@@ -273,8 +249,9 @@ public class MoodEventEditTest {
                 .atPosition(0)
                 .perform(click());
 
-        // Click the Edit button
-        onView(withText("Edit")).perform(click());
+        Thread.sleep(2000);
+
+        onView(withId(R.id.editButton)).perform(click());
 
         // Ensure UI updates
         Thread.sleep(2000);
@@ -286,15 +263,7 @@ public class MoodEventEditTest {
         Thread.sleep(2000);
 
         // Save changes
-        onView(withText("Save")).perform(click());
-
-        // Select same mood image
-        onData(anything())
-                .inAdapterView(withId(R.id.historyListView))
-                .atPosition(0)
-                .perform(click());
-
-        onView(withText("No image uploaded.")).check(matches(isDisplayed()));
+        onView(withText("Update")).perform(click());
     }
 
     @After

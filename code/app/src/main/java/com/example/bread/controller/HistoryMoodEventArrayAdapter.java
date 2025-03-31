@@ -34,11 +34,11 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
     }
 
     static class ViewHolder {
-        CheckBox checkBox;
+        CheckBox toggleButton;
         TextView socialSituation;
         TextView date;
-        TextView moodText;
-        TextView titleText;
+        TextView mood;
+        TextView title;
         ImageView visibilityIcon;
         ConstraintLayout eventLayout;
     }
@@ -49,22 +49,30 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
         ViewHolder holder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(context).inflate(R.layout.layout_event, parent, false);
+            convertView = LayoutInflater.from(context).inflate(R.layout.layout_event_history, parent, false);
             holder = new ViewHolder();
-            holder.checkBox = convertView.findViewById(R.id.checkbox);
-            holder.socialSituation = convertView.findViewById(R.id.history_social_situation_text);
+            holder.title = convertView.findViewById(R.id.history_title_text);
             holder.date = convertView.findViewById(R.id.date);
-            holder.titleText = convertView.findViewById(R.id.history_title_text);
-            holder.moodText = convertView.findViewById(R.id.textMood);
+            holder.mood = convertView.findViewById(R.id.textMood);
             holder.eventLayout = convertView.findViewById(R.id.historyConstraintLayout);
+            holder.socialSituation = convertView.findViewById(R.id.history_social_situation_text);
+            holder.toggleButton = convertView.findViewById(R.id.checkbox);
             holder.visibilityIcon = convertView.findViewById(R.id.visibility_icon);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
+
         MoodEvent moodEvent = getItem(position);
 
         if (moodEvent != null) {
+            int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
+            holder.eventLayout.setBackgroundResource(colorResId);
+
+            holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
+            holder.title.setText(moodEvent.getTitle());
+            holder.mood.setText(moodEvent.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+
             if (moodEvent.getSocialSituation() != null && moodEvent.getSocialSituation() != MoodEvent.SocialSituation.NONE) {
                 holder.socialSituation.setText(moodEvent.getSocialSituation().toString());
                 holder.socialSituation.setVisibility(View.VISIBLE);
@@ -76,14 +84,14 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
                 holder.socialSituation.setVisibility(View.INVISIBLE);
                 // Set the visibility icon's start constraint to be after the mood text
                 ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) holder.visibilityIcon.getLayoutParams();
-                params.startToEnd = holder.moodText.getId();
+                params.startToEnd = holder.mood.getId();
                 holder.visibilityIcon.setLayoutParams(params);
             }
 
             if (moodEvent.getVisibility() != null) {
-                if(moodEvent.getVisibility().toString().equals("PUBLIC")){
+                if (moodEvent.getVisibility().toString().equals("PUBLIC")) {
                     holder.visibilityIcon.setImageResource(R.drawable.ic_public); //Create ic_public.xml in drawable
-                }else{
+                } else {
                     holder.visibilityIcon.setImageResource(R.drawable.ic_private); //create ic_private.xml in drawable
                 }
                 holder.visibilityIcon.setVisibility(View.VISIBLE);
@@ -91,22 +99,14 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
                 holder.visibilityIcon.setVisibility(View.GONE);
             }
 
-            if (holder.checkBox != null) {
-                holder.checkBox.setOnCheckedChangeListener(null);
-                holder.checkBox.setChecked(selectedEvents.contains(moodEvent));
-                holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    if (isChecked) {
-                        selectedEvents.add(moodEvent);
-                    } else {
-                        selectedEvents.remove(moodEvent);
-                    }
-                });
-            }
-            int colorResId = EmotionUtils.getColorResource(moodEvent.getEmotionalState());
-            holder.eventLayout.setBackgroundResource(colorResId);
-            holder.date.setText(TimestampUtils.transformTimestamp(moodEvent.getTimestamp()));
-            holder.titleText.setText(moodEvent.getTitle());
-            holder.moodText.setText(moodEvent.getEmotionalState().toString() + " " + EmotionUtils.getEmoticon(moodEvent.getEmotionalState()));
+            holder.toggleButton.setChecked(selectedEvents.contains(moodEvent));
+            holder.toggleButton.setOnClickListener(v -> {
+                if (selectedEvents.contains(moodEvent)) {
+                    selectedEvents.remove(moodEvent);
+                } else {
+                    selectedEvents.add(moodEvent);
+                }
+            });
 
             convertView.setOnClickListener(v -> {
                 if (clickListener != null) {
