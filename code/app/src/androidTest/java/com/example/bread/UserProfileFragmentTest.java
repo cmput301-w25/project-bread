@@ -19,6 +19,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
 
+import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.MoodEvent;
 import com.example.bread.model.Participant;
 import com.example.bread.utils.EmotionUtils;
@@ -55,9 +56,7 @@ public class UserProfileFragmentTest {
 
     @BeforeClass
     public static void testSetup() {
-        String androidLocalHost = "10.0.2.2";
-        FirebaseFirestore.getInstance().useEmulator(androidLocalHost, 8080);
-        FirebaseAuth.getInstance().useEmulator(androidLocalHost, 9099);
+        FirebaseEmulatorRule.initializeEmulators();
 
         try {
             Tasks.await(
@@ -84,7 +83,7 @@ public class UserProfileFragmentTest {
     @Before
     public void seedDatabase() {
         // Seed the database with some mood events
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        FirebaseFirestore db = new FirebaseService().getDb();
         CollectionReference participants = db.collection("participants");
         Participant p1 = new Participant();
         p1.setUsername("testUser");
