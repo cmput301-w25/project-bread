@@ -95,7 +95,7 @@ public class HistoryFragment extends Fragment {
                 FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
                         R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
                 );
-                transaction.add(R.id.personal_frame_layout, fragment);
+                transaction.add(R.id.frame_layout, fragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
             }

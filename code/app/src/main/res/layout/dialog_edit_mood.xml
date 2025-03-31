@@ -160,40 +160,23 @@
                 app:layout_constraintTop_toBottomOf="@id/edit_social_situation_spinner" />
 
             <!-- Chips Container -->
+
+            <!-- Image Upload Label -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/chips_container"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/spacer">
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/locationChip"
+                    android:id="@+id/privateChip_editmood"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
                     android:layout_width="wrap_content"
                     android:layout_height="56dp"
-                    android:layout_marginTop="4dp"
-                    android:text="Add Location"
-                    android:textColor="@color/white"
-                    app:checkedIcon="@drawable/ic_check"
-                    app:checkedIconEnabled="true"
-                    app:checkedIconTint="#f8b64c"
-                    app:chipCornerRadius="27dp"
-                    app:chipStrokeWidth="1dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.174"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/publicChip"
-                    style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="56dp"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginTop="4dp"
                     android:text="Make Private"
                     android:textColor="@color/white"
                     app:checkedIcon="@drawable/ic_check"
@@ -201,14 +184,13 @@
                     app:checkedIconTint="#f8b64c"
                     app:chipCornerRadius="27dp"
                     app:chipStrokeWidth="1dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.411"
-                    app:layout_constraintStart_toEndOf="@id/locationChip"
+                    app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- Image Upload Label -->
             <TextView
                 android:id="@+id/image_upload_label"
                 android:layout_width="wrap_content"

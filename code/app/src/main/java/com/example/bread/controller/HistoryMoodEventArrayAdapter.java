@@ -5,6 +5,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -33,7 +34,7 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
     }
 
     static class ViewHolder {
-        ImageView toggleButton;
+        CheckBox toggleButton;
         TextView socialSituation;
         TextView date;
         TextView mood;
@@ -100,26 +101,11 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
             // Setting the toggle drawable based on whether this event is selected
             holder.toggleButton.setOnClickListener(v -> {
-                holder.toggleButton.animate()
-                        .scaleX(1.1f)
-                        .scaleY(1.1f)
-                        .setDuration(100)
-                        .withEndAction(() -> {
-                            // Toggle the selection state and change the drawable
-                            if (selectedEvents.contains(moodEvent)) {
-                                selectedEvents.remove(moodEvent);
-                                holder.toggleButton.setImageResource(R.drawable.outline_toggle_off_24);
-                            } else {
-                                selectedEvents.add(moodEvent);
-                                holder.toggleButton.setImageResource(R.drawable.outline_toggle_on_24);
-                            }
-                            // Animate scale back to normal
-                            holder.toggleButton.animate()
-                                    .scaleX(1f)
-                                    .scaleY(1f)
-                                    .setDuration(100)
-                                    .start();
-                        }).start();
+                if (selectedEvents.contains(moodEvent)) {
+                    selectedEvents.remove(moodEvent);
+                } else {
+                    selectedEvents.add(moodEvent);
+                }
             });
 
             convertView.setOnClickListener(v -> {

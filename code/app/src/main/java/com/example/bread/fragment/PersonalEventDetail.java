@@ -40,6 +40,7 @@ import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.ImageHandler;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.chip.Chip;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -267,6 +268,7 @@ public class PersonalEventDetail extends Fragment implements PersonalEventDetail
         EditText reasonEditText = cardView.findViewById(R.id.edit_reason);
         Spinner emotionSpinner = cardView.findViewById(R.id.edit_emotion_spinner);
         Spinner socialSituationSpinner = cardView.findViewById(R.id.edit_social_situation_spinner);
+        Chip privateChip = cardView.findViewById(R.id.privateChip_editmood);
         editImage = cardView.findViewById(R.id.image_edit_button);
         ImageButton deleteImageButton = cardView.findViewById(R.id.delete_image_button);
 
@@ -304,6 +306,8 @@ public class PersonalEventDetail extends Fragment implements PersonalEventDetail
         if (moodEvent.getSocialSituation() != null) {
             socialSituationSpinner.setSelection(socialAdapter.getPosition(moodEvent.getSocialSituation()));
         }
+
+        privateChip.setChecked(moodEvent.getVisibility() == MoodEvent.Visibility.PRIVATE);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && SdkExtensions.getExtensionVersion(Build.VERSION_CODES.R) >= 2) {
             editImage.setOnClickListener(v -> pickImage());
@@ -359,6 +363,7 @@ public class PersonalEventDetail extends Fragment implements PersonalEventDetail
             moodEvent.setReason(newReason);
             moodEvent.setSocialSituation(newSocialSituation);
             moodEvent.setAttachedImage(imageBase64);
+            moodEvent.setVisibility(privateChip.isChecked() ? MoodEvent.Visibility.PRIVATE : MoodEvent.Visibility.PUBLIC);
 
             // Update your local lists and notify changes as needed
             // (Assuming moodEventArrayList, allMoodEvents, and moodArrayAdapter are managed in HistoryFragment)

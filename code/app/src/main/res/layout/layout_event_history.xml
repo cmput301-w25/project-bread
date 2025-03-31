@@ -33,63 +33,40 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.0">
 
-            <!-- Profile Image -->
-
-            <!-- Username -->
-
-            <!-- Date -->
-
-            <!-- Reason / Title -->
-
-            <!-- Reason / Title -->
-
             <TextView
                 android:id="@+id/date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="264dp"
-                android:layout_marginTop="4dp"
+                android:layout_margin="8dp"
                 android:text="DD/MM/YYYY"
                 android:textColor="@android:color/white"
-                android:textSize="12sp"
-                app:layout_constraintStart_toStartOf="parent"
+                android:textSize="14sp"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/history_title_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="2dp"
+                android:ellipsize="end"
+                android:maxLines="2"
                 android:text="Reason For Mood"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/date"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
-
-            <!-- Mood Label -->
-
-            <!-- Emoticon -->
-
-            <!-- Optional Checkbox (if still needed) -->
-
-            <ImageView
-                android:id="@+id/checkbox"
-                android:layout_width="39dp"
-                android:layout_height="39dp"
-                android:layout_marginTop="1dp"
-                android:src="@drawable/outline_toggle_off_24"
-                app:layout_constraintBottom_toTopOf="@+id/textMood"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/history_title_text"
-                app:layout_constraintVertical_bias="0.0" />
-
 
             <TextView
                 android:id="@+id/history_social_situation_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/flair_background"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
@@ -103,7 +80,7 @@
                 android:id="@+id/textMood"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
+                android:layout_marginTop="16dp"
                 android:background="@drawable/flair_background"
                 android:paddingHorizontal="8dp"
                 android:paddingVertical="4dp"
@@ -115,13 +92,24 @@
 
             <ImageView
                 android:id="@+id/visibility_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="43dp"
                 android:contentDescription="Visibility Icon"
+                app:layout_constraintBottom_toBottomOf="@+id/history_social_situation_text"
                 app:layout_constraintStart_toEndOf="@+id/history_social_situation_text"
-                app:layout_constraintTop_toBottomOf="@+id/history_title_text" />
+                app:layout_constraintTop_toTopOf="@+id/history_social_situation_text" />
+
+            <CheckBox
+                android:id="@+id/checkbox"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toBottomOf="@+id/history_social_situation_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.986"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/history_social_situation_text"
+                app:layout_constraintVertical_bias="0.642" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
