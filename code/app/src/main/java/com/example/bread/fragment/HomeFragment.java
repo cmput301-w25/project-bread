@@ -472,7 +472,12 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
         }
     }
 
-    // Filter-related methods
+    /**
+     * Displays a dialog allowing the user to filter mood events by:
+     * - Events within the past week
+     * - Emotional state
+     * - Keyword in the reason field
+     */
     private void showFilterDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_filter_moods, null);
@@ -565,7 +570,9 @@ public class HomeFragment extends Fragment implements UserAdapter.UserInteractio
     }
 
     /**
-     * Applies filters to the mood events list
+     * Applies the currently selected filters to the mood events list.
+     * Filters by recent week, emotional state, and keyword.
+     * Updates the adapter and notifies the user if no matches are found.
      */
     private void applyFilters() {
         if (allMoodEvents.isEmpty() && !moodEventArrayList.isEmpty()) {

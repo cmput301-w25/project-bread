@@ -38,14 +38,14 @@ import java.util.Map;
  * AnalyticsFragment
  * <p>
  * Role / Purpose:
- * A Fragment that visualizes the user's mood data using interactive charts. Displays:
+ * A Fragment that visualizes the user's mood data using interactive charts.
+ * Displays:
  * - Current streak and longest streak of daily mood logging.
  * - A pie chart representing the frequency of each emotional state.
  * - A stacked bar chart showing monthly mood distributions for the current year.
  * - A line chart with a 30-day trend and 7-day moving average of mood scores.
  * <p>
- * The mood events are passed in as arguments via the `newInstance()` factory method and
- * rendered using the MPAndroidChart library.
+ * The mood events are passed in as arguments via the `newInstance()` factory method and rendered using the MPAndroidChart library.
  * <p>
  * Design Patterns:
  * - Factory Pattern: Uses a static `newInstance()` method to create a configured fragment instance.
@@ -132,6 +132,9 @@ public class AnalyticsFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Calculates mood addition streak (how many days in a row user has added a mood)
+     */
     private void calculateStreak() {
         if (moodEvents == null || moodEvents.isEmpty()) {
             streakTextView.setText("0");
@@ -162,6 +165,9 @@ public class AnalyticsFragment extends Fragment {
         streakTextView.setText(String.valueOf(streakCount));
     }
 
+    /**
+     * Calculates longest streak for current user (longest time theyve added a mood every day)
+     */
     private void calculateLongestStreak() {
         if (moodEvents == null || moodEvents.isEmpty()) {
             longestStreakTextView.setText("0");
@@ -189,6 +195,10 @@ public class AnalyticsFragment extends Fragment {
         longestStreakTextView.setText(String.valueOf(longestStreak));
     }
 
+    /**
+     * Backend for pie chart data
+     * @return PieData (to be displayed)
+     */
     private PieData generatePieData() {
         ArrayList<PieEntry> entries = new ArrayList<>();
 
@@ -224,6 +234,9 @@ public class AnalyticsFragment extends Fragment {
         return new PieData(dataSet);
     }
 
+    /**
+     * Frontend for pie chart display, assigns / sets up display
+     */
     private void drawPieChart() {
         pieChart.getDescription().setEnabled(false);
         pieChart.setDrawHoleEnabled(true);
@@ -246,6 +259,10 @@ public class AnalyticsFragment extends Fragment {
         pieChart.invalidate();
     }
 
+    /**
+     * Backends for bar chart feature
+     * @return BarData
+     */
     private BarData generateBarData() {
         if (moodEvents == null || moodEvents.isEmpty()) {
             return new BarData();
@@ -313,6 +330,9 @@ public class AnalyticsFragment extends Fragment {
         return barData;
     }
 
+    /**
+     * UI display for bar chart, sets up and assigns all visual displays
+     */
     private void drawBarChart() {
         BarData barData = generateBarData();
 
@@ -348,6 +368,11 @@ public class AnalyticsFragment extends Fragment {
         barChart.invalidate();
     }
 
+    /**
+     * Helper function to turn names of the months
+     * @param yearMonthKey
+     * @return String (month name)
+     */
     private String convertMonthKeysToMonthNames(String yearMonthKey) {
         String[] monthNames = new String[]{
                 "January", "February", "March", "April", "May", "June",
@@ -359,6 +384,10 @@ public class AnalyticsFragment extends Fragment {
         return monthNames[monthIndex] + " " + parts[0];
     }
 
+    /**
+     * Backend functionality for line data
+     * @return LineData
+     */
     private LineData generateLineData() {
         java.util.Calendar cal = java.util.Calendar.getInstance();
         // Set to midnight today for consistency
@@ -449,6 +478,9 @@ public class AnalyticsFragment extends Fragment {
         return new com.github.mikephil.charting.data.LineData(rawDataSet, movingAvgDataSet);
     }
 
+    /**
+     * Line chart UI, handles display on screen
+     */
     private void drawLineChart() {
         com.github.mikephil.charting.data.LineData lineData = generateLineData();
         lineChart.setData(lineData);

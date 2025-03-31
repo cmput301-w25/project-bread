@@ -62,6 +62,10 @@ public class FCMTokenManager {
                 .addOnSuccessListener(aVoid -> Log.d(TAG, "Token saved for user: " + username))
                 .addOnFailureListener(e -> Log.e(TAG, "Error saving token for user: " + username, e));
     }
+<<<<<<< Updated upstream
 
 
 }
+=======
+}
+>>>>>>> Stashed changes

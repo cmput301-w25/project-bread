@@ -47,7 +47,6 @@ import java.util.Objects;
  * User interaction logic is tightly coupled with UI update logic; potential for refactoring for separation of concerns.
  */
 
-
 public class FollowersListFragment extends Fragment implements FollowerAdapter.OnUserInteractionListener {
 
     private static final String TAG = "FollowersListFragment";
@@ -142,6 +141,10 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         return view;
     }
 
+    /**
+     * Loads the data for the followers or following list depending on the selected list type.
+     * Displays a progress bar while loading and handles errors with user feedback.
+     */
     private void loadData() {
         progressBar.setVisibility(View.VISIBLE);
         emptyView.setVisibility(View.GONE);
@@ -167,6 +170,12 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         }
     }
 
+    /**
+     * Fetches detailed participant data for a list of usernames and populates both the original and filtered participant lists. \
+     * Notifies the adapter once all participants are loaded.
+     *
+     * @param usernames A list of usernames to fetch Participant data for.
+     */
     private void loadParticipants(List<String> usernames) {
         if (usernames == null || usernames.isEmpty()) {
             progressBar.setVisibility(View.GONE);
@@ -205,6 +214,12 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         }
     }
 
+    /**
+     * Filters the original list of participants based on the provided search query.
+     * Updates the filtered list and UI accordingly.
+     *
+     * @param query The search string used to filter participants by username or display name.
+     */
     private void filterList(String query) {
         filteredList.clear();
 
@@ -223,6 +238,10 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         updateEmptyView();
     }
 
+    /**
+     * Updates the UI based on whether the filtered list is empty.
+     * Displays an appropriate message or shows the participant list.
+     */
     private void updateEmptyView() {
         if (filteredList.isEmpty()) {
             String message = listType == ParticipantRepository.ListType.FOLLOWERS ?
@@ -290,6 +309,13 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
                 .show();
     }
 
+    /**
+     * Removes the specified participant from the current user's list of followers.
+     * Updates both the filtered and original lists, refreshes the adapter UI, and shows a toast message.
+     *
+     * @param participant The participant to remove from the followers list.
+     * @param position    The position of the participant in the filtered list.
+     */
     private void removeFollower(Participant participant, int position) {
         progressBar.setVisibility(View.VISIBLE);
 
@@ -313,6 +339,13 @@ public class FollowersListFragment extends Fragment implements FollowerAdapter.O
         });
     }
 
+    /**
+     * Unfollows the specified participant from the current user's following list.
+     * Updates both the filtered and original lists, refreshes the adapter UI, and shows a toast message.
+     *
+     * @param participant The participant to unfollow.
+     * @param position    The position of the participant in the filtered list.
+     */
     private void unfollowUser(Participant participant, int position) {
         progressBar.setVisibility(View.VISIBLE);
 

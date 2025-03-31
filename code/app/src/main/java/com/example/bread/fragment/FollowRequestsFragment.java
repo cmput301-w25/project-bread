@@ -40,7 +40,6 @@ import java.util.List;
  * UI may briefly flicker on data reload due to full refresh; could benefit from a diff-based adapter update.
  */
 
-
 public class FollowRequestsFragment extends Fragment implements FollowRequestAdapter.RequestActionListener {
 
     private static final String TAG = "FollowRequestsFragment";

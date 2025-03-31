@@ -133,6 +133,11 @@ public class EventDetail extends Fragment {
         return view;
     }
 
+    /**
+     * Launches a dialog for the user to add a comment to the current mood event.
+     * Validates the input, ensures comment is under character limit, and syncs it with Firestore.
+     * Provides immediate UI feedback by updating the comment list.
+     */
     private void launchAddCommentDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_comment, null);
@@ -181,6 +186,11 @@ public class EventDetail extends Fragment {
         });
     }
 
+    /**
+     * Retrieves a DocumentReference to the currently authenticated Firebase user’s participant document.
+     *
+     * @return DocumentReference pointing to the user's participant document or null if the user is not authenticated or the display name is unavailable.
+     */
     private DocumentReference currentUserRef() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null && user.getDisplayName() != null) {
@@ -189,6 +199,10 @@ public class EventDetail extends Fragment {
         return null;
     }
 
+    /**
+     * Fetches all comments associated with the current mood event from Firestore.
+     * Updates the RecyclerView UI with a sorted list of comments using EventDetailAdapter.
+     */
     private void fetchComments() {
         moodEventRepository.fetchComments(moodEvent, comments -> {
             comments.sort(Comparator.reverseOrder());
@@ -197,6 +211,4 @@ public class EventDetail extends Fragment {
             eventRecyclerView.setAdapter(eventDetailAdapter);
         }, e -> Log.e(TAG, "Error fetching comments", e));
     }
-
-
 }

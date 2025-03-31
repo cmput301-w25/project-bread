@@ -495,10 +495,10 @@ public class HistoryFragment extends Fragment {
             dialog.dismiss();
         });
     }
-    // Edit / add image related functions
 
     /**
-     *
+     * Registers a result launcher for selecting an image from the gallery.
+     * Converts the selected image to Base64 and updates the image preview button.
      */
     private void registerResult() {
         resultLauncher = registerForActivityResult(
@@ -539,7 +539,12 @@ public class HistoryFragment extends Fragment {
         resultLauncher.launch(intent);
     }
 
-    // Filter-related methods
+    /**
+     * Displays a dialog allowing the user to filter mood events by:
+     * - Events within the past week
+     * - Emotional state
+     * - Keyword in the reason field
+     */
     private void showFilterDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext(), R.style.CustomAlertDialog);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_history_filter_moods, null);
@@ -593,6 +598,11 @@ public class HistoryFragment extends Fragment {
         });
     }
 
+    /**
+     * Applies the currently selected filters to the mood events list.
+     * Filters by recent week, emotional state, and keyword.
+     * Updates the adapter and notifies the user if no matches are found.
+     */
     private void applyFilters() {
         if (allMoodEvents.isEmpty() && !moodEventArrayList.isEmpty()) {
             allMoodEvents.addAll(moodEventArrayList);
@@ -621,6 +631,12 @@ public class HistoryFragment extends Fragment {
         }
     }
 
+    /**
+     * Filters a list of mood events to only include those from the past 7 days.
+     *
+     * @param events The list of mood events to filter.
+     * @return A list of mood events that occurred within the past week.
+     */
     private ArrayList<MoodEvent> filterByRecentWeek(ArrayList<MoodEvent> events) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
@@ -636,6 +652,13 @@ public class HistoryFragment extends Fragment {
         return filteredList;
     }
 
+    /**
+     * Filters a list of mood events to only include those with a matching emotional state.
+     *
+     * @param events The list of mood events to filter.
+     * @param state The emotional state to match.
+     * @return A list of mood events with the specified emotional state.
+     */
     private ArrayList<MoodEvent> filterByEmotionalState(ArrayList<MoodEvent> events, MoodEvent.EmotionalState state) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
 
@@ -648,6 +671,13 @@ public class HistoryFragment extends Fragment {
         return filteredList;
     }
 
+    /**
+     * Filters a list of mood events to only include those whose reason field contains a given keyword.
+     *
+     * @param events The list of mood events to filter.
+     * @param keyword The keyword to search for in the reason.
+     * @return A list of mood events whose reason contains the keyword.
+     */
     private ArrayList<MoodEvent> filterByKeyword(ArrayList<MoodEvent> events, String keyword) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
 
@@ -660,6 +690,10 @@ public class HistoryFragment extends Fragment {
         return filteredList;
     }
 
+    /**
+     * Resets all filters and restores the full list of mood events.
+     * Sorts the list by timestamp (most recent first).
+     */
     private void resetFilters() {
         if (!allMoodEvents.isEmpty()) {
             moodEventArrayList.clear();

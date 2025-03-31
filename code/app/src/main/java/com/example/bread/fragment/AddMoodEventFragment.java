@@ -214,7 +214,8 @@ public class AddMoodEventFragment extends DialogFragment {
     }
 
     /**
-     *
+     * Saves mood event by validating all inputs, assigning to proper variables, and saving to firebase
+     * Provides toast updates to user on mood addition success
      */
     private void saveMoodEvent() {
         Log.i(TAG, "Starting saveMoodEvent");
@@ -338,6 +339,10 @@ public class AddMoodEventFragment extends DialogFragment {
         );
     }
 
+    /**
+     * Retrieves String username of current user of the app from firebase
+     * @return String (username)
+     */
     private String getCurrentUsername() {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         String username = currentUser.getDisplayName();

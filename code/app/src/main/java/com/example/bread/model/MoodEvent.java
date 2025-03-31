@@ -105,7 +105,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
      */
     public enum Visibility {
         PRIVATE,
-        PUBLIC;
+        PUBLIC
     }
 
     private String id;

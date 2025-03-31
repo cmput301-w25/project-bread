@@ -155,9 +155,9 @@ public class MapFragmentTest {
         grantPermission();
 
         // Set mock location
-        Context context = ApplicationProvider.getApplicationContext();
-        FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
-        Tasks.await(fusedClient.setMockMode(true));
+            Context context = ApplicationProvider.getApplicationContext();
+            FusedLocationProviderClient fusedClient = LocationServices.getFusedLocationProviderClient(context);
+            Tasks.await(fusedClient.setMockMode(true));
 
         Location mockLocation = new Location(LocationManager.GPS_PROVIDER);
         mockLocation.setLatitude(37.4219999);
