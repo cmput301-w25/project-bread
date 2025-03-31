@@ -28,7 +28,20 @@ import com.google.firebase.firestore.ListenerRegistration;
 import com.example.bread.fragment.UserSearchFragment;
 
 /**
- * Represents the home page of the app, where users can navigate to different fragments.
+ * HomePage - View
+ *
+ * Role / Purpose:
+ * This is the main landing activity after login, serving as the navigation hub for users to interact
+ * with different features of the app like personal mood history, settings , map, etc.
+ * on the home page, u get to see the mood events of the users that you are following.(3 recent mood events per user.)
+ *
+ * Design Pattern:
+ * - View Pattern: Manages the navigation and lifecycle of fragments displayed on the screen.
+ * - Observer Pattern: Listens to real-time notification updates using Firestore listeners.
+ *
+ * Outstanding Issues / Comments:
+ * -
+ * -
  */
 public class HomePage extends AppCompatActivity {
 
@@ -37,7 +50,10 @@ public class HomePage extends AppCompatActivity {
     private ListenerRegistration notificationListener;
 
 
-
+    /**
+     * Lifecycle method called when the activity is resumed.
+     * Ensures notification channels exist and re-registers the Firestore listener.
+     */
     protected void onResume() {
         super.onResume();
 
@@ -47,7 +63,10 @@ public class HomePage extends AppCompatActivity {
         // Set up notification listener
         setupNotificationListener();
     }
-
+    /**
+     * Lifecycle method called when the activity is paused.
+     * Unregisters Firestore listener to avoid memory leaks.
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -58,7 +77,12 @@ public class HomePage extends AppCompatActivity {
             notificationListener = null;
         }
     }
-
+    /**
+     * Called when the activity is created.
+     * Sets up the layout, bottom navigation bar listener, and initial fragment.
+     *
+     * @param savedInstanceState previous state of the activity, if any
+     */
     @SuppressLint("NonConstantResourceId")
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +120,12 @@ public class HomePage extends AppCompatActivity {
         }
     }
 
+    /**
+     * Replaces the current fragment inside the main container.
+     *
+     * @param fragment the new fragment to show
+     */
+
     private void replaceFragment(Fragment fragment) {
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction().setCustomAnimations(
@@ -104,12 +134,18 @@ public class HomePage extends AppCompatActivity {
         transaction.replace(R.id.frame_layout, fragment);
         transaction.commit();
     }
-
+    /**
+     * Programmatically selects the home item in the bottom navigation bar.
+     */
     public void selectHomeNavigation() {
         binding.bottomNavigationView.setSelectedItemId(R.id.home);
     }
 
-    // Method to navigate to specific fragments from your branch
+    /**
+     * Navigates to a specific named fragment based on app-specific tags.
+     *
+     * @param fragmentName name of the fragment ("followRequests", "userSearch", "profile")
+     */
     public void navigateToFragment(String fragmentName) {
         Fragment fragment = null;
 
@@ -135,14 +171,24 @@ public class HomePage extends AppCompatActivity {
             transaction.commit();
         }
     }
-
+    /**
+     * Called when a new intent is delivered to an already running instance.
+     * Used for handling navigation via notifications.
+     *
+     * @param intent the new intent containing navigation data
+     */
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
 
         handleNotificationIntent(intent);
     }
-
+    /**
+     * Handles incoming intents triggered by notifications.
+     * Navigates to appropriate fragment based on "navigate_to" extra.
+     *
+     * @param intent the intent that triggered the activity
+     */
     private void handleNotificationIntent(Intent intent) {
         if (intent != null) {
             String navigateTo = intent.getStringExtra("navigate_to");
@@ -171,7 +217,10 @@ public class HomePage extends AppCompatActivity {
             }
         }
     }
-
+    /**
+     * Sets up a Firestore snapshot listener for unread notifications for the current user.
+     * Triggers system notifications and marks notifications as read.
+     */
     private void setupNotificationListener() {
         // Get current user
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();

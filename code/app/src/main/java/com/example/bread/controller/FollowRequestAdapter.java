@@ -12,11 +12,29 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bread.R;
 import com.example.bread.model.FollowRequest;
-import com.example.bread.model.Participant;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.ImageHandler;
 
 import java.util.List;
+
+/**
+ * FollowRequestAdapter - Controller
+ * <p>
+ * Role / Purpose
+ * Adapter that populates RecylerView list with follow requests
+ * Displays participant information (username, name, and profile image) per request
+ * Uses RequestActionListener to handle interactions
+ * <p>
+ * Design Pattern
+ * Adapter Pattern: Binds FollowRequest data to the RecyclerView.
+ * ViewHolder Pattern: Improves performance through view recycling.
+ * Listener Pattern: Delegates interaction handling (accept/decline) outside of adapter.
+ * Repository Pattern: Uses ParticipantRepository to fetch participant display data.
+ * <p>
+ * Outstanding Issues
+ * Error handling is minimal when fetching participant data (null on failure).
+ * Assumes stable data (no real-time updates or pagination).
+ */
 
 public class FollowRequestAdapter extends RecyclerView.Adapter<FollowRequestAdapter.RequestViewHolder> {
 
@@ -48,11 +66,19 @@ public class FollowRequestAdapter extends RecyclerView.Adapter<FollowRequestAdap
         return requestsList.size();
     }
 
+    /**
+     * Listener interface for handling follow request actions
+     */
     public interface RequestActionListener {
         void onAccept(String requestorUsername, int position);
+
         void onDecline(String requestorUsername, int position);
     }
 
+    /**
+     * ViewHolder for follow request information
+     * Assigns/sets values to request related variables
+     */
     class RequestViewHolder extends RecyclerView.ViewHolder {
         ImageView profileImage;
         TextView usernameText, nameText;

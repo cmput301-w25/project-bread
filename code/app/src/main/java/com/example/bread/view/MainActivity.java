@@ -14,13 +14,26 @@ import com.example.bread.R;
 import com.example.bread.firebase.FirebaseService;
 
 /**
- * Represents the main activity of the app, where the user is redirected to the login page if they
- * are not logged in, or to the home page if they are.
+ * MainActivity - Entry Point / Controller
+ *
+ * Role / Purpose:
+ * Acts as the app's entry point. Determines whether the user is logged in by checking
+ * SharedPreferences for a stored username and redirects accordingly to either the LoginPage or HomePage.
+ * Also initializes Firebase context for app-wide service availability.
+ *
+ * Design Pattern:
+ * -  Decides and redirects the user's flow based on stored state.
+ *
  */
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-
+    /**
+     * Called when the activity is first created.
+     * Sets up window insets, initializes Firebase services, and checks login status.
+     *
+     * @param savedInstanceState the saved state of the activity (if any)
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

@@ -22,18 +22,31 @@ import com.example.bread.repository.MoodEventRepository;
 import com.example.bread.repository.ParticipantRepository;
 import com.example.bread.utils.EmotionUtils;
 import com.example.bread.utils.ImageHandler;
+import com.example.bread.utils.TimestampUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.example.bread.utils.TimestampUtils;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 
 /**
- * Represents the profile page of the app, where users can view their profile information.
+ * UserProfileFragment - Fragment
+ * <p>
+ * Role / Purpose
+ * Displays another user's profile information including follower/following count, profile picture,
+ * and most recent mood event. Allows current user to send a follow request.
+ * <p>
+ * Design Pattern
+ * Fragment Pattern: Represents a UI screen within the navigation flow.
+ * MVC Pattern: Uses repositories to retrieve and bind participant and mood event data.
+ * <p>
+ * Outstanding Issues / Comments
+ * Does not currently support loading the full list of mood events or followers.
+ * Real-time updates are limited to initial fetch; no active listeners on mood changes.
  */
+
 public class UserProfileFragment extends Fragment {
 
     private static final String TAG = "UserProfileFragment";
@@ -53,7 +66,7 @@ public class UserProfileFragment extends Fragment {
 
     private ListenerRegistration participantListener;
 
-    private ArrayList<MoodEvent> userMoodEvents = new ArrayList<>();
+    private final ArrayList<MoodEvent> userMoodEvents = new ArrayList<>();
 
     public UserProfileFragment() {
         // Required empty public constructor
@@ -115,8 +128,7 @@ public class UserProfileFragment extends Fragment {
             if (isFollowing) {
                 followRequest.setVisibility(View.GONE);
                 loadRecentMoodEvent();
-            }
-            else{
+            } else {
                 recentMoodEventView.setVisibility(View.GONE);
                 emptyMoodText.setVisibility(View.GONE);
                 recentMoodHeader.setVisibility(View.GONE);
@@ -150,6 +162,10 @@ public class UserProfileFragment extends Fragment {
         return view;
     }
 
+    /**
+     * Loads the most recent mood event of the followed user from Firestore.
+     * Clears the current list and updates the UI after sorting events by date.
+     */
     private void loadRecentMoodEvent() {
         if (followedUsername == null) return;
 
@@ -171,6 +187,12 @@ public class UserProfileFragment extends Fragment {
         });
     }
 
+
+    /**
+     * Updates the UI to display the most recent mood event of the followed user.
+     * Handles setting text, mood details, images, and color based on emotional state.
+     * If no events are found, shows an empty message.
+     */
     private void updateRecentMoodEvent() {
         if (userMoodEvents.isEmpty()) {
             recentMoodEventView.setVisibility(View.GONE);
@@ -245,11 +267,19 @@ public class UserProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Initializes the participant data listener by fetching profile information.
+     * Intended to be called during setup or when profile data should refresh.
+     */
     private void setupParticipantListener() {
         // Replace with fetchBaseParticipant
         fetchParticipantData();
     }
 
+    /**
+     * Fetches base profile data of the followed user from Firestore and updates the UI.
+     * Used to display follower/following counts and profile picture.
+     */
     private void fetchParticipantData() {
         participantRepository.fetchBaseParticipant(followedUsername, participant -> {
             if (participant != null) {
@@ -259,7 +289,9 @@ public class UserProfileFragment extends Fragment {
     }
 
     /**
-     * Update UI with participant data
+     * Updates the profile UI with participant data including profile picture and social metrics.
+     *
+     * @param participant The participant object containing display information.
      */
     private void updateUI(Participant participant) {
         // Update follower and following counts
@@ -281,6 +313,11 @@ public class UserProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Navigates to a FollowersListFragment for the specified list type (followers or following).
+     *
+     * @param listType The type of list to display.
+     */
     private void navigateToFollowersList(ParticipantRepository.ListType listType) {
         String type = listType == ParticipantRepository.ListType.FOLLOWERS ? "followers" : "following";
         FollowersListFragment fragment = FollowersListFragment.newInstance(followedUsername, type);
@@ -292,6 +329,13 @@ public class UserProfileFragment extends Fragment {
         transaction.commit();
     }
 
+    /**
+     * Handles follow button click logic for a user.
+     * Checks if the current user already follows the target user or has sent a request.
+     * Sends a follow request if no relationship exists.
+     *
+     * @param username The username of the user to follow.
+     */
     private void onFollowClickProfile(String username) {
         // First check if already following
         participantRepository.isFollowing(currentUsername, username, isFollowing -> {
@@ -324,6 +368,12 @@ public class UserProfileFragment extends Fragment {
         });
     }
 
+    /**
+     * Updates the follow button text and state based on the current follow relationship.
+     * Displays "Following", "Requested", or "Follow" based on relationship status.
+     *
+     * @param followedUser The username of the user whose relationship status is being checked.
+     */
     private void updateFollowButtonState(String followedUser) {
         // Check if already following
         participantRepository.isFollowing(currentUsername, followedUser, isFollowing -> {

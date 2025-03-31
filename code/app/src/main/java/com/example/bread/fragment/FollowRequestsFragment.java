@@ -26,9 +26,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Fragment that displays follow requests for the current user.
- * Allows accepting or declining follow requests and offers to follow back when accepting.
+ * FollowRequestsFragment - Fragment
+ * <p>
+ * Role / Purpose
+ * Displays incoming follow requests for the current user and allows accepting or declining them.
+ * Provides option to follow back upon acceptance.
+ * <p>
+ * Design Pattern
+ * Fragment Pattern: Encapsulates UI logic for request handling.
+ * Observer Pattern: Listens for follow request data changes.
+ * <p>
+ * Outstanding Issues / Comments
+ * UI may briefly flicker on data reload due to full refresh; could benefit from a diff-based adapter update.
  */
+
 public class FollowRequestsFragment extends Fragment implements FollowRequestAdapter.RequestActionListener {
 
     private static final String TAG = "FollowRequestsFragment";
@@ -40,7 +51,7 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
     private FollowRequestAdapter requestAdapter;
     private ParticipantRepository participantRepository;
     private String currentUsername;
-    private List<FollowRequest> requestsList = new ArrayList<>();
+    private final List<FollowRequest> requestsList = new ArrayList<>();
 
     /**
      * Initialize the fragment, setting up the repository and retrieving current username.
@@ -55,11 +66,12 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             currentUsername = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
         }
     }
+
     /**
      * Create the fragment view, initialize UI components, and load data.
      *
-     * @param inflater Layout inflater to inflate the fragment layout
-     * @param container Parent view that the fragment UI attaches to
+     * @param inflater           Layout inflater to inflate the fragment layout
+     * @param container          Parent view that the fragment UI attaches to
      * @param savedInstanceState Saved instance state for fragment recreation
      * @return The inflated fragment view
      */
@@ -83,6 +95,7 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
 
         return view;
     }
+
     /**
      * Fetches follow requests from the repository and updates the UI.
      * Shows progress indicator during loading and handles empty state.
@@ -110,6 +123,7 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             updateEmptyView();
         });
     }
+
     /**
      * Updates the visibility of UI elements based on whether there are follow requests.
      * Shows empty view when there are no requests, shows the RecyclerView otherwise.
@@ -123,12 +137,13 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             requestsRecyclerView.setVisibility(View.VISIBLE);
         }
     }
+
     /**
      * Handles accepting a follow request.
      * Updates the database, refreshes the UI, and offers to follow back if appropriate.
      *
      * @param requestorUsername Username of the person who sent the follow request
-     * @param position Position of the request in the list
+     * @param position          Position of the request in the list
      */
     @Override
     public void onAccept(String requestorUsername, int position) {
@@ -200,6 +215,7 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             Log.e(TAG, "Error checking following status", e);
         });
     }
+
     /**
      * Sends a follow request back to the user whose request was accepted.
      *
@@ -218,12 +234,13 @@ public class FollowRequestsFragment extends Fragment implements FollowRequestAda
             progressBar.setVisibility(View.GONE);
         });
     }
+
     /**
      * Handles declining a follow request.
      * Updates the database and refreshes the UI.
      *
      * @param requestorUsername Username of the person who sent the follow request
-     * @param position Position of the request in the list
+     * @param position          Position of the request in the list
      */
     @Override
     public void onDecline(String requestorUsername, int position) {

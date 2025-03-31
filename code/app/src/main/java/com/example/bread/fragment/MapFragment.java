@@ -54,9 +54,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Represents the map page of the app, where users can view a map of their location and nearby
- * mood events.
+ * MapFragment - Fragment
+ * <p>
+ * Role / Purpose
+ * Displays a map showing nearby mood events with filtering options.
+ * Handles user location, mood filtering, and displays map markers with mood icons.
+ * <p>
+ * Design Pattern
+ * Fragment Pattern: Encapsulates map UI logic.
+ * Singleton Pattern: Uses LocationHandler as a centralized utility.
+ * Observer Pattern: Reacts to location and Firestore data updates.
+ * <p>
+ * Outstanding Issues / Comments
+ * Initial fetch may occur before permissions are granted and should wait until after permission result.
  */
+
 public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String TAG = "MapFragment";
@@ -172,6 +184,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    /**
+     * Calls location handler to fetch user location and calls helper function to retrieve events
+     * @param onSuccessListener
+     */
     private void fetchInRadiusMoodEventsFromFollowing(@NonNull OnSuccessListener<Map<String, MoodEvent>> onSuccessListener) {
         Log.i(TAG, "Location not available yet, waiting for location callback");
         locationHandler.fetchUserLocation(location -> {
@@ -180,6 +196,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    /**
+     * Calls method in mood repository to fetch all followed mood events within 5km
+     * @param currentLocation
+     * @param onSuccessListener
+     */
     private void doFetchInRadiusMoodEvents(@NonNull Location currentLocation, @NonNull OnSuccessListener<Map<String, MoodEvent>> onSuccessListener) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user == null) {
@@ -432,6 +453,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
+    /**
+     * Applies the currently selected filters to the mood events list.
+     * Filters by recent week, emotional state, and keyword.
+     * Updates the adapter and notifies the user if no matches are found.
+     */
     private ArrayList<MoodEvent> applyFilters(ArrayList<MoodEvent> moodEvents) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>(moodEvents);
 
@@ -454,6 +480,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return filteredList;
     }
 
+    /**
+     * Filters a list of mood events to only include those from the past 7 days.
+     *
+     * @param events The list of mood events to filter.
+     * @return A list of mood events that occurred within the past week.
+     */
     private ArrayList<MoodEvent> filterByRecentWeek(ArrayList<MoodEvent> events) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
         Calendar calendar = Calendar.getInstance();
@@ -469,6 +501,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return filteredList;
     }
 
+    /**
+     * Filters a list of mood events to only include those with a matching emotional state.
+     *
+     * @param events The list of mood events to filter.
+     * @param state The emotional state to match.
+     * @return A list of mood events with the specified emotional state.
+     */
     private ArrayList<MoodEvent> filterByEmotionalState(ArrayList<MoodEvent> events, MoodEvent.EmotionalState state) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
 
@@ -481,6 +520,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return filteredList;
     }
 
+    /**
+     * Filters a list of mood events to only include those whose reason field contains a given keyword.
+     *
+     * @param events The list of mood events to filter.
+     * @param keyword The keyword to search for in the reason.
+     * @return A list of mood events whose reason contains the keyword.
+     */
     private ArrayList<MoodEvent> filterByKeyword(ArrayList<MoodEvent> events, String keyword) {
         ArrayList<MoodEvent> filteredList = new ArrayList<>();
 
@@ -493,6 +539,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         return filteredList;
     }
 
+    /**
+     * Displays follower events on map with associated username
+     * @param eventsMap (username and mood event)
+     */
     private void putMarkersOnMap(Map<String, MoodEvent> eventsMap) {
         for (Map.Entry<String, MoodEvent> moodEvent : eventsMap.entrySet()) {
             String userId = moodEvent.getKey();
@@ -519,6 +569,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Displays personal events on map with associated mood and current user username.
+     * @param eventsArray (mood events of current user)
+     */
     private void putPersonalOnMap(ArrayList<MoodEvent> eventsArray) {
         for (MoodEvent event : eventsArray) {
 
@@ -543,6 +597,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    /**
+     * Adds a marker for users current location on the map to ease in finding it
+     */
     private void putUserLocationOnMap() {
         locationHandler.fetchUserLocation(location -> {
             LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());

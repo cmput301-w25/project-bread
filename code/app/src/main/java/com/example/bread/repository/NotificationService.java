@@ -4,8 +4,23 @@ import android.util.Log;
 
 import com.example.bread.firebase.FirebaseService;
 import com.example.bread.model.Notification;
-import com.example.bread.utils.NotificationUtils;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+/**
+ * NotificationService - Repository
+ * <p>
+ * Role / Purpose
+ * Provides a utility for sending follow request notifications between users by writing to the Firestore "notifications" collection.
+ * Encapsulates logic for constructing and storing notification data using the Notification model.
+ * <p>
+ * Design Patterns
+ * Singleton Pattern: Lazily initializes a shared FirebaseService instance for database access.
+ * Service Pattern: Acts as a standalone utility for managing notifications separate from UI logic.
+ * <p>
+ * Outstanding Issues
+ * - Currently limited to sending follow request notifications; other notification types may need to be added later.
+ * - No support for real-time listening, reading, or removing notifications.
+ */
 
 public class NotificationService {
     private static final String TAG = "NotificationService";
@@ -24,6 +39,9 @@ public class NotificationService {
 
     /**
      * Send a follow request notification by saving it to Firestore
+     *
+     * @param senderUsername
+     * @param recipientUsername
      */
     public static void sendFollowRequestNotification(String senderUsername, String recipientUsername) {
         if (senderUsername == null || senderUsername.isEmpty() || recipientUsername == null || recipientUsername.isEmpty()) {

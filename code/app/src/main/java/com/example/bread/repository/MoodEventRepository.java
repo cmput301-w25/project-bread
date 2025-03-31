@@ -33,16 +33,31 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Repository class for handling mood events in the database
+ * MoodEventRepository - Repository
+ * <p>
+ * Role / Purpose
+ * Handles all interactions with the Firestore database related to MoodEvent objects.
+ * Supports creating, updating, deleting, and retrieving mood events and associated comments.
+ * Enables fetching mood events from followed users, with filtering by location, visibility, and recency.
+ * Employs caching strategies to improve performance and reduce unnecessary network requests.
+ * <p>
+ * Design Patterns
+ * Repository Pattern: Abstracts data access and operations, separating business logic from data layer.
+ * Singleton Pattern: Leverages shared instances like FirebaseService and ParticipantRepository.
+ * Observer Pattern: Uses success and failure listeners to handle asynchronous operations and UI updates.
+ * Caching Strategy: Implements a simple memory-based cache for mood events to minimize redundant queries.
+ * <p>
+ * Outstanding Issues
+ * - Partial real-time support: methods rely on direct fetches rather than listeners for data changes.
  */
 public class MoodEventRepository {
     private final FirebaseService firebaseService;
     private static final String TAG = "MoodEventRepository";
     private static final int MAX_EVENTS_PER_USER = 3;
     private final ParticipantRepository participantRepository = new ParticipantRepository();
-    private Map<String, List<MoodEvent>> followingMoodsCache = new HashMap<>();
+    private final Map<String, List<MoodEvent>> followingMoodsCache = new HashMap<>();
     private long lastCacheUpdateTime = 0;
-    private static final long CACHE_EXPIRY_MS = 120*1000; // 2 minutes just in case there is no delay in fetching during demo or smn
+    private static final long CACHE_EXPIRY_MS = 120 * 1000; // 2 minutes just in case there is no delay in fetching during demo or smn
 
     public MoodEventRepository() {
         firebaseService = new FirebaseService();
@@ -66,11 +81,10 @@ public class MoodEventRepository {
     public void fetchEventsWithParticipantRef(@NonNull DocumentReference participantRef, @NonNull OnSuccessListener<List<MoodEvent>> onSuccessListener, OnFailureListener onFailureListener) {
         boolean offline = !FirebaseService.isNetworkConnected();
         Source source;
-        if (offline){
+        if (offline) {
             source = Source.CACHE;
             Log.d(TAG, "Fetching mood events with source: CACHE (offline mode)");
-        }
-        else {
+        } else {
             source = Source.DEFAULT;
             Log.d(TAG, " Fetching mood events with source : Default (online mode)");
         }
@@ -309,7 +323,7 @@ public class MoodEventRepository {
                         GeoLocation docLocation = new GeoLocation(lat, lng);
                         double distanceInM = GeoFireUtils.getDistanceBetween(docLocation, center);
 
-                        if (distanceInM <= radius*1000 && !Objects.requireNonNull(doc.get("participantRef")).equals(participantRepository.getParticipantRef(username))) {
+                        if (distanceInM <= radius * 1000 && !Objects.requireNonNull(doc.get("participantRef")).equals(participantRepository.getParticipantRef(username))) {
                             Log.d(TAG, "Went inside loop");
                             matchingDocs.add(doc.toObject(MoodEvent.class));
                         }

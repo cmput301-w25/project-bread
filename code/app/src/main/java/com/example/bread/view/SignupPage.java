@@ -34,7 +34,21 @@ import com.google.firebase.auth.UserProfileChangeRequest;
 import java.util.regex.Pattern;
 
 /**
- * Represents the signup page of the app, where users can create an account with their email and password.
+ * SignupPage - View
+ *
+ * Role / Purpose:
+ * Handles the user registration process. Collects user data (name, username, email, password),
+ * validates input fields(proper password selection, username availability), creates a FirebaseAuth account, stores the profile, and navigates to the home page.
+
+ *
+ * Design Pattern:
+ * -  Manages user interaction and connects UI with authentication and database logic.
+ * - Repository Pattern: Uses ParticipantRepository to abstract Firestore interactions.
+ * - Builder Pattern: Used in constructing UserProfileChangeRequest.
+ *
+ * Outstanding Issues / Comments:
+ * - Password strength requirements could be clarified with inline validation feedback.
+ * -
  */
 public class SignupPage extends AppCompatActivity {
 
