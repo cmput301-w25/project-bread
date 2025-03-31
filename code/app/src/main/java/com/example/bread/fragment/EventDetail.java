@@ -30,9 +30,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 
 
@@ -97,7 +95,6 @@ public class EventDetail extends Fragment {
                     R.anim.slide_in, R.anim.fade_out, R.anim.fade_in, R.anim.slide_out
             ).remove(EventDetail.this).commit();
         });
-
         addCommentButton.setOnClickListener(v -> {
             launchAddCommentDialog();
         });
@@ -185,7 +182,5 @@ public class EventDetail extends Fragment {
             eventRecyclerView.setAdapter(eventDetailAdapter);
         }, e -> Log.e(TAG, "Error fetching comments", e));
     }
-
-
 
 }

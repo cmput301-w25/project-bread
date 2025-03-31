@@ -6,13 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.bread.R;
-import com.example.bread.databinding.ActivityHomeAndHistoryPageBinding;
+import com.example.bread.databinding.ActivityHomePageBinding;
 import com.example.bread.fragment.AddMoodEventFragment;
 import com.example.bread.fragment.FollowRequestsFragment;
 import com.example.bread.fragment.HistoryFragment;
@@ -34,7 +33,7 @@ import com.example.bread.fragment.UserSearchFragment;
 public class HomePage extends AppCompatActivity {
 
     private static final String TAG = "HomePage";
-    ActivityHomeAndHistoryPageBinding binding;
+    ActivityHomePageBinding binding;
     private ListenerRegistration notificationListener;
 
 
@@ -66,7 +65,7 @@ public class HomePage extends AppCompatActivity {
 
         //followed the following video for navigation bar implementation, accessed on Feb 27 2025
         //https://www.youtube.com/watch?v=jOFLmKMOcK0
-        binding = ActivityHomeAndHistoryPageBinding.inflate(getLayoutInflater());
+        binding = ActivityHomePageBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         // Create notification channels
         NotificationUtils.createNotificationChannels(this);
