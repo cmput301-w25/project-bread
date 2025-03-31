@@ -16,6 +16,21 @@ import com.example.bread.R;
 import com.example.bread.view.HomePage;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+/**
+ * NotificationUtils - Utility
+ *
+ * Role / Purpose:
+ * Provides helper methods for managing and displaying local notifications related to app events
+ * such as follow requests. Handles notification channel creation and message display logic.
+ *
+ * Design Pattern:
+ * - Utility Pattern: Contains only static methods and constants; not meant to be instantiated.
+ * - Singleton-like static access: Ensures notification channels are initialized only once.
+ *
+ * Outstanding Issues / Comments:
+ * - Currently supports only one notification channel (follow requests); future expansion could
+ *   modularize different types (e.g., comments).
+ */
 public class NotificationUtils {
     private static final String TAG = "NotificationUtils";
     public static final String CHANNEL_ID = "follow_requests";
@@ -26,7 +41,12 @@ public class NotificationUtils {
     public static final String EXTRA_SENDER_USERNAME = "sender_username";
     public static final String TYPE_FOLLOW_REQUEST = "follow_request";
 
-
+    /**
+     * Creates notification channels for Android O and above.
+     * Should be called once during app launch or Activity creation.
+     *
+     * @param context context used to access system notification service
+     */
     public static void createNotificationChannels(Context context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
@@ -42,8 +62,15 @@ public class NotificationUtils {
         }
     }
 
+
     /**
-     * Shows a notification
+     * Displays a local notification to the user using the provided information.
+     *
+     * @param context        the context to use for system services
+     * @param title          the title of the notification
+     * @param message        the content/message of the notification
+     * @param pendingIntent  intent to trigger when the notification is clicked
+     * @param notificationId unique identifier for this notification (used to update or cancel it)
      */
     public static void showNotification(Context context, String title, String message,
                                         PendingIntent pendingIntent, int notificationId) {

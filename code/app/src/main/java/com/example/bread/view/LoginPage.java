@@ -25,7 +25,20 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 /**
- * Represents the login page of the app, where users can sign in with their email and password.
+ * LoginPage - view
+ *
+ * Role / Purpose:
+ * Handles user login functionality. Accepts email and password input, validates the fields,
+ * communicates with Firebase Authentication, and redirects users to the HomePage upon success.
+ * Also allows navigation to the SignUp page for new users.
+ *
+ * Design Pattern:
+ * - View Pattern: Manages the logic and user input for login.
+ * - Delegation Pattern: Uses Firebase callbacks to handle success and failure in authentication.
+ *
+ * Outstanding Issues / Comments:
+ * - UI/UX could benefit from animations or loading indicators during login attempts.
+ * -
  */
 public class LoginPage extends AppCompatActivity {
 
@@ -34,7 +47,12 @@ public class LoginPage extends AppCompatActivity {
     private EditText emailEditText, passwordEditText;
 
     private FirebaseAuth mAuth;
-
+    /**
+     * Called when the activity is starting.
+     * Sets up the login form, initializes Firebase Auth, and sets button listeners.
+     *
+     * @param savedInstanceState the saved instance state bundle
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,7 +114,10 @@ public class LoginPage extends AppCompatActivity {
             startActivity(intent);
         });
     }
-
+    /**
+     * Called when the activity becomes visible to the user.
+     * Automatically redirects to HomePage if the user is already signed in.
+     */
     @Override
     protected void onStart() {
         super.onStart();
@@ -115,7 +136,14 @@ public class LoginPage extends AppCompatActivity {
             Log.d(TAG, "User is not signed in");
         }
     }
-
+    /**
+     * Signs in the user using Firebase Authentication.
+     *
+     * @param email             user's email
+     * @param password          user's password
+     * @param onSuccessListener callback for success
+     * @param onFailureListener callback for failure
+     */
     private void signInUser(@NonNull String email, @NonNull String password, @NonNull OnSuccessListener<AuthResult> onSuccessListener, OnFailureListener onFailureListener) {
         mAuth.signInWithEmailAndPassword(email, password).addOnSuccessListener(onSuccessListener)
                 .addOnFailureListener(onFailureListener != null ? onFailureListener : e -> Log.e(TAG, "Failed to sign in user with email: " + email, e));
