@@ -34,7 +34,7 @@
         </androidx.cardview.widget.CardView>
 
         <TextView
-            android:id="@+id/username_text"
+            android:id="@+id/follow_username_text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"

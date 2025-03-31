@@ -212,7 +212,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             Log.d(TAG, "Current location: " + userLocation);
 
             currentLocation = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 13));
         });
 
         // Get UI settings
@@ -406,6 +406,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 });
             }
 
+            putUserLocationOnMap();
+
             dialog.dismiss();
         });
 
@@ -423,6 +425,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
             isFilteringByWeek = false;
             selectedEmotionalState = null;
             searchKeyword = "";
+
+            putUserLocationOnMap();
 
             dialog.dismiss();
         });
@@ -537,5 +541,12 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                 mMap.addMarker(testMark);
             }
         }
+    }
+
+    private void putUserLocationOnMap() {
+        locationHandler.fetchUserLocation(location -> {
+            LatLng userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+            mMap.addMarker(new MarkerOptions().position(userLocation).title("You are here").icon(BitmapDescriptorFactory.defaultMarker()));
+        });
     }
 }

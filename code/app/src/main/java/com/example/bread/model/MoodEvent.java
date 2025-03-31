@@ -143,6 +143,7 @@ public class MoodEvent implements Serializable, Comparable<MoodEvent> {
         this.reason = reason;
         this.emotionalState = emotionalState;
         this.participantRef = participantRef;
+        this.visibility = Visibility.PUBLIC;
     }
 
 
