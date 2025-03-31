@@ -26,8 +26,24 @@ import com.example.bread.utils.TimestampUtils;
 import java.util.ArrayList;
 
 /**
- * Adapter class for the HomeFragment ListView
+ * HomeMoodEventArrayAdapter
+ *
+ * Role / Purpose:
+ * ArrayAdapter that displays most recent MoodEvent entries in the HomeFragment ListView.
+ * Shows MoodEvent information (emotional state, participant info, mood title, social situation, and any attached image)
+ * Supports participant caching via LruCache to improve performance and reduce network calls.
+ *
+ * Design Patterns:
+ * Adapter Pattern: Binds MoodEvent model data to UI views in a ListView.
+ * ViewHolder Pattern: Optimizes scrolling performance by caching view lookups.
+ * Repository Pattern: Separates data-fetching concerns using ParticipantRepository.
+ * Caching Pattern: Uses LruCache to minimize redundant participant lookups.
+ * Observer Pattern: Clicks on items are handled through event listeners.
+ *
+ * Outstanding Issues:
+ * - Repetitive image decoding may cause UI jank on slower devices.
  */
+
 public class HomeMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
     // Static cache for participants shared across adapter instances

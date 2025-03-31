@@ -23,8 +23,20 @@ import com.example.bread.utils.TimestampUtils;
 import java.util.List;
 
 /**
- * EXPLANATION
+ * EventDetailAdapter - Controller
+ *
+ * Role / Purpose:
+ * Adapter uses a RecyclerView to display a MoodEvent and associated comments
+ * Used in the Event Details screen to allow users to view and scroll through an event and its responses.
+ *
+ * Design Pattern:
+ * Adapter Pattern: Bridges between data (MoodEvent, Comment) and the RecyclerView UI.
+ * ViewHolder Pattern: Used for performance optimization in view recycling.
+ *
+ * Outstanding Issues / Comments:
+ * Comment loading is static and doesn't support pagination or real-time updates.
  */
+
 public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final String TAG = "EventDetailAdapter";
@@ -77,6 +89,10 @@ public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
+    /**
+     * View holder for mood event header (all mood event details and features)
+     * Assigns/sets values to all details
+     */
     public static class HeaderViewHolder extends RecyclerView.ViewHolder {
         TextView usernameText, timestampText, eventTitle, emotionalStateText, socialSituationText, reasonText;
         ImageView profileImage, eventImage;
@@ -124,7 +140,10 @@ public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 
-    // ViewHolder for comments
+    /**
+     * View holder for comment details
+     * Sets values to comment variables
+     */
     public static class CommentViewHolder extends RecyclerView.ViewHolder {
         TextView usernameText, timestampText, commentText;
 
@@ -142,4 +161,3 @@ public class EventDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         }
     }
 }
-

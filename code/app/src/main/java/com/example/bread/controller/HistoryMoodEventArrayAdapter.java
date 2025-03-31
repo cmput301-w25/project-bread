@@ -23,8 +23,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Adapter class for the HistoryFragment ListView
+ * HistoryMoodEventArrayAdapter
+ *
+ * Role / Purpose:
+ * ArrayAdapter that displays MoodEvent items in the HistoryFragment's ListView.
+ * Extends MoodEventArrayAdapter to add support for event selection using checkboxes.
+ * Displays emotional state, social situation, event title, date, and visibility (public/private).
+ *
+ * Design Pattern:
+ * Adapter Pattern: Converts MoodEvent model objects into visual list items.
+ * ViewHolder Pattern: Caches child view lookups to optimize performance during scrolling.
+ * Observer Pattern (via listeners): Listens for checkbox changes to track selected events.
+ *
+ * Outstanding Issues:
+ * - Selection state is not preserved across configuration changes (e.g., screen rotation).
  */
+
 public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
 
     private final Set<MoodEvent> selectedEvents = new HashSet<>();
@@ -117,6 +131,10 @@ public class HistoryMoodEventArrayAdapter extends MoodEventArrayAdapter {
         return convertView;
     }
 
+    /**
+     * Getter method that returns selected event when user chooses one in the list
+     * @return Set<MoodEvent>
+     */
     public Set<MoodEvent> getSelectedEvents() {
         return selectedEvents;
     }

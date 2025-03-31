@@ -17,6 +17,22 @@ import com.example.bread.utils.ImageHandler;
 
 import java.util.List;
 
+/**
+ * FollowerAdapter - Controller
+ *
+ * Role / Purpose:
+ * Adapter that populates a RecyclerView list with followers or following profiles of current user
+ * Handles profile picture, username, and unfollow button
+ *
+ * Design Pattern:
+ * Adapter Pattern: Binds Participant data to the RecyclerView UI.
+ * ViewHolder Pattern: Caches view lookups for smooth scrolling and better performance.
+ * Listener Pattern: Uses a custom listener interface to decouple interaction logic.
+ *
+ * Outstanding Issues / Comments:
+ * Currently assumes the user list and list type won't change dynamically after instantiation.
+ */
+
 public class FollowerAdapter extends RecyclerView.Adapter<FollowerAdapter.FollowerViewHolder> {
 
     private final List<Participant> userList;
@@ -47,11 +63,18 @@ public class FollowerAdapter extends RecyclerView.Adapter<FollowerAdapter.Follow
         return userList.size();
     }
 
+    /**
+     * Listener interface for handling user interactions within a user-related adapter
+     */
     public interface OnUserInteractionListener {
         void onUserClick(Participant participant);
         void onRemoveClick(Participant participant, int position);
     }
 
+    /**
+     * ViewHolder for follower details / actions (profile pic, username, unfollow)
+     * Assigns / sets values to user information
+     */
     class FollowerViewHolder extends RecyclerView.ViewHolder {
         ImageView profileImage;
         TextView usernameText, nameText;

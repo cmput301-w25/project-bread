@@ -11,9 +11,23 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
 
 /**
- * Abstract class for the MoodEventArrayAdapter
- * Used to display mood events in a list view
+ * MoodEventArrayAdapter - Controller
+ *
+ * Role / Purpose:
+ * Abstract base adapter class for displaying MoodEvent items in a ListView.
+ * Provides logic and variables for implementations like HomeMoodEventArrayAdapter and HistoryMoodEventArrayAdapter.
+ * Supports click handling using a listener interface.
+ *
+ * Design Patterns:
+ * Adapter Pattern: Inherits from ArrayAdapter to map MoodEvent data to list items.
+ * Template Method Pattern: Designed for subclass extension with custom getView() logic.
+ * Listener Pattern: Defines OnMoodEventClickListener for handling mood event clicks.
+ * Singleton Pattern (indirect): Uses FirebaseAuth singleton for accessing the current user.
+ *
+ * Outstanding Issues:
+ * Data list and click listener are exposed to subclasses without encapsulation.
  */
+
 public abstract class MoodEventArrayAdapter extends ArrayAdapter<MoodEvent> {
     protected Context context;
     protected ArrayList<MoodEvent> events;

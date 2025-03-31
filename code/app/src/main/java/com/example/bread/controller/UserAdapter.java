@@ -18,6 +18,26 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.List;
 
+/**
+ * UserAdapter - Controller
+ *
+ * Role / Purpose
+ * RecyclerView adapter used to display Participant users
+ * Displays profile picture, username, full name, and a dynamic follow button.
+ * The adapter allows users to send follow requests, view other users' profiles, and handles different states like already following
+ * or follow request already sent.
+ *
+ * Design Patterns
+ * Adapter Pattern: Binds Participant model data to RecyclerView list items.
+ * ViewHolder Pattern: Optimizes view reuse for better performance.
+ * Repository Pattern: Uses ParticipantRepository to handle data and follow-state checks.
+ * Observer Pattern: Responds to user interactions via a listener interface.
+ *
+ * Outstanding Issues
+ * Follow state is updated optimistically, so backend errors may cause UI inconsistency.
+ * No support for follow request cancellation or unfollowing.
+ */
+
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder> {
 
     private final List<Participant> userList;
@@ -57,11 +77,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
         return userList.size();
     }
 
+    /**
+     * Interface for listener that handles user interactions (following or viewing profile)
+     */
     public interface UserInteractionListener {
         void onFollowClick(Participant participant);
         void onUserClick(Participant participant);
     }
 
+    /**
+     * ViewHolder that holds variables related to users (profile picture, username, name, follow status)
+     * Assigns/sets values to related variables
+     */
     class UserViewHolder extends RecyclerView.ViewHolder {
         ImageView profileImage;
         TextView usernameText, nameText;
@@ -112,6 +139,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             });
         }
 
+        /**
+         * Changes what is displayed on follow button based on whether they are not followed, followed, or requested
+         * Takes in selected user
+         * @param participant
+         */
         private void updateFollowButtonState(Participant participant) {
             // Check if already following
             participantRepository.isFollowing(currentUsername, participant.getUsername(), isFollowing -> {
